@@ -3,43 +3,42 @@ syntax = "proto2";
 package ujt_protos;
 
 message Service {
-    // a globally unique identifier
-    required string name = 1;
-    repeated Endpoint endpoints = 2;
-
+    // functionally required fields
+    optional string name = 1; // a globally unique identifier
+    optional Endpoint endpoints = 2;
+    // ---
     optional Status status = 3;
     repeated Dependency dependencies = 4;
-
     optional string comment = 5;
 }
 
 message Endpoint {
-    // use name as a unique identifier for endpoints within a service
-    required string name = 1;
-    required string service_name = 2;
-
-    // compute status from dependencies
-    optional Status status = 3;
+    // functionally required fields
+    optional string name = 1;
+    optional string service_name = 2;
+    // ---
+    optional Status status = 3; // computed from dependencies
     repeated Dependency dependencies = 4;
-
-    // this endpoint’s SLIs
     repeated SLI slis = 5;
-    
     optional string comment = 6;
 }
 
 message Dependency {
-    required string target_service_name = 1;
+    // functionally required fields
+    optional string target_service_name = 1;
+    // ---
 
     // if endpoint not present, then dependency on entire service
     optional string target_endpoint_name = 2;
-
     optional string comment = 3;
 }
 
 message SLI {
-    required string service_name = 1;
-    required string endpoint_name = 2;
+    // functionally required fields
+    optional string service_name = 1;
+    optional string endpoint_name = 2;
+    // ---
+
     optional SLIType sli_type = 3;
     optional double sli_value = 4;
     optional double slo_error_upper_bound = 5;
@@ -51,13 +50,15 @@ message SLI {
 }
 
 enum Status {
-    HEALTHY = 0;
-    WARN = 1;
-    ERROR = 2;
+    STATUS_UNSPECIFIED = 0;
+    STATUS_HEALTHY = 1;
+    STATUS_WARN = 2;
+    STATUS_ERROR = 3;
 }
 
 enum SLIType {
-    AVAILABILITY = 0;
-    LATENCY = 1;
-    THROUGHPUT = 2;
+    SLITYPE_UNSPECIFIED = 0;
+    SLITYPE_AVAILABILITY = 1;
+    SLITYPE_LATENCY = 2;
+    SLITYPE_THROUGHPUT = 3;
 }
