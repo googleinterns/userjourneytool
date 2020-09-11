@@ -1,0 +1,63 @@
+syntax = "proto2";
+
+package ujt_protos;
+
+message Service {
+    // a globally unique identifier
+    required string name = 1;
+    repeated Endpoint endpoints = 2;
+
+    optional Status status = 3;
+    repeated Dependency dependencies = 4;
+
+    optional string comment = 5;
+}
+
+message Endpoint {
+    // use name as a unique identifier for endpoints within a service
+    required string name = 1;
+    required string service_name = 2;
+
+    // compute status from dependencies
+    optional Status status = 3;
+    repeated Dependency dependencies = 4;
+
+    // this endpoint’s SLIs
+    repeated SLI slis = 5;
+    
+    optional string comment = 6;
+}
+
+message Dependency {
+    required string target_service_name = 1;
+
+    // if endpoint not present, then dependency on entire service
+    optional string target_endpoint_name = 2;
+
+    optional string comment = 3;
+}
+
+message SLI {
+    required string service_name = 1;
+    required string endpoint_name = 2;
+    optional SLIType sli_type = 3;
+    optional double sli_value = 4;
+    optional double slo_error_upper_bound = 5;
+    optional double slo_error_lower_bound = 6;
+    optional double slo_warn_upper_bound = 7;
+    optional double slo_warn_lower_bound = 8;
+
+    optional string comment = 9;
+}
+
+enum Status {
+    HEALTHY = 0;
+    WARN = 1;
+    ERROR = 2;
+}
+
+enum SLIType {
+    AVAILABILITY = 0;
+    LATENCY = 1;
+    THROUGHPUT = 2;
+}
