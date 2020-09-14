@@ -1,0 +1,2 @@
+#!/bin/bash
+isort ujt tests && yapf -vv -i --recursive --style="google" ujt tests && pylint -E ujt tests && mypy ujt tests

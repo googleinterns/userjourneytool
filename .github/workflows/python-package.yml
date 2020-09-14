@@ -28,12 +28,16 @@ jobs:
         python -m pip install --upgrade pip
         pip install -r requirements.txt
         pip install .
+    - name: Compile protobufs
+      run: |
+        python -m grpc.tools.protoc --proto_path=protos --python_out=generated --mypy_out=generated protos/*
     - name: Lint
       run: |
-        pylint -E ujt
+        pylint -E ujt tests
+        yapf --recursive --style="google" -d ujt tests
     - name: Type checking
       run: |
-        mypy ujt
+        mypy ujt tests
     - name: Test
       run: |
         pytest --cov=ujt

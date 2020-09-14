@@ -1,3 +1,10 @@
+# protobuf generated files
+generated/*
+!generated/__init__.py
+
+# vscode
+.vscode
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
