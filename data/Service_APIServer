@@ -1,0 +1,25 @@
+name: "APIServer"
+endpoints {
+  name: "StartGame"
+  service_name: "APIServer"
+  dependencies {
+    target_service_name: "APIServer"
+    target_endpoint_name: "UpdateGameState"
+  }
+}
+endpoints {
+  name: "UpdateGameState"
+  service_name: "APIServer"
+  dependencies {
+    target_service_name: "GameService"
+    target_endpoint_name: "GetPlayerLocation"
+  }
+  dependencies {
+    target_service_name: "GameService"
+    target_endpoint_name: "GetScore"
+  }
+  dependencies {
+    target_service_name: "LeaderboardService"
+    target_endpoint_name: "SetUserHighScore"
+  }
+}

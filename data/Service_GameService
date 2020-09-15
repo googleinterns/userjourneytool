@@ -1,0 +1,9 @@
+name: "GameService"
+endpoints {
+  name: "GetPlayerLocation"
+  service_name: "GameService"
+}
+endpoints {
+  name: "GetScore"
+  service_name: "GameService"
+}

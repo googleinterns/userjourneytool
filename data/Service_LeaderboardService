@@ -1,0 +1,25 @@
+name: "LeaderboardService"
+endpoints {
+  name: "GetLeaderboard"
+  service_name: "LeaderboardService"
+  dependencies {
+    target_service_name: "GameDB"
+    target_endpoint_name: "ReadHighScore"
+  }
+}
+endpoints {
+  name: "SetUserHighScore"
+  service_name: "LeaderboardService"
+  dependencies {
+    target_service_name: "GameDB"
+    target_endpoint_name: "WriteHighScore"
+  }
+}
+endpoints {
+  name: "GetUserHighScore"
+  service_name: "LeaderboardService"
+  dependencies {
+    target_service_name: "GameDB"
+    target_endpoint_name: "ReadHighScore"
+  }
+}

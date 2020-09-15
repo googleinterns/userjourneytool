@@ -1,0 +1,9 @@
+name: "ProfileDB"
+endpoints {
+  name: "ReadFriendsList"
+  service_name: "ProfileDB"
+}
+endpoints {
+  name: "WriteFriendsList"
+  service_name: "ProfileDB"
+}

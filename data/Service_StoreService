@@ -1,0 +1,9 @@
+name: "StoreService"
+endpoints {
+  name: "BuyCurrency"
+  service_name: "StoreService"
+  dependencies {
+    target_service_name: "StoreService"
+    target_endpoint_name: "VerifyPayment"
+  }
+}

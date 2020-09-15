@@ -1,0 +1,8 @@
+name: "MobileClient"
+user_journeys {
+  name: "Play a Game"
+  dependencies {
+    target_service_name: "APIServer"
+    target_endpoint_name: "StartGame"
+  }
+}

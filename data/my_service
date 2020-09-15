@@ -1,5 +1,0 @@
-name: "chuan_service"
-endpoints {
-  name: "chuan_endpoint"
-  service_name: "chuan_service"
-}

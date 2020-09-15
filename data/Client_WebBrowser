@@ -1,0 +1,22 @@
+name: "WebBrowser"
+user_journeys {
+  name: "View Leaderboard"
+  dependencies {
+    target_service_name: "WebServer"
+    target_endpoint_name: "ViewLeaderboard"
+  }
+}
+user_journeys {
+  name: "View Profile"
+  dependencies {
+    target_service_name: "WebServer"
+    target_endpoint_name: "ViewProfile"
+  }
+}
+user_journeys {
+  name: "Conduct Microtransaction"
+  dependencies {
+    target_service_name: "WebServer"
+    target_endpoint_name: "BuyCurrency"
+  }
+}

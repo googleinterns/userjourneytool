@@ -1,0 +1,21 @@
+name: "WebServer"
+endpoints {
+  name: "ViewProfile"
+  service_name: "WebServer"
+  dependencies {
+    target_service_name: "ProfileService"
+    target_endpoint_name: "Authenticate"
+  }
+  dependencies {
+    target_service_name: "ProfileService"
+    target_endpoint_name: "GetUserInfo"
+  }
+}
+endpoints {
+  name: "ViewLeaderboard"
+  service_name: "WebServer"
+  dependencies {
+    target_service_name: "LeaderboardService"
+    target_endpoint_name: "GetLeaderboard"
+  }
+}
