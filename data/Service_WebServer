@@ -19,3 +19,11 @@ endpoints {
     target_endpoint_name: "GetLeaderboard"
   }
 }
+endpoints {
+  name: "BuyCurrency"
+  service_name: "WebServer"
+  dependencies {
+    target_service_name: "StoreService"
+    target_endpoint_name: "VerifyPayment"
+  }
+}

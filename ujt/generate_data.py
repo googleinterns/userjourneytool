@@ -22,16 +22,33 @@ SERVICE_NAMES = [
     "ExternalPaymentProvider",
 ]
 SERVICE_ENDPOINT_NAME_MAP = {
-    "APIServer": ["StartGame", "UpdateGameState"],
-    "WebServer": ["ViewProfile", "ViewLeaderboard"],
-    "GameService": ["GetPlayerLocation", "GetScore"],
-    "LeaderboardService": [
-        "GetLeaderboard", "SetUserHighScore", "GetUserHighScore"
+    "APIServer": [
+        "StartGame",
+        "UpdateGameState",
     ],
-    "ProfileService": ["Authenticate", "GetUserInfo"],
-    "StoreService": ["BuyCurrency"],
-    "GameDB": ["ReadHighScore", "WriteHighScore"],
-    "ProfileDB": ["ReadFriendsList", "WriteFriendsList"],
+    "WebServer": ["ViewProfile", "ViewLeaderboard", "BuyCurrency"],
+    "GameService": [
+        "GetPlayerLocation",
+        "GetScore",
+    ],
+    "LeaderboardService": [
+        "GetLeaderboard",
+        "SetUserHighScore",
+        "GetUserHighScore",
+    ],
+    "ProfileService": [
+        "Authenticate",
+        "GetUserInfo",
+    ],
+    "StoreService": ["VerifyPayment"],
+    "GameDB": [
+        "ReadHighScore",
+        "WriteHighScore",
+    ],
+    "ProfileDB": [
+        "ReadFriendsList",
+        "WriteFriendsList",
+    ],
     "ExternalAuthProvider": [],
     "ExternalPaymentProvider": [],
 }
@@ -61,8 +78,10 @@ ENDPOINT_DEPENDENCY_MAP.update({
     "GetUserHighScore": [("GameDB", "ReadHighScore")],
     # ProfileService
     "Authenticate": [("ExternalAuthProvider", "")],
-    "GetUserInfo": [("LeaderboardService", "GetUserHighScore"),
-                    ("ProfileDB", "ReadFriendsList")],
+    "GetUserInfo": [
+        ("LeaderboardService", "GetUserHighScore"),
+        ("ProfileDB", "ReadFriendsList"),
+    ],
     # StoreService
     "VerifyPayment": [("ExternalPaymentProvider", "")],
 })

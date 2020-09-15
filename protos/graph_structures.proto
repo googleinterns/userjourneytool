@@ -12,7 +12,8 @@ message Service {
     repeated Endpoint endpoints = 2;
     optional Status status = 3;
     repeated Dependency dependencies = 4;
-    optional string comment = 5;
+    repeated SLI slis = 5;
+    optional string comment = 6;
 }
 
 message Endpoint {
@@ -59,12 +60,12 @@ message UserJourney {
     // a set of top level dependencies originating from Clients
     repeated Dependency dependencies = 2;
 }
+
 message Client {
     optional string name = 1;
     repeated UserJourney user_journeys = 2;
     // ---
 }
-
 
 enum Status {
     STATUS_UNSPECIFIED = 0;
@@ -78,4 +79,12 @@ enum SLIType {
     SLITYPE_AVAILABILITY = 1;
     SLITYPE_LATENCY = 2;
     SLITYPE_THROUGHPUT = 3;
+}
+
+message ServiceNameList {
+    repeated string names = 1;
+}
+
+message ClientNamelist {
+    repeated string names = 1;
 }
