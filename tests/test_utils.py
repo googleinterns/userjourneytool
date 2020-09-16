@@ -13,22 +13,27 @@ def patch_path():
     return "ujt.utils"
 
 
-def test_file_name():
+def test_named_proto_file_name():
     mock_proto_type = MagicMock(__name__=sentinel.type)
-    assert ujt.utils.file_name(sentinel.name,
-                               mock_proto_type) == "sentinel.type_sentinel.name"
+    assert ujt.utils.named_proto_file_name(
+        sentinel.name, mock_proto_type) == "sentinel.type_sentinel.name"
+
+
+def test_sli_file_name():
+    assert ujt.utils.sli_file_name(
+        "a", "b", 0
+    ) == f"{graph_structures_pb2.SLI.__name__}_a_b_{graph_structures_pb2.SLIType.Name(0)}"
 
 
 def test_write_proto_to_file(patch_path):
     mock_path = MagicMock()
     mock_path.return_value.parent.parent.__truediv__.return_value.__truediv__.return_value = sentinel.path
-    mock_proto_type = MagicMock(__name__=sentinel.type)
 
     with patch(f"{patch_path}.open", mock_open()) as mock_open_func, \
         patch(f"{patch_path}.text_format.MessageToString") as mock_message_to_string, \
         patch(f"{patch_path}.pathlib.Path", mock_path):
 
-        ujt.utils.write_proto_to_file(sentinel.message, mock_proto_type)
+        ujt.utils.write_proto_to_file(sentinel.name, sentinel.message)
 
         mock_message_to_string.assert_called_once_with(sentinel.message)
         mock_open_func.assert_called_once_with(sentinel.path, "w+")
@@ -67,9 +72,9 @@ def test_read_write_functional(patch_path, tmp_path):
     mock_path.return_value.parent.parent.__truediv__.return_value = tmp_path
 
     with patch(f"{patch_path}.pathlib.Path", mock_path):
-        ujt.utils.write_proto_to_file(service, graph_structures_pb2.Service)
+        ujt.utils.write_proto_to_file("sentinel.file_name", service)
         service_from_file = ujt.utils.read_proto_from_file(
-            service.name,
+            "sentinel.file_name",
             graph_structures_pb2.Service,
         )
 

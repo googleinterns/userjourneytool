@@ -14,6 +14,7 @@ message Service {
     repeated Dependency dependencies = 4;
     repeated SLI slis = 5;
     optional string comment = 6;
+    optional bool depends_on_own_slis = 7;
 }
 
 message Endpoint {
@@ -25,6 +26,7 @@ message Endpoint {
     repeated Dependency dependencies = 4;
     repeated SLI slis = 5;
     optional string comment = 6;
+    optional bool depends_on_own_slis = 7;
 }
 
 message Dependency {
@@ -79,12 +81,4 @@ enum SLIType {
     SLITYPE_AVAILABILITY = 1;
     SLITYPE_LATENCY = 2;
     SLITYPE_THROUGHPUT = 3;
-}
-
-message ServiceNameList {
-    repeated string names = 1;
-}
-
-message ClientNamelist {
-    repeated string names = 1;
 }

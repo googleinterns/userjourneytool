@@ -1,0 +1,7 @@
+service_name: "ProfileService"
+endpoint_name: "GetUserInfo"
+sli_value: 0.05503828388842358
+slo_error_upper_bound: 0.9
+slo_error_lower_bound: 0.1
+slo_warn_upper_bound: 0.8
+slo_warn_lower_bound: 0.2

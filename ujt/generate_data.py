@@ -1,5 +1,6 @@
 """ Temp file to generate mock data. """
 
+import random
 from collections import defaultdict
 from typing import DefaultDict, List, Tuple
 
@@ -9,18 +10,6 @@ from . import utils
 
 # define the mock data in a simpler format before generating protobufs
 # service and endpoint names correspond 1:1
-SERVICE_NAMES = [
-    "APIServer",
-    "WebServer",
-    "GameService",
-    "LeaderboardService",
-    "ProfileService",
-    "StoreService",
-    "GameDB",
-    "ProfileDB",
-    "ExternalAuthProvider",
-    "ExternalPaymentProvider",
-]
 SERVICE_ENDPOINT_NAME_MAP = {
     "APIServer": [
         "StartGame",
@@ -86,7 +75,6 @@ ENDPOINT_DEPENDENCY_MAP.update({
     "VerifyPayment": [("ExternalPaymentProvider", "")],
 })
 # client names and user journeys correspond 1:1
-CLIENT_NAMES = ["MobileClient", "WebBrowser"]
 CLIENT_USER_JOURNEY_NAME_MAP = {
     "MobileClient": ["Play a Game"],
     "WebBrowser": [
@@ -112,7 +100,8 @@ def generate_services():
     """
 
     services = [
-        graph_structures_pb2.Service(name=name) for name in SERVICE_NAMES
+        graph_structures_pb2.Service(name=name)
+        for name in SERVICE_ENDPOINT_NAME_MAP
     ]
     for service in services:
         endpoints = [
@@ -139,7 +128,10 @@ def generate_clients():
     Returns: A list of Client protobufs.
     """
 
-    clients = [graph_structures_pb2.Client(name=name) for name in CLIENT_NAMES]
+    clients = [
+        graph_structures_pb2.Client(name=name)
+        for name in CLIENT_USER_JOURNEY_NAME_MAP
+    ]
     for client in clients:
         user_journeys = [
             graph_structures_pb2.UserJourney(name=name)
@@ -159,14 +151,45 @@ def generate_clients():
     return clients
 
 
+SLO_BOUNDS = {
+    "slo_error_lower_bound": .1,
+    "slo_warn_lower_bound": .2,
+    "slo_warn_upper_bound": .8,
+    "slo_error_upper_bound": .9,
+}
+
+
+def generate_slis():
+    slis = []
+    for service_name, endpoint_names in SERVICE_ENDPOINT_NAME_MAP.items():
+        slis += [
+            graph_structures_pb2.SLI(
+                service_name=service_name,
+                endpoint_name=endpoint_name,
+                sli_value=random.random(),
+                **SLO_BOUNDS,
+            ) for endpoint_name in (endpoint_names + [""])
+        ]
+    return slis
+
+
 def save_mock_data():
     """ Saves the mock data used to test the UJT to disk. """
 
     for client in generate_clients():
-        utils.write_proto_to_file(client, graph_structures_pb2.Client)
+        utils.write_proto_to_file(
+            utils.named_proto_file_name(client.name,
+                                        graph_structures_pb2.Client), client)
 
     for service in generate_services():
-        utils.write_proto_to_file(service, graph_structures_pb2.Service)
+        utils.write_proto_to_file(
+            utils.named_proto_file_name(service.name,
+                                        graph_structures_pb2.Service), service)
+
+    for sli in generate_slis():
+        utils.write_proto_to_file(
+            utils.sli_file_name(sli.service_name, sli.endpoint_name,
+                                sli.sli_type), sli)
 
 
 if __name__ == "__main__":

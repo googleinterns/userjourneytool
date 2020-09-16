@@ -17,50 +17,68 @@ Currently used for protobuf read and write functionality.
 """
 
 import pathlib
-from typing import Type
+from typing import List, Type
 
 import google.protobuf.text_format as text_format
 from google.protobuf.message import Message
 
+from generated import graph_structures_pb2
 
-def file_name(name: str, proto_type: Type[Message]):
+
+def named_proto_file_name(name: str, proto_type: Type[Message]):
+    """ Generates the default file name for messages with a name field.
+
+    Such messages include: Services, Endpoints, Clients, UserJourneys.
+
+    Args:
+        name: A protobuf message name.
+        proto_type: The type of the protobuf message
+
+    Returns:
+        A string of the default file name for the given message.
+    """
     return f"{proto_type.__name__}_{name}"
 
 
-def write_proto_to_file(message: Message, proto_type: Type[Message]) -> None:
+def sli_file_name(service_name: str, endpoint_name: str,
+                  sli_type: "graph_structures_pb2.SLITypeValue"):
+    """ Generates the default file name for SLI messages.
+
+
+    Args:
+        message: A protobuf SLI message.
+
+    Returns:
+        A string of the default file name for the given message.
+    """
+    return f"{graph_structures_pb2.SLI.__name__}_{service_name}_{endpoint_name}_{graph_structures_pb2.SLIType.Name(sli_type)}"
+
+
+def write_proto_to_file(file_name: str, message: Message) -> None:
     """Writes a protobuf to disk in a human-readable format.
 
     Args:
-        message: A protobuf message with a name field.
-        proto_type: The type of the protobuf message.
-
-    Raises:
-        ValueError: The provided message's name field was empty.
-        AttributeError: The provided message does not contain a name field.
+        file_name: The desired file name for the file to be written.
+        message: A protobuf message.
     """
 
-    if not message.name:  # type: ignore
-        raise ValueError
-
-    with open(
-            pathlib.Path(__file__).parent.parent / "data" /
-            file_name(message.name, proto_type), "w+") as f:  # type: ignore
+    with open(pathlib.Path(__file__).parent.parent / "data" / file_name,
+              "w+") as f:
         f.write(text_format.MessageToString(message))
 
 
-def read_proto_from_file(name: str, proto_type: Type[Message]) -> Message:
+def read_proto_from_file(file_name: str, proto_type: Type[Message]) -> Message:
     """Reads a protobuf message from a file.
 
     Args:
-        name: The name field of the protobuf to be read.
+        file_name: The desired file name for the file to be read.
         proto_type: The type of the protobuf message.
 
     Raises:
         FileNotFoundError: The path was invalid.
     """
 
-    with open(
-            pathlib.Path(__file__).parent.parent / "data" /
-            file_name(name, proto_type), "r") as f:
+    with open(pathlib.Path(__file__).parent.parent / "data" / file_name,
+              "r") as f:
         proto_text: str = f.read()
         return text_format.Parse(proto_text, proto_type())
