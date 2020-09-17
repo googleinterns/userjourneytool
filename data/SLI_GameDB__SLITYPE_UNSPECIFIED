@@ -1,7 +1,0 @@
-service_name: "GameDB"
-endpoint_name: ""
-sli_value: 0.815711053754633
-slo_error_upper_bound: 0.9
-slo_error_lower_bound: 0.1
-slo_warn_upper_bound: 0.8
-slo_warn_lower_bound: 0.2

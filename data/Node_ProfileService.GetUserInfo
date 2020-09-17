@@ -1,0 +1,19 @@
+node_type: NODETYPE_ENDPOINT
+name: "ProfileService.GetUserInfo"
+parent_name: "ProfileService"
+dependencies {
+  target_name: "LeaderboardService.GetUserHighScore"
+  source_name: "ProfileService.GetUserInfo"
+}
+dependencies {
+  target_name: "ProfileDB.ReadFriendsList"
+  source_name: "ProfileService.GetUserInfo"
+}
+slis {
+  node_name: "ProfileService.GetUserInfo"
+  sli_value: 0.7410464805308303
+  slo_error_upper_bound: 0.9
+  slo_error_lower_bound: 0.1
+  slo_warn_upper_bound: 0.8
+  slo_warn_lower_bound: 0.2
+}

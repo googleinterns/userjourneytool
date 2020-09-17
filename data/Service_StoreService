@@ -1,9 +1,0 @@
-name: "StoreService"
-endpoints {
-  name: "VerifyPayment"
-  service_name: "StoreService"
-  dependencies {
-    target_service_name: "ExternalPaymentProvider"
-    target_endpoint_name: ""
-  }
-}

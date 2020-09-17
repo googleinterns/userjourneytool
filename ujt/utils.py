@@ -40,20 +40,6 @@ def named_proto_file_name(name: str, proto_type: Type[Message]):
     return f"{proto_type.__name__}_{name}"
 
 
-def sli_file_name(service_name: str, endpoint_name: str,
-                  sli_type: "graph_structures_pb2.SLITypeValue"):
-    """ Generates the default file name for SLI messages.
-
-
-    Args:
-        message: A protobuf SLI message.
-
-    Returns:
-        A string of the default file name for the given message.
-    """
-    return f"{graph_structures_pb2.SLI.__name__}_{service_name}_{endpoint_name}_{graph_structures_pb2.SLIType.Name(sli_type)}"
-
-
 def write_proto_to_file(file_name: str, message: Message) -> None:
     """Writes a protobuf to disk in a human-readable format.
 

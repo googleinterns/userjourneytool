@@ -1,0 +1,15 @@
+node_type: NODETYPE_ENDPOINT
+name: "LeaderboardService.GetUserHighScore"
+parent_name: "LeaderboardService"
+dependencies {
+  target_name: "GameDB.ReadHighScore"
+  source_name: "LeaderboardService.GetUserHighScore"
+}
+slis {
+  node_name: "LeaderboardService.GetUserHighScore"
+  sli_value: 0.3490879229281245
+  slo_error_upper_bound: 0.9
+  slo_error_lower_bound: 0.1
+  slo_warn_upper_bound: 0.8
+  slo_warn_lower_bound: 0.2
+}

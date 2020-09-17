@@ -13,42 +13,113 @@
 # limitations under the License.
 """ Main module for Dash app. """
 
+from typing import Dict, List, Set, Tuple, Union, cast
+
 import dash
 import dash_cytoscape as cyto
 import dash_html_components as html
 from dash.dependencies import Input, Output
 from flask_caching import Cache
+from google.protobuf.message import Message
 
-from generated import graph_structures_pb2
+from generated.graph_structures_pb2 import (SLI, Client, Node, SLIType, Status,
+                                            UserJourney)
 
 from . import converters, generate_data, utils
 
 
-def generate_graph_elements_from_local_data():
-    """ Converts the protobufs from the ../data directory to a cytoscape graph format.
+def read_local_data() -> Tuple[Dict[str, Node], Dict[str, Client]]:
+    """ Reads protobufs in text format from ../data directory into protobuf objects.
 
-    In subsequent versions, this method should use a RPC to fetch protobuf data from a reporting Server.
+    This is simply used as a proof-of-concept/test implementation. 
+    In actual usage, this method should not be used. Instead, protobufs should be read from a reporting server.
+    THis is highly coupled with implementation of mock data storage conventions.
+
+    Returns:
+        A tuple of two dictionaries.
+        The first dictionary contains a mapping from Node name to the actual Node protobuf message.
+        The first dictionary contains a mapping from Client name to the actual Client protobuf message.
+    """
+
+    service_names = generate_data.SERVICE_ENDPOINT_NAME_MAP.keys()
+    client_names = generate_data.CLIENT_USER_JOURNEY_NAME_MAP.keys()
+
+    flattened_endpoint_names = []
+    for service_name, endpoint_names in generate_data.SERVICE_ENDPOINT_NAME_MAP.items(
+    ):
+        flattened_endpoint_names += [
+            f"{service_name}.{endpoint_name}"
+            for endpoint_name in endpoint_names
+        ]
+
+    node_names = list(service_names) + flattened_endpoint_names
+
+    node_name_message_map: Dict[str, Node] = {
+        name: cast(
+            Node,
+            utils.read_proto_from_file(
+                utils.named_proto_file_name(name, Node),
+                Node,
+            )) for name in node_names
+    }
+
+    client_name_message_map: Dict[str, Client] = {
+        name: cast(
+            Client,
+            utils.read_proto_from_file(
+                utils.named_proto_file_name(name, Client), Client))
+        for name in client_names
+    }
+
+    return node_name_message_map, client_name_message_map
+
+
+def generate_graph_elements_from_local_data():
+    """ Generates a cytoscape elements dictionary from mock protobufs saved in the ../data directory.
+
+    In actual usage, this method should not be used. Instead, protobufs should be read from a reporting server.
+    In subsequent versions, this method should use a RPC to fetch protobuf data from a reporting server instead of reading local data.
 
     Returns:
         A list of dictionary objects, each containing information regarding a single node (Service or Client) or edge (Dependency).
     """
-    service_names = generate_data.SERVICE_ENDPOINT_NAME_MAP.keys()
-    client_names = generate_data.CLIENT_USER_JOURNEY_NAME_MAP.keys()
-    services = [
-        utils.read_proto_from_file(
-            utils.named_proto_file_name(name, graph_structures_pb2.Service),
-            graph_structures_pb2.Service,
-        ) for name in service_names
-    ]
-    clients = [
-        utils.read_proto_from_file(
-            utils.named_proto_file_name(name, graph_structures_pb2.Client),
-            graph_structures_pb2.Client,
-        ) for name in client_names
-    ]
 
-    return (converters.cytoscape_elements_from_clients(clients) +
-            converters.cytoscape_elements_from_services(services))
+    node_name_message_map, client_name_message_map = read_local_data()
+
+    return generate_graph_elements(node_name_message_map,
+                                   client_name_message_map)
+
+
+def generate_graph_elements(node_name_message_map: Dict[str, Node],
+                            client_name_message_map: Dict[str, Client]):
+    """ Generates a cytoscape elements dictionary from Service, SLI, and Client protobufs.
+
+    Args:
+        node_name_message_map: A dictionary mapping Node names to their corresponding Node protobuf message.
+        client_name_message_map: A dictionary mapping Client names to the corresponding Client protobuf message.
+
+    Returns:
+        A list of dictionary objects, each containing information regarding a single node (Service or Client) or edge (Dependency).
+    """
+
+    #compute_node_statuses(services, slis)
+
+    return (converters.cytoscape_elements_from_nodes(node_name_message_map) +
+            converters.cytoscape_elements_from_clients(client_name_message_map))
+
+
+def compute_node_statuses(node_name_message_map: Dict[str, Node]):
+    """ Annotates Node status based on their dependencies. 
+
+    Args:
+        node_name_message_map: A dictionary mapping Node names to their corresponding Node protobuf message.
+    """
+
+    pass
+
+
+def compute_single_node_status(node: Node):
+    pass
 
 
 cyto.load_extra_layouts()
@@ -109,12 +180,11 @@ app.layout = html.Div(children=[
     html.Button(id="refresh-button", children="Refresh"),
     html.Div(id="refresh-signal", style={"display": "none"})
 ])
-
-
+"""
 @app.callback()
 def refresh_slis():
     pass
-
+"""
 
 # on interval:
 #   update the slis

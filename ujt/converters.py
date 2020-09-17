@@ -1,82 +1,72 @@
-from typing import Collection, Dict, List
+from typing import Any, Collection, Dict, List, Union
 
-from generated import graph_structures_pb2
+from generated.graph_structures_pb2 import Client, Dependency, Node, NodeType
 
 
-def cytoscape_elements_from_services(
-        services: List[graph_structures_pb2.Service]):
-    """ Converts a list of Service protobufs to a cytoscape graph format.
+def cytoscape_elements_from_nodes(node_name_message_map: Dict[str, Node]):
+    """ Converts a dictionary of Node protobufs to a cytoscape graph format.
 
     Args:
-        services: A client of Service protobufs.
+        node_name_message_map: A dictionary mapping Node names to their corresponding Node protobuf message.
     Returns:
         A list of dictionary objects, each containing information regarding a single node (Service) or edge (Dependency).
     """
 
-    parent_nodes: List[Dict[str, Collection[str]]] = []
-    child_nodes: List[Dict[str, Collection[str]]] = []
-    edges: List[Dict[str, Collection[str]]] = []
+    node_elements: List[Dict[str, Any]] = []
+    edge_elements: List[Dict[str, Any]] = []
 
-    for service in services:
-        parent_nodes.append({
+    for name, message in node_name_message_map.items():
+        node_element: Dict[str, Any] = {
             "data": {
-                "id": service.name,
-                "label": service.name,
+                "id": name,
+                "label":
+                    name.split(".")[-1]  # the node's relative name
             },
-            "classes": "service",
-        })
-        for endpoint in service.endpoints:
-            child_nodes.append({
+            "classes": NodeType.Name(message.node_type)
+        }
+        if message.parent_name:
+            node_element["data"]["parent"] = message.parent_name
+        node_elements.append(node_element)
+
+        for dependency in message.dependencies:
+            edge_element = {
                 "data": {
-                    "id": endpoint.name,
-                    "label": endpoint.name,
-                    "parent": service.name,
+                    "source": name,
+                    "target": dependency.target_name,
                 }
-            })
-            for dependency in endpoint.dependencies:
-                edges.append({
-                    "data": {
-                        "source":
-                            endpoint.name,
-                        "target": (dependency.target_endpoint_name
-                                   if dependency.target_endpoint_name else
-                                   dependency.target_service_name)
-                    }
-                })
+            }
+            edge_elements.append(edge_element)
 
-    return parent_nodes + child_nodes + edges
+    return node_elements + edge_elements
 
 
-def cytoscape_elements_from_clients(clients: List[graph_structures_pb2.Client]):
-    """ Converts a list of Client protobufs to a cytoscape graph format.
+def cytoscape_elements_from_clients(client_name_message_map: Dict[str, Client]):
+    """ Converts a dictionary  of Client protobufs to a cytoscape graph format.
 
     Args:
-        clients: A list of Client protobufs.
+        client_name_message_map: A dictionary mapping Client names to the corresponding Client protobuf message.
     Returns:
         A list of dictionary objects, each containing information regarding a single node (Client) or edge (Dependency).
     """
 
-    nodes: List[Dict[str, Collection[str]]] = []
-    edges: List[Dict[str, Collection[str]]] = []
+    node_elements: List[Dict[str, Collection[str]]] = []
+    edge_elements: List[Dict[str, Collection[str]]] = []
 
-    for client in clients:
-        nodes.append({
+    for name, message in client_name_message_map.items():
+        node_elements.append({
             "data": {
-                "id": client.name,
-                "label": client.name,
+                "id": name,
+                "label": name,
             },
             "classes": "client",
         })
-        for user_journey in client.user_journeys:
+        for user_journey in message.user_journeys:
             for dependency in user_journey.dependencies:
-                edges.append({
+                edge_elements.append({
                     "data": {
-                        "source":
-                            client.name,
-                        "target": (dependency.target_endpoint_name
-                                   if dependency.target_endpoint_name else
-                                   dependency.target_service_name)
+                        "source": name,
+                        "target": dependency.target_name,
                     }
                 })
 
-    return nodes + edges
+    return node_elements + edge_elements

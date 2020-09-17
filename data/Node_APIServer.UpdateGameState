@@ -1,0 +1,23 @@
+node_type: NODETYPE_ENDPOINT
+name: "APIServer.UpdateGameState"
+parent_name: "APIServer"
+dependencies {
+  target_name: "GameService.GetPlayerLocation"
+  source_name: "APIServer.UpdateGameState"
+}
+dependencies {
+  target_name: "GameService.GetScore"
+  source_name: "APIServer.UpdateGameState"
+}
+dependencies {
+  target_name: "LeaderboardService.SetUserHighScore"
+  source_name: "APIServer.UpdateGameState"
+}
+slis {
+  node_name: "APIServer.UpdateGameState"
+  sli_value: 0.5059801201185269
+  slo_error_upper_bound: 0.9
+  slo_error_lower_bound: 0.1
+  slo_warn_upper_bound: 0.8
+  slo_warn_lower_bound: 0.2
+}

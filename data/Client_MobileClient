@@ -1,8 +1,10 @@
 name: "MobileClient"
 user_journeys {
-  name: "Play a Game"
+  name: "MobileClient.PlayGame"
+  client_name: "MobileClient"
   dependencies {
-    target_service_name: "APIServer"
-    target_endpoint_name: "StartGame"
+    target_name: "APIServer.StartGame"
+    source_name: "MobileClient.PlayGame"
+    toplevel: true
   }
 }

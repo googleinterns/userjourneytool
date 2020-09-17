@@ -1,9 +1,0 @@
-name: "GameDB"
-endpoints {
-  name: "ReadHighScore"
-  service_name: "GameDB"
-}
-endpoints {
-  name: "WriteHighScore"
-  service_name: "GameDB"
-}

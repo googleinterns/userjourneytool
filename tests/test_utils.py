@@ -19,12 +19,6 @@ def test_named_proto_file_name():
         sentinel.name, mock_proto_type) == "sentinel.type_sentinel.name"
 
 
-def test_sli_file_name():
-    assert ujt.utils.sli_file_name(
-        "a", "b", 0
-    ) == f"{graph_structures_pb2.SLI.__name__}_a_b_{graph_structures_pb2.SLIType.Name(0)}"
-
-
 def test_write_proto_to_file(patch_path):
     mock_path = MagicMock()
     mock_path.return_value.parent.parent.__truediv__.return_value.__truediv__.return_value = sentinel.path
@@ -64,18 +58,18 @@ def test_read_proto_from_file(patch_path):
 
 
 def test_read_write_functional(patch_path, tmp_path):
-    service = graph_structures_pb2.Service()
-    service.name = "name"
-    service.comment = "comment"
+    node = graph_structures_pb2.Node()
+    node.name = "name"
+    node.comment = "comment"
 
     mock_path = MagicMock()
     mock_path.return_value.parent.parent.__truediv__.return_value = tmp_path
 
     with patch(f"{patch_path}.pathlib.Path", mock_path):
-        ujt.utils.write_proto_to_file("sentinel.file_name", service)
+        ujt.utils.write_proto_to_file("sentinel.file_name", node)
         service_from_file = ujt.utils.read_proto_from_file(
             "sentinel.file_name",
-            graph_structures_pb2.Service,
+            graph_structures_pb2.Node,
         )
 
-    assert service_from_file == service
+    assert service_from_file == node
