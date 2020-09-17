@@ -21,11 +21,16 @@ User Journey Tool simplifies debugging by providing an overview of an applicatio
 
         ./generate_protos
 
-5. Run tests.
+5. Run the tool.
+
+        python3 -m ujt.app
+
+
+6. Run tests.
 
         mypy --cov=ujt
 
-5. Before committing, lint and type check the code.
+7. Before committing, lint and type check the code.
 
         ./lint
 
