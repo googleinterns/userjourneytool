@@ -7,7 +7,7 @@ package ujt_protos;
 
 message Node { // all names are fully qualified (grandparent.parent.this_node.child)
     optional NodeType node_type = 1;
-    optional string name = 2;
+    optional string name = 2;  // a fully qualified, period delimited name
     // ---
 
     repeated string child_names = 3;
@@ -40,7 +40,8 @@ message SLI {
     optional double slo_warn_upper_bound = 6;
     optional double slo_warn_lower_bound = 7;
 
-    optional string comment = 8;
+    optional Status status = 8;
+    optional string comment = 9;
 }
 
 
@@ -51,6 +52,7 @@ message UserJourney {
 
     // a set of top level dependencies originating from Clients
     repeated Dependency dependencies = 3;
+    optional Status status = 4;
 }
 
 message Client {

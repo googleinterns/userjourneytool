@@ -1,6 +1,6 @@
 from typing import Any, Collection, Dict, List, Union
 
-from generated.graph_structures_pb2 import Client, Dependency, Node, NodeType
+from generated.graph_structures_pb2 import Client, Dependency, Node, NodeType, Status
 
 
 def cytoscape_elements_from_nodes(node_name_message_map: Dict[str, Node]):
@@ -15,20 +15,20 @@ def cytoscape_elements_from_nodes(node_name_message_map: Dict[str, Node]):
     node_elements: List[Dict[str, Any]] = []
     edge_elements: List[Dict[str, Any]] = []
 
-    for name, message in node_name_message_map.items():
+    for name, node in node_name_message_map.items():
         node_element: Dict[str, Any] = {
             "data": {
                 "id": name,
                 "label":
                     name.split(".")[-1]  # the node's relative name
             },
-            "classes": NodeType.Name(message.node_type)
+            "classes": " ".join([NodeType.Name(node.node_type), Status.Name(node.status)])
         }
-        if message.parent_name:
-            node_element["data"]["parent"] = message.parent_name
+        if node.parent_name:
+            node_element["data"]["parent"] = node.parent_name
         node_elements.append(node_element)
 
-        for dependency in message.dependencies:
+        for dependency in node.dependencies:
             edge_element = {
                 "data": {
                     "source": name,

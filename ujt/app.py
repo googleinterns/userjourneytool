@@ -14,6 +14,7 @@
 """ Main module for Dash app. """
 
 from typing import Dict, List, Set, Tuple, Union, cast
+from collections import defaultdict
 
 import dash
 import dash_cytoscape as cyto
@@ -25,7 +26,7 @@ from google.protobuf.message import Message
 from generated.graph_structures_pb2 import (SLI, Client, Node, SLIType, Status,
                                             UserJourney)
 
-from . import converters, generate_data, utils
+from . import converters, generate_data, utils, logic
 
 
 def read_local_data() -> Tuple[Dict[str, Node], Dict[str, Client]]:
@@ -78,7 +79,8 @@ def generate_graph_elements_from_local_data():
     """ Generates a cytoscape elements dictionary from mock protobufs saved in the ../data directory.
 
     In actual usage, this method should not be used. Instead, protobufs should be read from a reporting server.
-    In subsequent versions, this method should use a RPC to fetch protobuf data from a reporting server instead of reading local data.
+    In subsequent versions, this method should be replaced with generate_graph_elements_from_remote_data to
+    use a RPC to fetch protobuf data from a reporting server instead of reading local data.
 
     Returns:
         A list of dictionary objects, each containing information regarding a single node (Service or Client) or edge (Dependency).
@@ -89,6 +91,16 @@ def generate_graph_elements_from_local_data():
     return generate_graph_elements(node_name_message_map,
                                    client_name_message_map)
 
+def generate_graph_elements_from_remote_data():
+    """ Generates a cytoscape elements dictionary from mock protobufs saved in the ../data directory.
+
+    In actual usage, this method should be used to read protobufs from a reporting server.
+    This mthod should replace generate_graph_elements_from_local_data
+
+    Returns:
+        A list of dictionary objects, each containing information regarding a single node (Service or Client) or edge (Dependency).
+    """
+    raise NotImplementedError
 
 def generate_graph_elements(node_name_message_map: Dict[str, Node],
                             client_name_message_map: Dict[str, Client]):
@@ -102,24 +114,10 @@ def generate_graph_elements(node_name_message_map: Dict[str, Node],
         A list of dictionary objects, each containing information regarding a single node (Service or Client) or edge (Dependency).
     """
 
-    #compute_node_statuses(services, slis)
+    logic.compute_node_statuses(node_name_message_map, client_name_message_map)
 
     return (converters.cytoscape_elements_from_nodes(node_name_message_map) +
             converters.cytoscape_elements_from_clients(client_name_message_map))
-
-
-def compute_node_statuses(node_name_message_map: Dict[str, Node]):
-    """ Annotates Node status based on their dependencies. 
-
-    Args:
-        node_name_message_map: A dictionary mapping Node names to their corresponding Node protobuf message.
-    """
-
-    pass
-
-
-def compute_single_node_status(node: Node):
-    pass
 
 
 cyto.load_extra_layouts()
@@ -147,11 +145,29 @@ CYTO_STYLESHEET = [
         }
     },
     {
-        "selector": ".service",
+        "selector": ".NODETYPE_SERVICE",
         "style": {
             "shape": "rectangle",
             # set non-compound nodes (services with no endpoints) to match same color as compound nodes
             "background-color": "lightgrey",
+        }
+    },
+    {
+        "selector": ".STATUS_HEALTHY",
+        "style": {
+            "background-color": "green"
+        }
+    },
+    {
+        "selector": ".STATUS_WARN",
+        "style": {
+            "background-color": "orange"
+        }
+    },
+    {
+        "selector": ".STATUS_ERROR",
+        "style": {
+            "background-color": "red"
         }
     }
 ]
