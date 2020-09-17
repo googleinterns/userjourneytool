@@ -13,8 +13,8 @@
 # limitations under the License.
 """ Main module for Dash app. """
 
-from typing import Dict, List, Set, Tuple, Union, cast
 from collections import defaultdict
+from typing import Dict, List, Set, Tuple, Union, cast
 
 import dash
 import dash_cytoscape as cyto
@@ -26,7 +26,7 @@ from google.protobuf.message import Message
 from generated.graph_structures_pb2 import (SLI, Client, Node, SLIType, Status,
                                             UserJourney)
 
-from . import converters, generate_data, utils, logic
+from . import converters, generate_data, logic, utils
 
 
 def read_local_data() -> Tuple[Dict[str, Node], Dict[str, Client]]:
@@ -91,6 +91,7 @@ def generate_graph_elements_from_local_data():
     return generate_graph_elements(node_name_message_map,
                                    client_name_message_map)
 
+
 def generate_graph_elements_from_remote_data():
     """ Generates a cytoscape elements dictionary from mock protobufs saved in the ../data directory.
 
@@ -101,6 +102,7 @@ def generate_graph_elements_from_remote_data():
         A list of dictionary objects, each containing information regarding a single node (Service or Client) or edge (Dependency).
     """
     raise NotImplementedError
+
 
 def generate_graph_elements(node_name_message_map: Dict[str, Node],
                             client_name_message_map: Dict[str, Client]):
@@ -134,7 +136,7 @@ CYTO_STYLESHEET = [
         "selector": "node",
         "style": {
             "content": "data(label)",
-            "color": "red",
+            #"color": "red",
         }
     },
     {
@@ -150,6 +152,7 @@ CYTO_STYLESHEET = [
             "shape": "rectangle",
             # set non-compound nodes (services with no endpoints) to match same color as compound nodes
             "background-color": "lightgrey",
+            "background-blacken": -.5
         }
     },
     {

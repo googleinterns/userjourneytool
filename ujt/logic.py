@@ -1,17 +1,23 @@
-from typing import Dict
 from collections import defaultdict
-from generated.graph_structures_pb2 import Node, Client, SLI, Status
+from typing import TYPE_CHECKING, Dict
+
+from generated.graph_structures_pb2 import SLI, Client, Node, Status
+
+if TYPE_CHECKING:
+    from generated.graph_structures_pb2 import \
+        StatusValue  # pylint: disable=no-name-in-module
+
 
 def compute_node_statuses(node_name_message_map: Dict[str, Node],
-                            client_name_message_map: Dict[str, Client]):
-    """ Annotates Node status based on their dependencies. 
+                          client_name_message_map: Dict[str, Client]):
+    """ Annotates Node status based on their dependencies.
 
     Args:
         node_name_message_map: A dictionary mapping Node names to their corresponding Node protobuf message.
         client_name_message_map: A dictionary mapping Client names to the corresponding Client protobuf message.
     """
 
-    # initially mark all nodes as unspecified 
+    # initially mark all nodes as unspecified
     for node in node_name_message_map.values():
         node.status = Status.STATUS_UNSPECIFIED
 
@@ -21,7 +27,8 @@ def compute_node_statuses(node_name_message_map: Dict[str, Node],
     for client in client_name_message_map.values():
         for user_journey in client.user_journeys:
             for dependency in user_journey.dependencies:
-                compute_single_node_status(node_name_message_map, dependency.target_name)
+                compute_single_node_status(node_name_message_map,
+                                           dependency.target_name)
 
     # annottate remaining nodes (those not connected as part of a user journey)
     for node in node_name_message_map.values():
@@ -30,7 +37,7 @@ def compute_node_statuses(node_name_message_map: Dict[str, Node],
 
 
 def compute_single_node_status(node_name_message_map: Dict[str, Node],
-                            node_name: str) -> "StatusValue":
+                               node_name: str) -> "StatusValue":
     """ Annotates and returns the status of a single Node based on its dependencies. 
 
     Args:
@@ -40,17 +47,19 @@ def compute_single_node_status(node_name_message_map: Dict[str, Node],
     Returns:
         The status of the annotated node.
     """
-    
+
     node = node_name_message_map[node_name]
     if node.status != Status.STATUS_UNSPECIFIED:
         return node.status
 
     status_count_map: Dict["StatusValue", int] = defaultdict(int)
     for child_name in node.child_names:
-        status_count_map[compute_single_node_status(node_name_message_map, child_name)] += 1
+        status_count_map[compute_single_node_status(node_name_message_map,
+                                                    child_name)] += 1
 
     for dependency in node.dependencies:
-        status_count_map[compute_single_node_status(node_name_message_map, dependency.target_name)] += 1
+        status_count_map[compute_single_node_status(
+            node_name_message_map, dependency.target_name)] += 1
 
     for sli in node.slis:
         status_count_map[compute_sli_status(sli)] += 1
@@ -64,7 +73,8 @@ def compute_single_node_status(node_name_message_map: Dict[str, Node],
 
     node.status = status_value
     return status_value
-        
+
+
 def compute_sli_status(sli: SLI) -> "StatusValue":
     """ Annotates and returns the status of a SLI based on its values. 
 
