@@ -1,10 +1,10 @@
 from unittest.mock import Mock, call, patch, sentinel
 
 import pytest
+from graph_structures_pb2 import (SLI, Client, Dependency, Node, NodeType,
+                                  UserJourney)
 
 import ujt.generate_data
-from generated.graph_structures_pb2 import (SLI, Client, Dependency, Node,
-                                            NodeType, UserJourney)
 
 
 @pytest.fixture

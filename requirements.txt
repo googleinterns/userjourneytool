@@ -12,3 +12,4 @@ pylint-protobuf==0.13
 mypy-protobuf==1.23
 grpcio-tools==1.32.0
 Flask-Caching==1.9.0
+dash-bootstrap-components==0.10.6

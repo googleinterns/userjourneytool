@@ -1,8 +1,8 @@
 import pytest
+from graph_structures_pb2 import (SLI, Client, Dependency, Node, NodeType,
+                                  Status, UserJourney)
 
 import ujt.converters
-from generated.graph_structures_pb2 import (SLI, Client, Dependency, Node,
-                                            NodeType, Status, UserJourney)
 
 
 @pytest.fixture
@@ -269,14 +269,14 @@ def test_cytoscape_elements_from_clients():
                 "id": client_relative_names[0],
                 "label": client_relative_names[0]
             },
-            "classes": "client"
+            "classes": ujt.converters.CLIENT_CLASS,
         },
         {
             "data": {
                 "id": client_relative_names[1],
                 "label": client_relative_names[1]
             },
-            "classes": "client"
+            "classes": ujt.converters.CLIENT_CLASS,
         },
     ]
 

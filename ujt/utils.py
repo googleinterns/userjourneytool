@@ -20,9 +20,8 @@ import pathlib
 from typing import List, Type
 
 import google.protobuf.text_format as text_format
+import graph_structures_pb2
 from google.protobuf.message import Message
-
-from generated import graph_structures_pb2
 
 
 def named_proto_file_name(name: str, proto_type: Type[Message]):

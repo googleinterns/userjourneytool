@@ -1,7 +1,8 @@
 from typing import Any, Collection, Dict, List, Union
 
-from generated.graph_structures_pb2 import (Client, Dependency, Node, NodeType,
-                                            Status)
+from graph_structures_pb2 import Client, Dependency, Node, NodeType, Status
+
+CLIENT_CLASS = "CLIENT"
 
 
 def cytoscape_elements_from_nodes(node_name_message_map: Dict[str, Node]):
@@ -24,9 +25,10 @@ def cytoscape_elements_from_nodes(node_name_message_map: Dict[str, Node]):
                     name.split(".")[-1]  # the node's relative name
             },
             "classes":
-                " ".join(
-                    [NodeType.Name(node.node_type),
-                     Status.Name(node.status)])
+                " ".join([
+                    NodeType.Name(node.node_type),
+                    Status.Name(node.status),
+                ])
         }
         if node.parent_name:
             node_element["data"]["parent"] = node.parent_name
@@ -62,7 +64,7 @@ def cytoscape_elements_from_clients(client_name_message_map: Dict[str, Client]):
                 "id": name,
                 "label": name,
             },
-            "classes": "client",
+            "classes": CLIENT_CLASS,
         })
         for user_journey in message.user_journeys:
             for dependency in user_journey.dependencies:

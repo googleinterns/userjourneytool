@@ -1,9 +1,13 @@
 # protobuf generated files
 generated/*
 !generated/__init__.py
+!generated/setup.py
 
 # vscode
 .vscode
+
+# flask cache dir
+cache_dir/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
