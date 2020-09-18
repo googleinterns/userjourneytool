@@ -26,7 +26,7 @@ from google.protobuf.message import Message
 from generated.graph_structures_pb2 import (SLI, Client, Node, SLIType, Status,
                                             UserJourney)
 
-from . import converters, generate_data, logic, utils
+from . import compute_status, converters, generate_data, utils
 
 
 def read_local_data() -> Tuple[Dict[str, Node], Dict[str, Client]]:
@@ -39,7 +39,7 @@ def read_local_data() -> Tuple[Dict[str, Node], Dict[str, Client]]:
     Returns:
         A tuple of two dictionaries.
         The first dictionary contains a mapping from Node name to the actual Node protobuf message.
-        The first dictionary contains a mapping from Client name to the actual Client protobuf message.
+        The second dictionary contains a mapping from Client name to the actual Client protobuf message.
     """
 
     service_names = generate_data.SERVICE_ENDPOINT_NAME_MAP.keys()
@@ -116,7 +116,8 @@ def generate_graph_elements(node_name_message_map: Dict[str, Node],
         A list of dictionary objects, each containing information regarding a single node (Service or Client) or edge (Dependency).
     """
 
-    logic.compute_node_statuses(node_name_message_map, client_name_message_map)
+    compute_status.compute_node_statuses(node_name_message_map,
+                                         client_name_message_map)
 
     return (converters.cytoscape_elements_from_nodes(node_name_message_map) +
             converters.cytoscape_elements_from_clients(client_name_message_map))

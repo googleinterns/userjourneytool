@@ -32,70 +32,116 @@ def test_save_mock_data(patch_path):
 
 
 def test_generate_nodes_functional(patch_path):
+    service_relative_names = ["Service0", "Service1"]
+    endpoint_relative_names = ["Endpoint0", "Endpoint1", "Endpoint2"]
+
     test_service_endpoint_name_map = {
-        "Service1": ["Endpoint1", "Endpoint2"],
-        "Service2": ["Endpoint3"],
+        service_relative_names[0]: [
+            endpoint_relative_names[0], endpoint_relative_names[1]
+        ],
+        service_relative_names[1]: [endpoint_relative_names[2]],
     }
     test_node_dependency_map = {
-        "Service1.Endpoint1": ["Service1.Endpoint2", "Service2.Endpoint3"],
-        "Service1.Endpoint2": ["Service2.Endpoint3"],
-        "Service2.Endpoint3": [],
+        f"{service_relative_names[0]}.{endpoint_relative_names[0]}": [
+            f"{service_relative_names[0]}.{endpoint_relative_names[1]}",
+            f"{service_relative_names[1]}.{endpoint_relative_names[2]}"
+        ],
+        f"{service_relative_names[0]}.{endpoint_relative_names[1]}": [
+            f"{service_relative_names[1]}.{endpoint_relative_names[2]}"
+        ],
+        f"{service_relative_names[1]}.{endpoint_relative_names[2]}": [],
     }
     expected_nodes = [
-        Node(node_type=NodeType.NODETYPE_SERVICE,
-             name="Service1",
-             child_names=["Service1.Endpoint1", "Service1.Endpoint2"],
-             slis=[
-                 SLI(node_name="Service1",
-                     sli_value=.5,
-                     **ujt.generate_data.SLO_BOUNDS)
-             ]),
-        Node(node_type=NodeType.NODETYPE_SERVICE,
-             name="Service2",
-             child_names=["Service2.Endpoint3"],
-             slis=[
-                 SLI(node_name="Service2",
-                     sli_value=.5,
-                     **ujt.generate_data.SLO_BOUNDS)
-             ]),
-        Node(node_type=NodeType.NODETYPE_ENDPOINT,
-             name="Service1.Endpoint1",
-             parent_name="Service1",
-             dependencies=[
-                 Dependency(
-                     target_name="Service1.Endpoint2",
-                     source_name="Service1.Endpoint1",
-                 ),
-                 Dependency(target_name="Service2.Endpoint3",
-                            source_name="Service1.Endpoint1")
-             ],
-             slis=[
-                 SLI(node_name="Service1.Endpoint1",
-                     sli_value=.5,
-                     **ujt.generate_data.SLO_BOUNDS)
-             ]),
-        Node(node_type=NodeType.NODETYPE_ENDPOINT,
-             name="Service1.Endpoint2",
-             parent_name="Service1",
-             dependencies=[
-                 Dependency(
-                     target_name="Service2.Endpoint3",
-                     source_name="Service1.Endpoint2",
-                 ),
-             ],
-             slis=[
-                 SLI(node_name="Service1.Endpoint2",
-                     sli_value=.5,
-                     **ujt.generate_data.SLO_BOUNDS)
-             ]),
-        Node(node_type=NodeType.NODETYPE_ENDPOINT,
-             name="Service2.Endpoint3",
-             parent_name="Service2",
-             slis=[
-                 SLI(node_name="Service2.Endpoint3",
-                     sli_value=.5,
-                     **ujt.generate_data.SLO_BOUNDS)
-             ]),
+        Node(
+            node_type=NodeType.NODETYPE_SERVICE,
+            name=service_relative_names[0],
+            child_names=[
+                f"{service_relative_names[0]}.{endpoint_relative_names[0]}",
+                f"{service_relative_names[0]}.{endpoint_relative_names[1]}"
+            ],
+            slis=[
+                SLI(
+                    node_name=service_relative_names[0],
+                    sli_value=.5,
+                    **ujt.generate_data.SLO_BOUNDS,
+                ),
+            ],
+        ),
+        Node(
+            node_type=NodeType.NODETYPE_SERVICE,
+            name=service_relative_names[1],
+            child_names=[
+                f"{service_relative_names[1]}.{endpoint_relative_names[2]}"
+            ],
+            slis=[
+                SLI(
+                    node_name=service_relative_names[1],
+                    sli_value=.5,
+                    **ujt.generate_data.SLO_BOUNDS,
+                ),
+            ],
+        ),
+        Node(
+            node_type=NodeType.NODETYPE_ENDPOINT,
+            name=f"{service_relative_names[0]}.{endpoint_relative_names[0]}",
+            parent_name=service_relative_names[0],
+            dependencies=[
+                Dependency(
+                    target_name=
+                    f"{service_relative_names[0]}.{endpoint_relative_names[1]}",
+                    source_name=
+                    f"{service_relative_names[0]}.{endpoint_relative_names[0]}",
+                ),
+                Dependency(
+                    target_name=
+                    f"{service_relative_names[1]}.{endpoint_relative_names[2]}",
+                    source_name=
+                    f"{service_relative_names[0]}.{endpoint_relative_names[0]}",
+                ),
+            ],
+            slis=[
+                SLI(
+                    node_name=
+                    f"{service_relative_names[0]}.{endpoint_relative_names[0]}",
+                    sli_value=.5,
+                    **ujt.generate_data.SLO_BOUNDS,
+                ),
+            ],
+        ),
+        Node(
+            node_type=NodeType.NODETYPE_ENDPOINT,
+            name=f"{service_relative_names[0]}.{endpoint_relative_names[1]}",
+            parent_name=service_relative_names[0],
+            dependencies=[
+                Dependency(
+                    target_name=
+                    f"{service_relative_names[1]}.{endpoint_relative_names[2]}",
+                    source_name=
+                    f"{service_relative_names[0]}.{endpoint_relative_names[1]}",
+                ),
+            ],
+            slis=[
+                SLI(
+                    node_name=
+                    f"{service_relative_names[0]}.{endpoint_relative_names[1]}",
+                    sli_value=.5,
+                    **ujt.generate_data.SLO_BOUNDS,
+                ),
+            ],
+        ),
+        Node(
+            node_type=NodeType.NODETYPE_ENDPOINT,
+            name=f"{service_relative_names[1]}.{endpoint_relative_names[2]}",
+            parent_name=service_relative_names[1],
+            slis=[
+                SLI(
+                    node_name=
+                    f"{service_relative_names[1]}.{endpoint_relative_names[2]}",
+                    sli_value=.5,
+                    **ujt.generate_data.SLO_BOUNDS,
+                ),
+            ],
+        ),
     ]
     with patch(f"{patch_path}.SERVICE_ENDPOINT_NAME_MAP", test_service_endpoint_name_map), \
         patch(f"{patch_path}.NODE_DEPENDENCY_MAP", test_node_dependency_map), \
@@ -108,42 +154,59 @@ def test_generate_nodes_functional(patch_path):
 
 
 def test_generate_clients_functional(patch_path):
+    client_relative_names = ["Client0", "Client1"]
+    user_journey_relative_names = ["UJ0", "UJ1", "UJ2"]
+    service_relative_names = ["Service0", "Service1", "Service2", "Service3"]
+
     test_client_user_journey_name_map = {
-        "Client1": ["UJ1", "UJ2"],
-        "Client2": ["UJ3"],
+        client_relative_names[0]: [
+            user_journey_relative_names[0], user_journey_relative_names[1]
+        ],
+        client_relative_names[1]: [user_journey_relative_names[2]],
     }
     test_user_journey_dependency_map = {
-        "Client1.UJ1": ["Service1", "Service2"],
-        "Client1.UJ2": ["Service3"],
-        "Client2.UJ3": ["Service4"],
+        f"{client_relative_names[0]}.{user_journey_relative_names[0]}": [
+            service_relative_names[0], service_relative_names[1]
+        ],
+        f"{client_relative_names[0]}.{user_journey_relative_names[1]}": [
+            service_relative_names[2]
+        ],
+        f"{client_relative_names[1]}.{user_journey_relative_names[2]}": [
+            service_relative_names[3]
+        ],
     }
     expected_clients = [
         Client(
-            name="Client1",
+            name=client_relative_names[0],
             user_journeys=[
                 UserJourney(
-                    name="Client1.UJ1",
-                    client_name="Client1",
+                    name=
+                    f"{client_relative_names[0]}.{user_journey_relative_names[0]}",
+                    client_name=client_relative_names[0],
                     dependencies=[
                         Dependency(
-                            target_name="Service1",
-                            source_name="Client1.UJ1",
+                            target_name=service_relative_names[0],
+                            source_name=
+                            f"{client_relative_names[0]}.{user_journey_relative_names[0]}",
                             toplevel=True,
                         ),
                         Dependency(
-                            target_name="Service2",
-                            source_name="Client1.UJ1",
+                            target_name=service_relative_names[1],
+                            source_name=
+                            f"{client_relative_names[0]}.{user_journey_relative_names[0]}",
                             toplevel=True,
                         ),
                     ],
                 ),
                 UserJourney(
-                    name="Client1.UJ2",
-                    client_name="Client1",
+                    name=
+                    f"{client_relative_names[0]}.{user_journey_relative_names[1]}",
+                    client_name=client_relative_names[0],
                     dependencies=[
                         Dependency(
-                            target_name="Service3",
-                            source_name="Client1.UJ2",
+                            target_name=service_relative_names[2],
+                            source_name=
+                            f"{client_relative_names[0]}.{user_journey_relative_names[1]}",
                             toplevel=True,
                         ),
                     ],
@@ -151,30 +214,29 @@ def test_generate_clients_functional(patch_path):
             ],
         ),
         Client(
-            name="Client2",
+            name=client_relative_names[1],
             user_journeys=[
                 UserJourney(
-                    name="Client2.UJ3",
-                    client_name="Client2",
+                    name=
+                    f"{client_relative_names[1]}.{user_journey_relative_names[2]}",
+                    client_name=client_relative_names[1],
                     dependencies=[
                         Dependency(
-                            target_name="Service4",
-                            source_name="Client2.UJ3",
+                            target_name=service_relative_names[3],
+                            source_name=
+                            f"{client_relative_names[1]}.{user_journey_relative_names[2]}",
                             toplevel=True,
                         ),
                     ],
                 ),
             ],
-        )
+        ),
     ]
     with patch(f"{patch_path}.CLIENT_USER_JOURNEY_NAME_MAP", test_client_user_journey_name_map), \
         patch(f"{patch_path}.USER_JOURNEY_DEPENDENCY_MAP", test_user_journey_dependency_map):
         clients = ujt.generate_data.generate_clients()
         # not the most elegant way to check list equality ignoring order,
         # but can't hash or sort Nodes. This should be fine for small test cases.
-        print(clients)
-        print("--")
-        print(expected_clients)
         assert all([
             expected_client in clients for expected_client in expected_clients
         ])

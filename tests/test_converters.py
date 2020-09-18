@@ -2,7 +2,7 @@ import pytest
 
 import ujt.converters
 from generated.graph_structures_pb2 import (SLI, Client, Dependency, Node,
-                                            NodeType, UserJourney)
+                                            NodeType, Status, UserJourney)
 
 
 @pytest.fixture
@@ -11,126 +11,185 @@ def patch_path():
 
 
 def test_cytoscape_elements_from_nodes():
+    service_relative_names = ["Service0", "Service1"]
+    endpoint_relative_names = ["Endpoint0", "Endpoint1", "Endpoint2"]
+
     node_name_message_map = {
-        "Service1":
-            Node(node_type=NodeType.NODETYPE_SERVICE,
-                 name="Service1",
-                 child_names=["Service1.Endpoint1", "Service1.Endpoint2"],
-                 slis=[
-                     SLI(node_name="Service1",
-                         sli_value=.5,
-                         **ujt.generate_data.SLO_BOUNDS)
-                 ]),
-        "Service2":
-            Node(node_type=NodeType.NODETYPE_SERVICE,
-                 name="Service2",
-                 child_names=["Service2.Endpoint3"],
-                 slis=[
-                     SLI(node_name="Service2",
-                         sli_value=.5,
-                         **ujt.generate_data.SLO_BOUNDS)
-                 ]),
-        "Service1.Endpoint1":
-            Node(node_type=NodeType.NODETYPE_ENDPOINT,
-                 name="Service1.Endpoint1",
-                 parent_name="Service1",
-                 dependencies=[
-                     Dependency(
-                         target_name="Service1.Endpoint2",
-                         source_name="Service1.Endpoint1",
-                     ),
-                     Dependency(target_name="Service2.Endpoint3",
-                                source_name="Service1.Endpoint1")
-                 ],
-                 slis=[
-                     SLI(node_name="Service1.Endpoint1",
-                         sli_value=.5,
-                         **ujt.generate_data.SLO_BOUNDS)
-                 ]),
-        "Service1.Endpoint2":
-            Node(node_type=NodeType.NODETYPE_ENDPOINT,
-                 name="Service1.Endpoint2",
-                 parent_name="Service1",
-                 dependencies=[
-                     Dependency(
-                         target_name="Service2.Endpoint3",
-                         source_name="Service1.Endpoint2",
-                     ),
-                 ],
-                 slis=[
-                     SLI(node_name="Service1.Endpoint2",
-                         sli_value=.5,
-                         **ujt.generate_data.SLO_BOUNDS)
-                 ]),
-        "Service2.Endpoint3":
-            Node(node_type=NodeType.NODETYPE_ENDPOINT,
-                 name="Service2.Endpoint3",
-                 parent_name="Service2",
-                 slis=[
-                     SLI(node_name="Service2.Endpoint3",
-                         sli_value=.5,
-                         **ujt.generate_data.SLO_BOUNDS)
-                 ]),
+        service_relative_names[0]:
+            Node(
+                node_type=NodeType.NODETYPE_SERVICE,
+                name=service_relative_names[0],
+                child_names=[
+                    f"{service_relative_names[0]}.{endpoint_relative_names[0]}",
+                    f"{service_relative_names[0]}.{endpoint_relative_names[1]}"
+                ],
+                slis=[
+                    SLI(
+                        node_name=service_relative_names[0],
+                        sli_value=.5,
+                        **ujt.generate_data.SLO_BOUNDS,
+                    ),
+                ],
+            ),
+        service_relative_names[1]:
+            Node(
+                node_type=NodeType.NODETYPE_SERVICE,
+                name=service_relative_names[1],
+                child_names=[
+                    f"{service_relative_names[1]}.{endpoint_relative_names[2]}"
+                ],
+                slis=[
+                    SLI(
+                        node_name=service_relative_names[1],
+                        sli_value=.5,
+                        **ujt.generate_data.SLO_BOUNDS,
+                    ),
+                ],
+            ),
+        f"{service_relative_names[0]}.{endpoint_relative_names[0]}":
+            Node(
+                node_type=NodeType.NODETYPE_ENDPOINT,
+                name=f"{service_relative_names[0]}.{endpoint_relative_names[0]}",
+                parent_name=service_relative_names[0],
+                dependencies=[
+                    Dependency(
+                        target_name=
+                        f"{service_relative_names[0]}.{endpoint_relative_names[1]}",
+                        source_name=
+                        f"{service_relative_names[0]}.{endpoint_relative_names[0]}",
+                    ),
+                    Dependency(
+                        target_name=
+                        f"{service_relative_names[1]}.{endpoint_relative_names[2]}",
+                        source_name=
+                        f"{service_relative_names[0]}.{endpoint_relative_names[0]}",
+                    ),
+                ],
+                slis=[
+                    SLI(
+                        node_name=
+                        f"{service_relative_names[0]}.{endpoint_relative_names[0]}",
+                        sli_value=.5,
+                        **ujt.generate_data.SLO_BOUNDS,
+                    ),
+                ],
+            ),
+        f"{service_relative_names[0]}.{endpoint_relative_names[1]}":
+            Node(
+                node_type=NodeType.NODETYPE_ENDPOINT,
+                name=f"{service_relative_names[0]}.{endpoint_relative_names[1]}",
+                parent_name=service_relative_names[0],
+                dependencies=[
+                    Dependency(
+                        target_name=
+                        f"{service_relative_names[1]}.{endpoint_relative_names[2]}",
+                        source_name=
+                        f"{service_relative_names[0]}.{endpoint_relative_names[1]}",
+                    ),
+                ],
+                slis=[
+                    SLI(
+                        node_name=
+                        f"{service_relative_names[0]}.{endpoint_relative_names[1]}",
+                        sli_value=.5,
+                        **ujt.generate_data.SLO_BOUNDS,
+                    ),
+                ],
+            ),
+        f"{service_relative_names[1]}.{endpoint_relative_names[2]}":
+            Node(
+                node_type=NodeType.NODETYPE_ENDPOINT,
+                name=f"{service_relative_names[1]}.{endpoint_relative_names[2]}",
+                parent_name=service_relative_names[1],
+                slis=[
+                    SLI(
+                        node_name=
+                        f"{service_relative_names[1]}.{endpoint_relative_names[2]}",
+                        sli_value=.5,
+                        **ujt.generate_data.SLO_BOUNDS,
+                    ),
+                ],
+            ),
     }
 
     expected_node_elements = [
         {
             "data": {
-                "id": "Service1",
-                "label": "Service1"
+                "id": service_relative_names[0],
+                "label": service_relative_names[0],
             },
-            "classes": "NODETYPE_SERVICE STATUS_UNSPECIFIED"
+            "classes":
+                f"{NodeType.Name(NodeType.NODETYPE_SERVICE)} {Status.Name(Status.STATUS_UNSPECIFIED)}"
         },
         {
             "data": {
-                "id": "Service2",
-                "label": "Service2"
+                "id": service_relative_names[1],
+                "label": service_relative_names[1],
             },
-            "classes": "NODETYPE_SERVICE STATUS_UNSPECIFIED"
+            "classes":
+                f"{NodeType.Name(NodeType.NODETYPE_SERVICE)} {Status.Name(Status.STATUS_UNSPECIFIED)}"
         },
         {
             "data": {
-                "id": "Service1.Endpoint1",
-                "label": "Endpoint1",
-                "parent": "Service1",
+                "id":
+                    f"{service_relative_names[0]}.{endpoint_relative_names[0]}",
+                "label":
+                    endpoint_relative_names[0],
+                "parent":
+                    service_relative_names[0],
             },
-            "classes": "NODETYPE_ENDPOINT STATUS_UNSPECIFIED"
+            "classes":
+                f"{NodeType.Name(NodeType.NODETYPE_ENDPOINT)} {Status.Name(Status.STATUS_UNSPECIFIED)}"
         },
         {
             "data": {
-                "id": "Service1.Endpoint2",
-                "label": "Endpoint2",
-                "parent": "Service1",
+                "id":
+                    f"{service_relative_names[0]}.{endpoint_relative_names[1]}",
+                "label":
+                    endpoint_relative_names[1],
+                "parent":
+                    service_relative_names[0],
             },
-            "classes": "NODETYPE_ENDPOINT STATUS_UNSPECIFIED"
+            "classes":
+                f"{NodeType.Name(NodeType.NODETYPE_ENDPOINT)} {Status.Name(Status.STATUS_UNSPECIFIED)}"
         },
         {
             "data": {
-                "id": "Service2.Endpoint3",
-                "label": "Endpoint3",
-                "parent": "Service2",
+                "id":
+                    f"{service_relative_names[1]}.{endpoint_relative_names[2]}",
+                "label":
+                    endpoint_relative_names[2],
+                "parent":
+                    service_relative_names[1],
             },
-            "classes": "NODETYPE_ENDPOINT STATUS_UNSPECIFIED"
+            "classes":
+                f"{NodeType.Name(NodeType.NODETYPE_ENDPOINT)} {Status.Name(Status.STATUS_UNSPECIFIED)}"
         },
     ]
 
     expected_edge_elements = [
         {
             "data": {
-                "source": "Service1.Endpoint1",
-                "target": "Service1.Endpoint2",
+                "source":
+                    f"{service_relative_names[0]}.{endpoint_relative_names[0]}",
+                "target":
+                    f"{service_relative_names[0]}.{endpoint_relative_names[1]}",
             }
         },
         {
             "data": {
-                "source": "Service1.Endpoint1",
-                "target": "Service2.Endpoint3",
+                "source":
+                    f"{service_relative_names[0]}.{endpoint_relative_names[0]}",
+                "target":
+                    f"{service_relative_names[1]}.{endpoint_relative_names[2]}",
             }
         },
         {
             "data": {
-                "source": "Service1.Endpoint2",
-                "target": "Service2.Endpoint3",
+                "source":
+                    f"{service_relative_names[0]}.{endpoint_relative_names[1]}",
+                "target":
+                    f"{service_relative_names[1]}.{endpoint_relative_names[2]}",
             }
         },
     ]
@@ -140,51 +199,62 @@ def test_cytoscape_elements_from_nodes():
 
 
 def test_cytoscape_elements_from_clients():
+    client_relative_names = ["Client0", "Client1"]
+    user_journey_relative_names = ["UJ0", "UJ1", "UJ2"]
+    service_relative_names = ["Service0", "Service1", "Service2", "Service3"]
+
     client_name_message_map = {
-        "Client1":
+        client_relative_names[0]:
             Client(
-                name="Client1",
+                name=client_relative_names[0],
                 user_journeys=[
                     UserJourney(
-                        name="Client1.UJ1",
-                        client_name="Client1",
+                        name=
+                        f"{client_relative_names[0]}.{user_journey_relative_names[0]}",
+                        client_name=client_relative_names[0],
                         dependencies=[
                             Dependency(
-                                target_name="Service1",
-                                source_name="Client1.UJ1",
+                                target_name=service_relative_names[0],
+                                source_name=
+                                f"{client_relative_names[0]}.{user_journey_relative_names[0]}",
                                 toplevel=True,
                             ),
                             Dependency(
-                                target_name="Service2",
-                                source_name="Client1.UJ1",
+                                target_name=service_relative_names[1],
+                                source_name=
+                                f"{client_relative_names[0]}.{user_journey_relative_names[0]}",
                                 toplevel=True,
                             ),
                         ],
                     ),
                     UserJourney(
-                        name="Client1.UJ2",
-                        client_name="Client1",
+                        name=
+                        f"{client_relative_names[0]}.{user_journey_relative_names[1]}",
+                        client_name=client_relative_names[0],
                         dependencies=[
                             Dependency(
-                                target_name="Service3",
-                                source_name="Client1.UJ2",
+                                target_name=service_relative_names[2],
+                                source_name=
+                                f"{client_relative_names[0]}.{user_journey_relative_names[1]}",
                                 toplevel=True,
                             ),
                         ],
                     ),
                 ],
             ),
-        "Client2":
+        client_relative_names[1]:
             Client(
-                name="Client2",
+                name=client_relative_names[1],
                 user_journeys=[
                     UserJourney(
-                        name="Client2.UJ3",
-                        client_name="Client2",
+                        name=
+                        f"{client_relative_names[1]}.{user_journey_relative_names[2]}",
+                        client_name=client_relative_names[1],
                         dependencies=[
                             Dependency(
-                                target_name="Service4",
-                                source_name="Client2.UJ3",
+                                target_name=service_relative_names[3],
+                                source_name=
+                                f"{client_relative_names[1]}.{user_journey_relative_names[2]}",
                                 toplevel=True,
                             ),
                         ],
@@ -196,15 +266,15 @@ def test_cytoscape_elements_from_clients():
     expected_node_elements = [
         {
             "data": {
-                "id": "Client1",
-                "label": "Client1"
+                "id": client_relative_names[0],
+                "label": client_relative_names[0]
             },
             "classes": "client"
         },
         {
             "data": {
-                "id": "Client2",
-                "label": "Client2"
+                "id": client_relative_names[1],
+                "label": client_relative_names[1]
             },
             "classes": "client"
         },
@@ -213,26 +283,26 @@ def test_cytoscape_elements_from_clients():
     expected_edge_elements = [
         {
             "data": {
-                "source": "Client1",
-                "target": "Service1",
+                "source": client_relative_names[0],
+                "target": service_relative_names[0],
             }
         },
         {
             "data": {
-                "source": "Client1",
-                "target": "Service2",
+                "source": client_relative_names[0],
+                "target": service_relative_names[1],
             }
         },
         {
             "data": {
-                "source": "Client1",
-                "target": "Service3",
+                "source": client_relative_names[0],
+                "target": service_relative_names[2],
             }
         },
         {
             "data": {
-                "source": "Client2",
-                "target": "Service4",
+                "source": client_relative_names[1],
+                "target": service_relative_names[3],
             }
         },
     ]
