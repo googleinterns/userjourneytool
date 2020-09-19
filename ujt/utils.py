@@ -23,6 +23,8 @@ import google.protobuf.text_format as text_format
 import graph_structures_pb2
 from google.protobuf.message import Message
 
+from . import converters
+
 
 def named_proto_file_name(name: str, proto_type: Type[Message]):
     """ Generates the default file name for messages with a name field.
@@ -67,3 +69,15 @@ def read_proto_from_file(file_name: str, proto_type: Type[Message]) -> Message:
               "r") as f:
         proto_text: str = f.read()
         return text_format.Parse(proto_text, proto_type())
+
+
+def is_client_cytoscape_node(tapNode):
+    return converters.CLIENT_CLASS in tapNode["classes"].split(" ")
+
+
+def relative_name(full_name):
+    return full_name.split(".")[-1]
+
+
+def human_readable_enum_name(enum_value, enum_class):
+    return enum_class.Name(enum_value).split("_")[-1]

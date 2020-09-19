@@ -24,8 +24,14 @@ from dash.dependencies import Input, Output
 from dash.exceptions import PreventUpdate
 from flask_caching import Cache
 from google.protobuf.message import Message
-from graph_structures_pb2 import (SLI, Client, Node, NodeType, SLIType, Status,
-                                  UserJourney)
+from graph_structures_pb2 import (
+    SLI,
+    Client,
+    Node,
+    NodeType,
+    SLIType,
+    Status,
+    UserJourney)
 
 from . import compute_status, converters, generate_data, utils
 
@@ -71,22 +77,30 @@ def read_local_data() -> Tuple[Dict[str, Node], Dict[str, Client]]:
 
     node_names = list(service_names) + flattened_endpoint_names
 
-    node_name_message_map: Dict[str, Node] = {
-        name: cast(
-            Node,
-            utils.read_proto_from_file(
-                utils.named_proto_file_name(name, Node),
-                Node,
-            )) for name in node_names
-    }
+    node_name_message_map: Dict[str,
+                                Node] = {
+                                    name: cast(
+                                        Node,
+                                        utils.read_proto_from_file(
+                                            utils.named_proto_file_name(
+                                                name,
+                                                Node),
+                                            Node,
+                                        ))
+                                    for name in node_names
+                                }
 
-    client_name_message_map: Dict[str, Client] = {
-        name: cast(
-            Client,
-            utils.read_proto_from_file(
-                utils.named_proto_file_name(name, Client), Client))
-        for name in client_names
-    }
+    client_name_message_map: Dict[str,
+                                  Client] = {
+                                      name: cast(
+                                          Client,
+                                          utils.read_proto_from_file(
+                                              utils.named_proto_file_name(
+                                                  name,
+                                                  Client),
+                                              Client))
+                                      for name in client_names
+                                  }
 
     return node_name_message_map, client_name_message_map
 
@@ -124,8 +138,11 @@ def get_client_name_message_map() -> Dict[str, Client]:
     return read_local_data()[1]
 
 
-def generate_graph_elements(node_name_message_map: Dict[str, Node],
-                            client_name_message_map: Dict[str, Client]):
+def generate_graph_elements(
+        node_name_message_map: Dict[str,
+                                    Node],
+        client_name_message_map: Dict[str,
+                                      Client]):
     """ Generates a cytoscape elements dictionary from Service, SLI, and Client protobufs.
 
     Args:
@@ -136,13 +153,16 @@ def generate_graph_elements(node_name_message_map: Dict[str, Node],
         A list of dictionary objects, each containing information regarding a single node (Service or Client) or edge (Dependency).
     """
 
-    return (converters.cytoscape_elements_from_nodes(node_name_message_map) +
-            converters.cytoscape_elements_from_clients(client_name_message_map))
+    return (
+        converters.cytoscape_elements_from_nodes(node_name_message_map) +
+        converters.cytoscape_elements_from_clients(client_name_message_map))
 
 
 @app.callback(
-    Output("cytoscape-graph", "elements"),
-    [Input("refresh-button", "n_clicks_timestamp")],
+    Output("cytoscape-graph",
+           "elements"),
+    [Input("refresh-button",
+           "n_clicks_timestamp")],
 )
 def refresh_graph(n_clicks_timestamp):
     cache.clear()
@@ -150,6 +170,69 @@ def refresh_graph(n_clicks_timestamp):
         get_node_name_message_map(),
         get_client_name_message_map(),
     )
+
+
+@app.callback(
+    Output('node-info-panel',
+           'children'),
+    [Input('cytoscape-graph',
+           'tapNode')],
+)
+def generate_node_info_panel(tapNode):
+    if tapNode is None or utils.is_client_cytoscape_node(tapNode):
+        raise PreventUpdate
+
+    node_name = tapNode["data"]["id"]
+    node_name_message_map = get_node_name_message_map()
+    node = node_name_message_map[node_name]
+
+    out = [
+        html.H2(
+            f"{utils.relative_name(node_name)} ({utils.human_readable_enum_name(node.node_type, NodeType)})"
+        ),
+    ]
+
+    if node.slis:
+        out += [
+            html.H3("SLI Info"),
+            *converters.bootstrap_info_table_from_slis(node.slis),
+        ]
+
+    if node.child_names:
+        child_nodes = [
+            node_name_message_map[child_name] for child_name in node.child_names
+        ]
+        out += [
+            html.H3("Child Node Info"),
+            *converters.bootstrap_info_table_from_nodes(
+                child_nodes,
+                use_relative_names=True),
+        ]
+
+    if node.dependencies:
+        dependency_nodes = [
+            node_name_message_map[dependency.target_name]
+            for dependency in node.dependencies
+        ]
+        out += [
+            html.H3("Dependency Node Info"),
+            *converters.bootstrap_info_table_from_nodes(dependency_nodes),
+        ]
+
+    return out
+
+
+@app.callback(
+    Output('client-info-panel',
+           'children'),
+    [Input('cytoscape-graph',
+           'tapNode')],
+)
+def generate_client_info_panel(tapNode):
+    if tapNode is None or not utils.is_client_cytoscape_node(tapNode):
+        raise PreventUpdate
+
+    return "client_info"
 
 
 CYTO_STYLESHEET = [
@@ -169,12 +252,13 @@ CYTO_STYLESHEET = [
     },
     {
         "selector": f".{NodeType.Name(NodeType.NODETYPE_SERVICE)}",
-        "style": {
-            "shape": "rectangle",
-            # set non-compound nodes (services with no endpoints) to match same color as compound nodes
-            "background-color": "lightgrey",
-            "background-blacken": -.5
-        }
+        "style":
+            {
+                "shape": "rectangle",
+                # set non-compound nodes (services with no endpoints) to match same color as compound nodes
+                "background-color": "lightgrey",
+                "background-blacken": -.5
+            }
     },
     {
         "selector": f".{Status.Name(Status.STATUS_HEALTHY)}",
@@ -202,30 +286,56 @@ CYTO_STYLESHEET = [
     }
 ]
 
-app.layout = html.Div(children=[
-    html.H1(children="User Journey Tool",
+app.layout = html.Div(
+    children=[
+        html.H1(
+            children="User Journey Tool",
             style={
                 "textAlign": "center",
                 "color": "black",
             }),
-    cyto.Cytoscape(
-        id="cytoscape-graph",
-        #layout={"name": "breadthfirst", "roots": "#MobileClient, #WebBrowser"},
-        layout={
-            "name": "dagre",
-            "nodeDimensionsIncludeLabels": "true",
-        },
-        style={
-            "width": "100%",
-            "height": "600px",
-            "backgroundColor": "azure"
-        },
-        #elements=generate_graph_elements_from_local_data(),
-        stylesheet=CYTO_STYLESHEET,
-    ),
-    dbc.Button(id="refresh-button", children="Refresh"),
-    html.Div(id="refresh-signal", style={"display": "none"}),
-])
+        cyto.Cytoscape(
+            id="cytoscape-graph",
+            #layout={"name": "breadthfirst", "roots": "#MobileClient, #WebBrowser"},
+            layout={
+                "name": "dagre",
+                "nodeDimensionsIncludeLabels": "true",
+            },
+            style={
+                "width": "100%",
+                "height": "600px",
+                "backgroundColor": "azure"
+            },
+            #elements=generate_graph_elements_from_local_data(),
+            stylesheet=CYTO_STYLESHEET,
+        ),
+        dbc.Button(id="refresh-button",
+                   children="Refresh"),
+        html.Div(id="refresh-signal",
+                 style={"display": "none"}),
+        html.Div(
+            children=[
+                dbc.Container(
+                    dbc.Row(
+                        [
+                            dbc.Col(
+                                [
+                                    html.H1("Node Info"),
+                                    html.Div(
+                                        id="node-info-panel",
+                                        className="info-panel"),
+                                ]),
+                            dbc.Col(
+                                [
+                                    html.H1("Client Info"),
+                                    html.Div(
+                                        id="client-info-panel",
+                                        className="info-panel"),
+                                ]),
+                        ])),
+            ],
+            className="mb-5"),
+    ])
 
 if __name__ == "__main__":
     app.run_server(debug=True)

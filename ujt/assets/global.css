@@ -1,5 +1,25 @@
 /* place css styles for Dash app here */
-
+/*
 .info-panel {
     border: 1px solid black;
+}
+*/
+.header-row {
+    background-color: azure;
+}
+
+.data-row {
+    background-color: whitesmoke;
+}
+
+.STATUS_HEALTHY {
+    color: green;
+}
+
+.STATUS_WARN {
+    color: orange;
+}
+
+.STATUS_ERROR {
+    color: red;
 }

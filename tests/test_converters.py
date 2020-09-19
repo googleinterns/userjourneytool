@@ -1,6 +1,12 @@
 import pytest
-from graph_structures_pb2 import (SLI, Client, Dependency, Node, NodeType,
-                                  Status, UserJourney)
+from graph_structures_pb2 import (
+    SLI,
+    Client,
+    Dependency,
+    Node,
+    NodeType,
+    Status,
+    UserJourney)
 
 import ujt.converters
 
@@ -114,54 +120,59 @@ def test_cytoscape_elements_from_nodes():
 
     expected_node_elements = [
         {
-            "data": {
-                "id": service_relative_names[0],
-                "label": service_relative_names[0],
-            },
+            "data":
+                {
+                    "id": service_relative_names[0],
+                    "label": service_relative_names[0],
+                },
             "classes":
                 f"{NodeType.Name(NodeType.NODETYPE_SERVICE)} {Status.Name(Status.STATUS_UNSPECIFIED)}"
         },
         {
-            "data": {
-                "id": service_relative_names[1],
-                "label": service_relative_names[1],
-            },
+            "data":
+                {
+                    "id": service_relative_names[1],
+                    "label": service_relative_names[1],
+                },
             "classes":
                 f"{NodeType.Name(NodeType.NODETYPE_SERVICE)} {Status.Name(Status.STATUS_UNSPECIFIED)}"
         },
         {
-            "data": {
-                "id":
-                    f"{service_relative_names[0]}.{endpoint_relative_names[0]}",
-                "label":
-                    endpoint_relative_names[0],
-                "parent":
-                    service_relative_names[0],
-            },
+            "data":
+                {
+                    "id":
+                        f"{service_relative_names[0]}.{endpoint_relative_names[0]}",
+                    "label":
+                        endpoint_relative_names[0],
+                    "parent":
+                        service_relative_names[0],
+                },
             "classes":
                 f"{NodeType.Name(NodeType.NODETYPE_ENDPOINT)} {Status.Name(Status.STATUS_UNSPECIFIED)}"
         },
         {
-            "data": {
-                "id":
-                    f"{service_relative_names[0]}.{endpoint_relative_names[1]}",
-                "label":
-                    endpoint_relative_names[1],
-                "parent":
-                    service_relative_names[0],
-            },
+            "data":
+                {
+                    "id":
+                        f"{service_relative_names[0]}.{endpoint_relative_names[1]}",
+                    "label":
+                        endpoint_relative_names[1],
+                    "parent":
+                        service_relative_names[0],
+                },
             "classes":
                 f"{NodeType.Name(NodeType.NODETYPE_ENDPOINT)} {Status.Name(Status.STATUS_UNSPECIFIED)}"
         },
         {
-            "data": {
-                "id":
-                    f"{service_relative_names[1]}.{endpoint_relative_names[2]}",
-                "label":
-                    endpoint_relative_names[2],
-                "parent":
-                    service_relative_names[1],
-            },
+            "data":
+                {
+                    "id":
+                        f"{service_relative_names[1]}.{endpoint_relative_names[2]}",
+                    "label":
+                        endpoint_relative_names[2],
+                    "parent":
+                        service_relative_names[1],
+                },
             "classes":
                 f"{NodeType.Name(NodeType.NODETYPE_ENDPOINT)} {Status.Name(Status.STATUS_UNSPECIFIED)}"
         },
@@ -169,28 +180,31 @@ def test_cytoscape_elements_from_nodes():
 
     expected_edge_elements = [
         {
-            "data": {
-                "source":
-                    f"{service_relative_names[0]}.{endpoint_relative_names[0]}",
-                "target":
-                    f"{service_relative_names[0]}.{endpoint_relative_names[1]}",
-            }
+            "data":
+                {
+                    "source":
+                        f"{service_relative_names[0]}.{endpoint_relative_names[0]}",
+                    "target":
+                        f"{service_relative_names[0]}.{endpoint_relative_names[1]}",
+                }
         },
         {
-            "data": {
-                "source":
-                    f"{service_relative_names[0]}.{endpoint_relative_names[0]}",
-                "target":
-                    f"{service_relative_names[1]}.{endpoint_relative_names[2]}",
-            }
+            "data":
+                {
+                    "source":
+                        f"{service_relative_names[0]}.{endpoint_relative_names[0]}",
+                    "target":
+                        f"{service_relative_names[1]}.{endpoint_relative_names[2]}",
+                }
         },
         {
-            "data": {
-                "source":
-                    f"{service_relative_names[0]}.{endpoint_relative_names[1]}",
-                "target":
-                    f"{service_relative_names[1]}.{endpoint_relative_names[2]}",
-            }
+            "data":
+                {
+                    "source":
+                        f"{service_relative_names[0]}.{endpoint_relative_names[1]}",
+                    "target":
+                        f"{service_relative_names[1]}.{endpoint_relative_names[2]}",
+                }
         },
     ]
 
@@ -265,45 +279,51 @@ def test_cytoscape_elements_from_clients():
 
     expected_node_elements = [
         {
-            "data": {
-                "id": client_relative_names[0],
-                "label": client_relative_names[0]
-            },
+            "data":
+                {
+                    "id": client_relative_names[0],
+                    "label": client_relative_names[0]
+                },
             "classes": ujt.converters.CLIENT_CLASS,
         },
         {
-            "data": {
-                "id": client_relative_names[1],
-                "label": client_relative_names[1]
-            },
+            "data":
+                {
+                    "id": client_relative_names[1],
+                    "label": client_relative_names[1]
+                },
             "classes": ujt.converters.CLIENT_CLASS,
         },
     ]
 
     expected_edge_elements = [
         {
-            "data": {
-                "source": client_relative_names[0],
-                "target": service_relative_names[0],
-            }
+            "data":
+                {
+                    "source": client_relative_names[0],
+                    "target": service_relative_names[0],
+                }
         },
         {
-            "data": {
-                "source": client_relative_names[0],
-                "target": service_relative_names[1],
-            }
+            "data":
+                {
+                    "source": client_relative_names[0],
+                    "target": service_relative_names[1],
+                }
         },
         {
-            "data": {
-                "source": client_relative_names[0],
-                "target": service_relative_names[2],
-            }
+            "data":
+                {
+                    "source": client_relative_names[0],
+                    "target": service_relative_names[2],
+                }
         },
         {
-            "data": {
-                "source": client_relative_names[1],
-                "target": service_relative_names[3],
-            }
+            "data":
+                {
+                    "source": client_relative_names[1],
+                    "target": service_relative_names[3],
+                }
         },
     ]
 
