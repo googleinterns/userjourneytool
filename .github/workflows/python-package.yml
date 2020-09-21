@@ -31,6 +31,7 @@ jobs:
     - name: Compile protobufs
       run: |
         python -m grpc.tools.protoc --proto_path=protos --python_out=generated --mypy_out=generated protos/*
+        pip install --editable generated/
     - name: Lint
       run: |
         pylint -E ujt tests
