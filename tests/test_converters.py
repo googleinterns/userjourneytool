@@ -12,7 +12,7 @@ import ujt.constants
 import ujt.converters
 
 
-def test_cytoscape_elements_from_nodes():
+def test_cytoscape_elements_from_node_map():
     service_relative_names = ["Service0", "Service1"]
     endpoint_relative_names = ["Endpoint0", "Endpoint1", "Endpoint2"]
 
@@ -204,11 +204,11 @@ def test_cytoscape_elements_from_nodes():
         },
     ]
 
-    assert expected_node_elements + expected_edge_elements == ujt.converters.cytoscape_elements_from_nodes(
+    assert expected_node_elements + expected_edge_elements == ujt.converters.cytoscape_elements_from_node_map(
         node_name_message_map)
 
 
-def test_cytoscape_elements_from_clients():
+def test_cytoscape_elements_from_client_map():
     client_relative_names = ["Client0", "Client1"]
     user_journey_relative_names = ["UJ0", "UJ1", "UJ2"]
     service_relative_names = ["Service0", "Service1", "Service2", "Service3"]
@@ -323,7 +323,7 @@ def test_cytoscape_elements_from_clients():
         },
     ]
 
-    assert expected_node_elements + expected_edge_elements == ujt.converters.cytoscape_elements_from_clients(
+    assert expected_node_elements + expected_edge_elements == ujt.converters.cytoscape_elements_from_client_map(
         client_name_message_map)
 
 

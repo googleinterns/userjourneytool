@@ -17,153 +17,49 @@ from typing import Dict, Tuple, cast
 
 import dash
 import dash_html_components as html
-from dash.dependencies import Input, Output
+from dash.dependencies import Input, Output, State
 from dash.exceptions import PreventUpdate
 from graph_structures_pb2 import (
     Client,
     Node,
     NodeType)
 
-from . import compute_status, converters, generate_data, utils
-from .dash_app import app, cache
-
-@cache.memoize()
-def read_local_data() -> Tuple[Dict[str, Node], Dict[str, Client]]:
-    """ Reads protobufs in text format from ../data directory into protobuf objects.
-
-    This is simply used as a proof-of-concept/test implementation. 
-    In actual usage, this method should not be used. Instead, protobufs should be read from a reporting server.
-    This is highly coupled with implementation of mock data storage conventions.
-
-    Returns:
-        A tuple of two dictionaries.
-        The first dictionary contains a mapping from Node name to the actual Node protobuf message.
-        The second dictionary contains a mapping from Client name to the actual Client protobuf message.
-    """
-
-    service_names = generate_data.SERVICE_ENDPOINT_NAME_MAP.keys()
-    client_names = generate_data.CLIENT_USER_JOURNEY_NAME_MAP.keys()
-
-    flattened_endpoint_names = []
-    for service_name, endpoint_names in generate_data.SERVICE_ENDPOINT_NAME_MAP.items(
-    ):
-        flattened_endpoint_names += [
-            f"{service_name}.{endpoint_name}"
-            for endpoint_name in endpoint_names
-        ]
-
-    node_names = list(service_names) + flattened_endpoint_names
-
-    node_name_message_map: Dict[str,
-                                Node] = {
-                                    name: cast(
-                                        Node,
-                                        utils.read_proto_from_file(
-                                            utils.named_proto_file_name(
-                                                name,
-                                                Node),
-                                            Node,
-                                        ))
-                                    for name in node_names
-                                }
-
-    client_name_message_map: Dict[str,
-                                  Client] = {
-                                      name: cast(
-                                          Client,
-                                          utils.read_proto_from_file(
-                                              utils.named_proto_file_name(
-                                                  name,
-                                                  Client),
-                                              Client))
-                                      for name in client_names
-                                  }
-
-    compute_status.compute_statuses(
-        node_name_message_map,
-        client_name_message_map,
-    )
-
-    return node_name_message_map, client_name_message_map
-
-
-@cache.memoize()
-def get_node_name_message_map() -> Dict[str, Node]:
-    """ Gets a dictionary mapping Node names to Node messages.
-
-    Currently reads local data, but should be eventually modified to use remote data.
-    Computes the status of Nodes and their SLIs before returning dictionary.
-
-    Returns:
-        A dictionary mapping Node names to Node messages
-    """
-
-    return read_local_data()[0]
-
-
-@cache.memoize()
-def get_client_name_message_map() -> Dict[str, Client]:
-    """ Gets a dictionary mapping Client names to Client messages.
-
-    Currently reads local data, but should be eventually modified to use remote data.
-
-    Returns:
-        A dictionary mapping Client names to Client messages
-    """
-    return read_local_data()[1]
-
-
-def generate_graph_elements(
-        node_name_message_map: Dict[str,
-                                    Node],
-        client_name_message_map: Dict[str,
-                                      Client]):
-    """ Generates a cytoscape elements dictionary from Service, SLI, and Client protobufs.
-
-    Args:
-        node_name_message_map: A dictionary mapping Node names to their corresponding Node protobuf message.
-        client_name_message_map: A dictionary mapping Client names to the corresponding Client protobuf message.
-
-    Returns:
-        A list of dictionary objects, each containing information regarding a single node (Service or Client) or edge (Dependency).
-    """
-
-    return (
-        converters.cytoscape_elements_from_nodes(node_name_message_map) +
-        converters.cytoscape_elements_from_clients(client_name_message_map))
-
-
-def generate_dropdown_options(client_name_message_map: Dict[str, Client]):
-    return [
-        {
-            "label": name,
-            "value": name,
-        } for name in client_name_message_map.keys()
-    ]
+from . import compute_status, converters, generate_data, utils, state
+from .dash_app import app
 
 
 @app.callback(
-    [
-        Output("cytoscape-graph",
-               "elements"),
-        Output("client-dropdown",
-               "options")
-    ],
+    Output("cytoscape-graph", "elements"),
     [Input("refresh-button",
            "n_clicks_timestamp")],
 )
-def refresh(n_clicks_timestamp):
-    cache.clear()
-    node_name_message_map, client_name_message_map = read_local_data()
+def update_graph_elements(n_clicks_timestamp):
+    """ Update the elements of the cytoscape graph.
 
-    cytoscape_graph_elements = generate_graph_elements(
+    This function is called on startup, when the refresh button is clicked, and when a row is selected in the User Journey Datatable.
+    We need this callback to handle these (generally unrelated) situations because Dash only supports assigning
+    a single callback to a given output element.
+
+    Returns:
+        A dictionary of cytoscape elements describing the nodes and edges of the graph.
+    """
+
+    ctx = dash.callback_context
+
+    if ctx.triggered:
+        # ctx.triggered[0] is either "cytoscape-graph.tapNode" or "client-dropdown.value"
+        triggered_id, triggered_prop = ctx.triggered[0]["prop_id"].split(".")
+        if triggered_id == "refresh-button":
+            state.clear_cache()
+
+    node_name_message_map, client_name_message_map = state.get_message_maps()
+
+    cytoscape_graph_elements = converters.cytoscape_elements_from_maps(
         node_name_message_map,
         client_name_message_map,
     )
 
-    client_dropdown_options = generate_dropdown_options(client_name_message_map)
-
-    return cytoscape_graph_elements, client_dropdown_options
+    return cytoscape_graph_elements
 
 
 @app.callback(
@@ -177,7 +73,7 @@ def generate_node_info_panel(tap_node):
         raise PreventUpdate
 
     node_name = tap_node["data"]["id"]
-    node_name_message_map = get_node_name_message_map()
+    node_name_message_map = state.get_node_name_message_map()
     node = node_name_message_map[node_name]
 
     out = [
@@ -247,7 +143,7 @@ def generate_client_info_panel(tap_node, dropdown_value):
     else:
         client_name = ctx.triggered[0]["value"]
 
-    client_name_message_map = get_client_name_message_map()
+    client_name_message_map = state.get_client_name_message_map()
     client = client_name_message_map[client_name]
     return converters.datatable_from_client(client, "datatable-client")
 
@@ -263,3 +159,12 @@ def update_client_dropdown_value(tap_node):
         raise PreventUpdate
     return tap_node["data"]["id"]
 
+'''
+@app.callback(
+    Output("cytoscape-graph", "elements"),
+    [Input("client_dropdown", "value")],
+    [State("cytoscape_graph", "elements")],
+)
+def highlight_user_joruney_path(value, elements):
+    return elements
+'''

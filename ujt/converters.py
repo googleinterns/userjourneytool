@@ -11,7 +11,27 @@ from graph_structures_pb2 import (
 from . import constants, utils
 
 
-def cytoscape_elements_from_nodes(node_name_message_map: Dict[str, Node]):
+def cytoscape_elements_from_maps(
+        node_name_message_map: Dict[str,
+                                    Node],
+        client_name_message_map: Dict[str,
+                                      Client]):
+    """ Generates a cytoscape elements dictionary from Service, SLI, and Client protobufs.
+
+    Args:
+        node_name_message_map: A dictionary mapping Node names to their corresponding Node protobuf message.
+        client_name_message_map: A dictionary mapping Client names to the corresponding Client protobuf message.
+
+    Returns:
+        A list of dictionary objects, each containing information regarding a single node (Service or Client) or edge (Dependency).
+    """
+
+    return (
+        cytoscape_elements_from_node_map(node_name_message_map) +
+        cytoscape_elements_from_client_map(client_name_message_map))
+
+
+def cytoscape_elements_from_node_map(node_name_message_map: Dict[str, Node]):
     """ Converts a dictionary of Node protobufs to a cytoscape graph format.
 
     Args:
@@ -57,7 +77,7 @@ def cytoscape_elements_from_nodes(node_name_message_map: Dict[str, Node]):
     return node_elements + edge_elements
 
 
-def cytoscape_elements_from_clients(client_name_message_map: Dict[str, Client]):
+def cytoscape_elements_from_client_map(client_name_message_map: Dict[str, Client]):
     """ Converts a dictionary  of Client protobufs to a cytoscape graph format.
 
     Args:
@@ -172,3 +192,12 @@ def datatable_from_client(client, table_id):
         data=data,
         style_data_conditional=constants.DATATABLE_CONDITIONAL_STYLE,
     )
+
+
+def dropdown_options_from_client_map(client_name_message_map: Dict[str, Client]):
+    return [
+        {
+            "label": name,
+            "value": name,
+        } for name in client_name_message_map.keys()
+    ]
