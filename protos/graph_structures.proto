@@ -2,51 +2,63 @@ syntax = "proto2";
 
 package ujt_protos;
 
-message Service {
-    // functionally required fields
-    optional string name = 1; // a globally unique identifier
-    optional Endpoint endpoints = 2;
-    // ---
-    optional Status status = 3;
-    repeated Dependency dependencies = 4;
-    optional string comment = 5;
-}
+// functionally required fields declared at the top of each message
+// separated by ---
 
-message Endpoint {
-    // functionally required fields
-    optional string name = 1;
-    optional string service_name = 2;
+message Node { // all names are fully qualified (grandparent.parent.this_node.child)
+    optional NodeType node_type = 1;
+    optional string name = 2;  // a fully qualified, period delimited name
     // ---
-    optional Status status = 3; // computed from dependencies
-    repeated Dependency dependencies = 4;
-    repeated SLI slis = 5;
-    optional string comment = 6;
+
+    repeated string child_names = 3;
+    optional string parent_name = 4;
+
+    optional Status status = 5;
+    repeated Dependency dependencies = 6;
+    repeated SLI slis = 7;
+    optional string comment = 8;
 }
 
 message Dependency {
     // functionally required fields
-    optional string target_service_name = 1;
+    optional string target_name = 1;
+    optional string source_name = 2;
     // ---
 
-    // if endpoint not present, then dependency on entire service
-    optional string target_endpoint_name = 2;
-    optional string comment = 3;
+    optional bool toplevel = 3;
+    optional string comment = 4;
 }
 
 message SLI {
-    // functionally required fields
-    optional string service_name = 1;
-    optional string endpoint_name = 2;
+    optional string node_name = 1;
     // ---
 
-    optional SLIType sli_type = 3;
-    optional double sli_value = 4;
-    optional double slo_error_upper_bound = 5;
-    optional double slo_error_lower_bound = 6;
-    optional double slo_warn_upper_bound = 7;
-    optional double slo_warn_lower_bound = 8;
+    optional SLIType sli_type = 2;
+    optional double sli_value = 3;
+    optional double slo_error_upper_bound = 4;
+    optional double slo_error_lower_bound = 5;
+    optional double slo_warn_upper_bound = 6;
+    optional double slo_warn_lower_bound = 7;
 
+    optional Status status = 8;
     optional string comment = 9;
+}
+
+
+message UserJourney {
+    optional string name = 1;
+    optional string client_name = 2;
+    // ---
+
+    // a set of top level dependencies originating from Clients
+    repeated Dependency dependencies = 3;
+    optional Status status = 4;
+}
+
+message Client {
+    optional string name = 1;
+    repeated UserJourney user_journeys = 2;
+    // ---
 }
 
 enum Status {
@@ -61,4 +73,11 @@ enum SLIType {
     SLITYPE_AVAILABILITY = 1;
     SLITYPE_LATENCY = 2;
     SLITYPE_THROUGHPUT = 3;
+}
+
+enum NodeType {
+    NODETYPE_UNSPECIFIED = 0;
+    NODETYPE_ENDPOINT = 1;
+    NODETYPE_SERVICE = 2;
+    NODETYPE_SYSTEM = 3;
 }
