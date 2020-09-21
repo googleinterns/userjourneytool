@@ -101,7 +101,8 @@ def bootstrap_info_table_from_nodes(nodes, use_relative_names=False):
                 dbc.Col("Node"),
                 dbc.Col("Status"),
             ],
-            className="header-row")
+            className="header-row"
+        ),
     ]
 
     for node in nodes:
