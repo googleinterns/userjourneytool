@@ -195,7 +195,8 @@ def generate_node_info_panel(tapNode):
     if node.slis:
         out += [
             html.H3("SLI Info"),
-            *converters.bootstrap_info_table_from_slis(node.slis),
+            converters.datatable_from_slis(node.slis,
+                                           id="datatable-slis")
         ]
 
     if node.child_names:
@@ -204,9 +205,10 @@ def generate_node_info_panel(tapNode):
         ]
         out += [
             html.H3("Child Node Info"),
-            *converters.bootstrap_info_table_from_nodes(
+            converters.datatable_from_nodes(
                 child_nodes,
-                use_relative_names=True),
+                use_relative_names=True,
+                id="datatable-child-node")
         ]
 
     if node.dependencies:
@@ -216,7 +218,10 @@ def generate_node_info_panel(tapNode):
         ]
         out += [
             html.H3("Dependency Node Info"),
-            *converters.bootstrap_info_table_from_nodes(dependency_nodes),
+            converters.datatable_from_nodes(
+                dependency_nodes,
+                use_relative_names=False,
+                id="datatable-dependency-nodes")
         ]
 
     return out
@@ -280,9 +285,12 @@ CYTO_STYLESHEET = [
     },
     {
         "selector": ":selected:",
-        "style": {
-            "border-width": 1,
-        }
+        "style":
+            {
+                "border-width": 1,
+                "border-color": "black",
+                #"background-blacken": .5,
+            }
     }
 ]
 

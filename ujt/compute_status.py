@@ -34,7 +34,8 @@ def compute_statuses(
                 status_count_map[compute_single_node_status(
                     node_name_message_map,
                     dependency.target_name)] += 1
-            user_journey.status = compute_status_from_count_map(status_count_map)
+            user_journey.status = compute_status_from_count_map(
+                status_count_map)
 
     # annotate remaining nodes (those not connected as part of a user journey)
     for node in node_name_message_map.values():
