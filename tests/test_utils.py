@@ -2,10 +2,11 @@
 
 from unittest.mock import MagicMock, Mock, mock_open, patch, sentinel
 
-import graph_structures_pb2
+from graph_structures_pb2 import Node, NodeType, Status
 import pytest
 
 import ujt.utils
+import ujt.converters
 
 
 @pytest.fixture
@@ -61,7 +62,7 @@ def test_read_proto_from_file(patch_path):
 
 
 def test_read_write_functional(patch_path, tmp_path):
-    node = graph_structures_pb2.Node()
+    node = Node()
     node.name = "name"
     node.comment = "comment"
 
@@ -72,7 +73,25 @@ def test_read_write_functional(patch_path, tmp_path):
         ujt.utils.write_proto_to_file("sentinel.file_name", node)
         service_from_file = ujt.utils.read_proto_from_file(
             "sentinel.file_name",
-            graph_structures_pb2.Node,
+            Node,
         )
 
     assert service_from_file == node
+
+
+def test_is_client_cytoscape_node():
+    non_client_node = { "classes" : f"{NodeType.NODETYPE_SERVICE} {Status.STATUS_HEALTHY}"}
+    assert not ujt.utils.is_client_cytoscape_node(non_client_node)
+
+    client_node = {"classes" : ujt.converters.CLIENT_CLASS}
+    assert ujt.utils.is_client_cytoscape_node(client_node)
+
+
+def test_relative_name():
+    system_name, service_name, endpoint_name = "System", "Service", "Endpoint"
+    assert ujt.utils.relative_name(f"{system_name}.{service_name}.{endpoint_name}") == endpoint_name
+
+    assert ujt.utils.relative_name(system_name) == system_name
+
+def test_human_readable_enum_name():
+    assert ujt.utils.human_readable_enum_name(Status.STATUS_HEALTHY, Status) == "HEALTHY"

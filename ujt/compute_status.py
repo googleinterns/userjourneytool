@@ -8,7 +8,7 @@ if TYPE_CHECKING:
         StatusValue  # pylint: disable=no-name-in-module
 
 
-def compute_node_statuses(
+def compute_statuses(
         node_name_message_map: Dict[str,
                                     Node],
         client_name_message_map: Dict[str,
@@ -29,12 +29,14 @@ def compute_node_statuses(
     # not strictly required to start at clients, but more efficient and easier to think about
     for client in client_name_message_map.values():
         for user_journey in client.user_journeys:
+            status_count_map: Dict["StatusValue", int] = defaultdict(int)
             for dependency in user_journey.dependencies:
-                compute_single_node_status(
+                status_count_map[compute_single_node_status(
                     node_name_message_map,
-                    dependency.target_name)
+                    dependency.target_name)] += 1
+            user_journey.status = compute_status_from_count_map(status_count_map)
 
-    # annottate remaining nodes (those not connected as part of a user journey)
+    # annotate remaining nodes (those not connected as part of a user journey)
     for node in node_name_message_map.values():
         if node.status == Status.STATUS_UNSPECIFIED:
             compute_single_node_status(node_name_message_map, node.name)
@@ -72,15 +74,17 @@ def compute_single_node_status(
     for sli in node.slis:
         status_count_map[compute_sli_status(sli)] += 1
 
-    if status_count_map[Status.STATUS_ERROR] > 0:
-        status_value = Status.STATUS_ERROR
-    elif status_count_map[Status.STATUS_WARN] > 0:
-        status_value = Status.STATUS_WARN
-    else:
-        status_value = Status.STATUS_HEALTHY
+    node.status = compute_status_from_count_map(status_count_map)
+    return node.status
 
-    node.status = status_value
-    return status_value
+
+def compute_status_from_count_map(status_count_map):
+    if status_count_map[Status.STATUS_ERROR] > 0:
+        return Status.STATUS_ERROR
+    elif status_count_map[Status.STATUS_WARN] > 0:
+        return Status.STATUS_WARN
+    else:
+        return Status.STATUS_HEALTHY
 
 
 def compute_sli_status(sli: SLI) -> "StatusValue":

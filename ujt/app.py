@@ -118,7 +118,7 @@ def get_node_name_message_map() -> Dict[str, Node]:
 
     node_name_message_map, client_name_message_map = read_local_data()
 
-    compute_status.compute_node_statuses(
+    compute_status.compute_statuses(
         node_name_message_map,
         client_name_message_map,
     )
