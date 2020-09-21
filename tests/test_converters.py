@@ -339,7 +339,7 @@ def test_cytoscape_elements_from_clients():
         client_name_message_map)
 
 
-def test_datatable_from_nodes(patch_path, current_path):
+def test_datatable_from_nodes():
     node = Node(name="node", status=Status.STATUS_HEALTHY)
     table_id = "test-table"
 
@@ -361,7 +361,8 @@ def test_datatable_from_nodes(patch_path, current_path):
     table = ujt.converters.datatable_from_nodes(
         [node],
         use_relative_names=False,
-        id=table_id)
+        table_id=table_id,
+    )
 
     assert table.id == table_id  # pylint: disable=no-member
     assert table.columns == expected_columns  # pylint: disable=no-member
@@ -369,7 +370,7 @@ def test_datatable_from_nodes(patch_path, current_path):
     assert table.style_data_conditional == ujt.converters.STYLE_DATA_CONDITIONAL  # pylint: disable=no-member
 
 
-def test_datatable_from_slis(patch_path, current_path):
+def test_datatable_from_slis():
     sli = SLI(
         sli_type=SLIType.SLITYPE_UNSPECIFIED,
         sli_value=.511,
@@ -413,7 +414,45 @@ def test_datatable_from_slis(patch_path, current_path):
         }
     ]
 
-    table = ujt.converters.datatable_from_slis([sli], id=table_id)
+    table = ujt.converters.datatable_from_slis([sli], table_id=table_id)
+
+    assert table.id == table_id  # pylint: disable=no-member
+    assert table.columns == expected_columns  # pylint: disable=no-member
+    assert table.data == expected_data  # pylint: disable=no-member
+    assert table.style_data_conditional == ujt.converters.STYLE_DATA_CONDITIONAL  # pylint: disable=no-member
+
+
+def test_datatable_from_client():
+    client = Client(
+        name="client",
+        user_journeys=[
+            UserJourney(
+                name="client.uj",
+                status=Status.STATUS_HEALTHY,
+            ),
+        ],
+    )
+    table_id = "test-table"
+
+    expected_columns = [
+        {
+            "name": "User Journey",
+            "id": "User Journey"
+        },
+        {
+            "name": "Status",
+            "id": "Status"
+        },
+    ]
+    expected_data = [{
+        "User Journey": "uj",
+        "Status": "HEALTHY",
+    }]
+
+    table = ujt.converters.datatable_from_client(
+        client,
+        table_id=table_id,
+    )
 
     assert table.id == table_id  # pylint: disable=no-member
     assert table.columns == expected_columns  # pylint: disable=no-member

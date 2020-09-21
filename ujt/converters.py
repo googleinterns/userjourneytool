@@ -120,7 +120,7 @@ STYLE_DATA_CONDITIONAL = [
 ]
 
 
-def datatable_from_nodes(nodes, use_relative_names, id):
+def datatable_from_nodes(nodes, use_relative_names, table_id):
     columns = [{"name": name, "id": name} for name in ["Node", "Status"]]
     data = [
         {
@@ -134,18 +134,18 @@ def datatable_from_nodes(nodes, use_relative_names, id):
     ]
 
     return dash_table.DataTable(
-        id=id,
+        id=table_id,
         columns=columns,
         data=data,
         style_data_conditional=STYLE_DATA_CONDITIONAL,
     )
 
 
-def datatable_from_slis(slis, id):
+def datatable_from_slis(slis, table_id):
     columns = [
         {
             "name": name,
-            "id": name
+            "id": name,
         } for name in ["Type",
                        "Status",
                        "Value",
@@ -171,7 +171,32 @@ def datatable_from_slis(slis, id):
     ]
 
     return dash_table.DataTable(
-        id=id,
+        id=table_id,
+        columns=columns,
+        data=data,
+        style_data_conditional=STYLE_DATA_CONDITIONAL,
+    )
+
+
+def datatable_from_client(client, table_id):
+    columns = [
+        {
+            "name": name,
+            "id": name,
+        } for name in ["User Journey",
+                       "Status"]
+    ]
+    data = [
+        {
+            "User Journey":
+                utils.relative_name(user_journey.name),
+            "Status":
+                utils.human_readable_enum_name(user_journey.status,
+                                               Status),
+        } for user_journey in client.user_journeys
+    ]
+    return dash_table.DataTable(
+        id=table_id,
         columns=columns,
         data=data,
         style_data_conditional=STYLE_DATA_CONDITIONAL,

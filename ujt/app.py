@@ -18,6 +18,7 @@ from typing import Dict, List, Set, Tuple, Union, cast
 
 import dash
 import dash_bootstrap_components as dbc
+import dash_core_components as dcc
 import dash_cytoscape as cyto
 import dash_html_components as html
 from dash.dependencies import Input, Output
@@ -62,8 +63,6 @@ def read_local_data() -> Tuple[Dict[str, Node], Dict[str, Client]]:
         The second dictionary contains a mapping from Client name to the actual Client protobuf message.
     """
 
-    cache.clear()
-
     service_names = generate_data.SERVICE_ENDPOINT_NAME_MAP.keys()
     client_names = generate_data.CLIENT_USER_JOURNEY_NAME_MAP.keys()
 
@@ -102,6 +101,11 @@ def read_local_data() -> Tuple[Dict[str, Node], Dict[str, Client]]:
                                       for name in client_names
                                   }
 
+    compute_status.compute_statuses(
+        node_name_message_map,
+        client_name_message_map,
+    )
+
     return node_name_message_map, client_name_message_map
 
 
@@ -116,14 +120,7 @@ def get_node_name_message_map() -> Dict[str, Node]:
         A dictionary mapping Node names to Node messages
     """
 
-    node_name_message_map, client_name_message_map = read_local_data()
-
-    compute_status.compute_statuses(
-        node_name_message_map,
-        client_name_message_map,
-    )
-
-    return node_name_message_map
+    return read_local_data()[0]
 
 
 @cache.memoize()
@@ -158,31 +155,50 @@ def generate_graph_elements(
         converters.cytoscape_elements_from_clients(client_name_message_map))
 
 
+def generate_dropdown_options(client_name_message_map: Dict[str, Client]):
+    return [
+        {
+            "label": name,
+            "value": name,
+        } for name in client_name_message_map.keys()
+    ]
+
+
 @app.callback(
-    Output("cytoscape-graph",
-           "elements"),
+    [
+        Output("cytoscape-graph",
+               "elements"),
+        Output("client-dropdown",
+               "options")
+    ],
     [Input("refresh-button",
            "n_clicks_timestamp")],
 )
-def refresh_graph(n_clicks_timestamp):
+def refresh(n_clicks_timestamp):
     cache.clear()
-    return generate_graph_elements(
-        get_node_name_message_map(),
-        get_client_name_message_map(),
+    node_name_message_map, client_name_message_map = read_local_data()
+
+    cytoscape_graph_elements = generate_graph_elements(
+        node_name_message_map,
+        client_name_message_map,
     )
+
+    client_dropdown_options = generate_dropdown_options(client_name_message_map)
+
+    return cytoscape_graph_elements, client_dropdown_options
 
 
 @app.callback(
-    Output('node-info-panel',
-           'children'),
-    [Input('cytoscape-graph',
-           'tapNode')],
+    Output("node-info-panel",
+           "children"),
+    [Input("cytoscape-graph",
+           "tapNode")],
 )
-def generate_node_info_panel(tapNode):
-    if tapNode is None or utils.is_client_cytoscape_node(tapNode):
+def generate_node_info_panel(tap_node):
+    if tap_node is None or utils.is_client_cytoscape_node(tap_node):
         raise PreventUpdate
 
-    node_name = tapNode["data"]["id"]
+    node_name = tap_node["data"]["id"]
     node_name_message_map = get_node_name_message_map()
     node = node_name_message_map[node_name]
 
@@ -228,16 +244,45 @@ def generate_node_info_panel(tapNode):
 
 
 @app.callback(
-    Output('client-info-panel',
-           'children'),
-    [Input('cytoscape-graph',
-           'tapNode')],
+    Output("client-info-panel",
+           "children"),
+    [Input("cytoscape-graph",
+           "tapNode"),
+     Input("client-dropdown",
+           "value")],
 )
-def generate_client_info_panel(tapNode):
-    if tapNode is None or not utils.is_client_cytoscape_node(tapNode):
+def generate_client_info_panel(tap_node, dropdown_value):
+    ctx = dash.callback_context
+
+    if not ctx.triggered:  # initial callback - no graph clicks or dropdown selection yet
         raise PreventUpdate
 
-    return "client_info"
+    # ctx.triggered[0] is either "cytoscape-graph.tapNode" or "client-dropdown.value"
+    triggered_id, triggered_prop = ctx.triggered[0]["prop_id"].split(".")
+    if triggered_id == "cytoscape-graph":
+        tap_node = ctx.triggered[0]["value"]
+        if not utils.is_client_cytoscape_node(tap_node):
+            raise PreventUpdate
+
+        client_name = tap_node["data"]["id"]
+    else:
+        client_name = ctx.triggered[0]["value"]
+
+    client_name_message_map = get_client_name_message_map()
+    client = client_name_message_map[client_name]
+    return converters.datatable_from_client(client, "datatable-client")
+
+
+@app.callback(
+    Output("client-dropdown",
+           "value"),
+    [Input("cytoscape-graph",
+           "tapNode")],
+)
+def update_client_dropdown_value(tap_node):
+    if tap_node is None or not utils.is_client_cytoscape_node(tap_node):
+        raise PreventUpdate
+    return tap_node["data"]["id"]
 
 
 CYTO_STYLESHEET = [
@@ -336,6 +381,11 @@ app.layout = html.Div(
                             dbc.Col(
                                 [
                                     html.H1("Client Info"),
+                                    dcc.Dropdown(
+                                        id="client-dropdown",
+                                        clearable=False,
+                                        searchable=False,
+                                    ),
                                     html.Div(
                                         id="client-info-panel",
                                         className="info-panel"),

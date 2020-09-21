@@ -71,8 +71,8 @@ def read_proto_from_file(file_name: str, proto_type: Type[Message]) -> Message:
         return text_format.Parse(proto_text, proto_type())
 
 
-def is_client_cytoscape_node(tapNode):
-    return converters.CLIENT_CLASS in tapNode["classes"].split(" ")
+def is_client_cytoscape_node(tap_node):
+    return converters.CLIENT_CLASS in tap_node["classes"].split(" ")
 
 
 def relative_name(full_name):
