@@ -1,10 +1,8 @@
-from typing import Any, Collection, Dict, List, Union
+from typing import Any, Collection, Dict, List
 
-import dash_bootstrap_components as dbc
 import dash_table
 from graph_structures_pb2 import (
     Client,
-    Dependency,
     Node,
     NodeType,
     SLIType,

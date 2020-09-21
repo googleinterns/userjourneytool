@@ -11,43 +11,21 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-""" Main module for Dash app. """
+""" Callbacks for Dash app. """
 
-from collections import defaultdict
-from typing import Dict, List, Set, Tuple, Union, cast
+from typing import Dict, Tuple, cast
 
 import dash
-import dash_bootstrap_components as dbc
-import dash_core_components as dcc
-import dash_cytoscape as cyto
 import dash_html_components as html
 from dash.dependencies import Input, Output
 from dash.exceptions import PreventUpdate
-from flask_caching import Cache
-from google.protobuf.message import Message
 from graph_structures_pb2 import (
-    SLI,
     Client,
     Node,
-    NodeType,
-    SLIType,
-    Status,
-    UserJourney)
+    NodeType)
 
-from . import compute_status, constants, converters, generate_data, utils
-
-# Initialize Dash app and Flask-Cache
-cyto.load_extra_layouts()
-app = dash.Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
-cache = Cache()
-cache.init_app(
-    app.server,
-    config={
-        "CACHE_TYPE": "filesystem",
-        "CACHE_DIR": "cache_dir"
-    },
-)
-
+from . import compute_status, converters, generate_data, utils
+from .dash_app import app, cache
 
 @cache.memoize()
 def read_local_data() -> Tuple[Dict[str, Node], Dict[str, Client]]:
@@ -285,56 +263,3 @@ def update_client_dropdown_value(tap_node):
         raise PreventUpdate
     return tap_node["data"]["id"]
 
-
-app.layout = html.Div(
-    children=[
-        html.H1(children="User Journey Tool",
-                style={
-                    "textAlign": "center",
-                }),
-        cyto.Cytoscape(
-            id="cytoscape-graph",
-            layout={
-                "name": "dagre",
-                "nodeDimensionsIncludeLabels": "true",
-            },
-            style={
-                "width": constants.GRAPH_WIDTH,
-                "height": constants.GRAPH_HEIGHT,
-                "backgroundColor": constants.GRAPH_BACKGROUND_COLOR,
-            },
-            stylesheet=constants.CYTO_STYLESHEET,
-        ),
-        dbc.Button(id="refresh-button",
-                   children="Refresh"),
-        html.Div(
-            children=[
-                dbc.Container(
-                    dbc.Row(
-                        [
-                            dbc.Col(
-                                [
-                                    html.H1("Node Info"),
-                                    html.Div(
-                                        id="node-info-panel",
-                                        className="info-panel"),
-                                ]),
-                            dbc.Col(
-                                [
-                                    html.H1("Client Info"),
-                                    dcc.Dropdown(
-                                        id="client-dropdown",
-                                        clearable=False,
-                                        searchable=False,
-                                    ),
-                                    html.Div(
-                                        id="client-info-panel",
-                                        className="info-panel"),
-                                ]),
-                        ])),
-            ],
-            className="mb-5"),
-    ])
-
-if __name__ == "__main__":
-    app.run_server(debug=True)

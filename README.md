@@ -27,7 +27,7 @@ User Journey Tool simplifies debugging by providing an overview of an applicatio
 
 6. Run the tool.
 
-        python3 -m ujt.app
+        python3 -m ujt.ujt
 
 7. Run tests.
 

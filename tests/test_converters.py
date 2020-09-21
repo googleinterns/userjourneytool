@@ -1,6 +1,3 @@
-from unittest.mock import Mock, patch
-
-import pytest
 from graph_structures_pb2 import (
     SLI,
     Client,
@@ -13,16 +10,6 @@ from graph_structures_pb2 import (
 
 import ujt.constants
 import ujt.converters
-
-
-@pytest.fixture
-def patch_path():
-    return "ujt.converters"
-
-
-@pytest.fixture
-def current_path():
-    return "tests.test_converters"
 
 
 def test_cytoscape_elements_from_nodes():
