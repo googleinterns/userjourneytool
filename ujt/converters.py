@@ -1,6 +1,7 @@
 from typing import Any, Collection, Dict, List, Union
 
 import dash_bootstrap_components as dbc
+import dash_table
 from graph_structures_pb2 import (
     Client,
     Dependency,
@@ -94,72 +95,84 @@ def cytoscape_elements_from_clients(client_name_message_map: Dict[str, Client]):
     return node_elements + edge_elements
 
 
-def bootstrap_info_table_from_nodes(nodes, use_relative_names=False):
-    node_rows = [
-        dbc.Row(
-            children=[
-                dbc.Col("Node"),
-                dbc.Col("Status"),
-            ],
-            className="header-row"
-        ),
+STYLE_DATA_CONDITIONAL = [
+    {
+        "if": {
+            "column_id": "Status",
+            "filter_query": "{Status} = HEALTHY"
+        },
+        "color": "green"
+    },
+    {
+        "if": {
+            "column_id": "Status",
+            "filter_query": "{Status} = WARN"
+        },
+        "color": "orange"
+    },
+    {
+        "if": {
+            "column_id": "Status",
+            "filter_query": "{Status} = ERROR"
+        },
+        "color": "red"
+    }
+]
+
+
+def datatable_from_nodes(nodes, use_relative_names, id):
+    columns = [{"name": name, "id": name} for name in ["Node", "Status"]]
+    data = [
+        {
+            "Node":
+                utils.relative_name(node.name)
+                if use_relative_names else node.name,
+            "Status":
+                utils.human_readable_enum_name(node.status,
+                                               Status),
+        } for node in nodes
     ]
 
-    for node in nodes:
-        node_row = dbc.Row(
-            children=[
-                dbc.Col(
-                    utils.relative_name(node.name
-                                       ) if use_relative_names else node.name),
-                dbc.Col(
-                    children=utils.human_readable_enum_name(
-                        node.status,
-                        Status),
-                    className=Status.Name(node.status),
-                ),
-            ],
-            className="data-row",
-        )
-        node_rows.append(node_row)
-
-    return node_rows
+    return dash_table.DataTable(
+        id=id,
+        columns=columns,
+        data=data,
+        style_data_conditional=STYLE_DATA_CONDITIONAL,
+    )
 
 
-def bootstrap_info_table_from_slis(slis):
-    sli_rows = [
-        dbc.Row(
-            children=[
-                dbc.Col("SLI"),
-                dbc.Col("SLI Type"),
-                dbc.Col("SLI Status"),
-                dbc.Col("Warn Range"),
-                dbc.Col("Error Range"),
-            ],
-            className="header-row",
-        ),
+def datatable_from_slis(slis, id):
+    columns = [
+        {
+            "name": name,
+            "id": name
+        } for name in ["Type",
+                       "Status",
+                       "Value",
+                       "Warn Range",
+                       "Error Range"]
+    ]
+    data = [
+        {
+            "Type":
+                utils.human_readable_enum_name(sli.sli_type,
+                                               SLIType),
+            "Status":
+                utils.human_readable_enum_name(sli.status,
+                                               Status),
+            "Value":
+                round(sli.sli_value,
+                      2),
+            "Warn Range":
+                f"({sli.slo_warn_lower_bound}, {sli.slo_warn_upper_bound})",
+            "Error Range":
+                f"({sli.slo_error_lower_bound}, {sli.slo_error_upper_bound})",
+        } for sli in slis
     ]
 
-    for sli in slis:
-        sli_row = dbc.Row(
-            children=[
-                dbc.Col(utils.human_readable_enum_name(sli.sli_type,
-                                                       SLIType)),
-                dbc.Col(
-                    children=utils.human_readable_enum_name(sli.status,
-                                                            Status),
-                    className=Status.Name(sli.status),
-                ),
-                dbc.Col(round(sli.sli_value,
-                              2)),
-                dbc.Col(
-                    f"({sli.slo_warn_lower_bound}, {sli.slo_warn_upper_bound})"
-                ),
-                dbc.Col(
-                    f"({sli.slo_error_lower_bound}, {sli.slo_error_upper_bound})"
-                ),
-            ],
-            className="data-row",
-        )
-        sli_rows.append(sli_row)
-
-    return sli_rows
+    return dash_table.DataTable(
+        id=id,
+        columns=columns,
+        data=data,
+        style_data_conditional=STYLE_DATA_CONDITIONAL,
+    )

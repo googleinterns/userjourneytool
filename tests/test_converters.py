@@ -1,3 +1,5 @@
+from unittest.mock import Mock, patch
+
 import pytest
 from graph_structures_pb2 import (
     SLI,
@@ -5,14 +7,12 @@ from graph_structures_pb2 import (
     Dependency,
     Node,
     NodeType,
-    Status,
-    UserJourney,
     SLIType,
-)
+    Status,
+    UserJourney)
 
 import ujt.converters
-import dash_bootstrap_components as dbc
-from unittest.mock import patch, Mock
+
 
 @pytest.fixture
 def patch_path():
@@ -339,38 +339,37 @@ def test_cytoscape_elements_from_clients():
         client_name_message_map)
 
 
-def test_bootstrap_info_table_from_nodes(patch_path, current_path):
+def test_datatable_from_nodes(patch_path, current_path):
     node = Node(name="node", status=Status.STATUS_HEALTHY)
+    table_id = "test-table"
 
-    # assert dbc.Row() == dbc.Row() fails -- there are probably some unique internal fields being set
-    # Thus, patch these calls to return a tuple of the args and kwargs instead of a real Row or Col object.
-    with patch(f"{patch_path}.dbc.Row", Mock(side_effect=lambda *args, **kwargs: (args, kwargs))), \
-        patch(f"{patch_path}.dbc.Col", Mock(side_effect=lambda *args, **kwargs: (args, kwargs))), \
-        patch(f"{current_path}.dbc.Row", Mock(side_effect=lambda *args, **kwargs: (args, kwargs))), \
-        patch(f"{current_path}.dbc.Col", Mock(side_effect=lambda *args, **kwargs: (args, kwargs))):
-        expected_table = [
-            dbc.Row(
-                children=[
-                    dbc.Col("Node"),
-                    dbc.Col("Status"),
-                ],
-                className="header-row"
-            ),
-            dbc.Row(
-                children=[
-                    dbc.Col(node.name),
-                    dbc.Col(
-                        children="HEALTHY",
-                        className="STATUS_HEALTHY",
-                    ),
-                ],
-                className="data-row"
-            )
-        ]
-        table = ujt.converters.bootstrap_info_table_from_nodes([node])
-        assert table == expected_table
+    expected_columns = [
+        {
+            "name": "Node",
+            "id": "Node"
+        },
+        {
+            "name": "Status",
+            "id": "Status"
+        },
+    ]
+    expected_data = [{
+        "Node": node.name,
+        "Status": "HEALTHY",
+    }]
 
-def test_bootstrap_info_table_from_slis(patch_path, current_path):
+    table = ujt.converters.datatable_from_nodes(
+        [node],
+        use_relative_names=False,
+        id=table_id)
+
+    assert table.id == table_id  # pylint: disable=no-member
+    assert table.columns == expected_columns  # pylint: disable=no-member
+    assert table.data == expected_data  # pylint: disable=no-member
+    assert table.style_data_conditional == ujt.converters.STYLE_DATA_CONDITIONAL  # pylint: disable=no-member
+
+
+def test_datatable_from_slis(patch_path, current_path):
     sli = SLI(
         sli_type=SLIType.SLITYPE_UNSPECIFIED,
         sli_value=.511,
@@ -380,41 +379,43 @@ def test_bootstrap_info_table_from_slis(patch_path, current_path):
         slo_error_upper_bound=.9,
         status=Status.STATUS_HEALTHY,
     )
+    table_id = "test-table"
 
-    # assert dbc.Row() == dbc.Row() fails -- there are probably some unique internal fields being set
-    # Thus, patch these calls to return a tuple of the args and kwargs instead of a real Row or Col object.
-    with patch(f"{patch_path}.dbc.Row", Mock(side_effect=lambda *args, **kwargs: (args, kwargs))), \
-        patch(f"{patch_path}.dbc.Col", Mock(side_effect=lambda *args, **kwargs: (args, kwargs))), \
-        patch(f"{current_path}.dbc.Row", Mock(side_effect=lambda *args, **kwargs: (args, kwargs))), \
-        patch(f"{current_path}.dbc.Col", Mock(side_effect=lambda *args, **kwargs: (args, kwargs))):
-        expected_table = [
-            dbc.Row(
-            children=[
-                dbc.Col("SLI"),
-                dbc.Col("SLI Type"),
-                dbc.Col("SLI Status"),
-                dbc.Col("Warn Range"),
-                dbc.Col("Error Range"),
-            ],
-            className="header-row",
-        ),
-            dbc.Row(
-            children=[
-                dbc.Col("UNSPECIFIED"),
-                dbc.Col(
-                    children="HEALTHY",
-                    className="STATUS_HEALTHY",
-                ),
-                dbc.Col(.51),
-                dbc.Col(
-                    f"({sli.slo_warn_lower_bound}, {sli.slo_warn_upper_bound})"
-                ),
-                dbc.Col(
-                    f"({sli.slo_error_lower_bound}, {sli.slo_error_upper_bound})"
-                ),
-            ],
-            className="data-row",
-        )
-        ]
-        table = ujt.converters.bootstrap_info_table_from_slis([sli])
-        assert table == expected_table
+    expected_columns = [
+        {
+            "name": "Type",
+            "id": "Type"
+        },
+        {
+            "name": "Status",
+            "id": "Status"
+        },
+        {
+            "name": "Value",
+            "id": "Value"
+        },
+        {
+            "name": "Warn Range",
+            "id": "Warn Range"
+        },
+        {
+            "name": "Error Range",
+            "id": "Error Range"
+        },
+    ]
+    expected_data = [
+        {
+            "Type": "UNSPECIFIED",
+            "Status": "HEALTHY",
+            "Value": .51,
+            "Warn Range": "(0.2, 0.8)",
+            "Error Range": "(0.1, 0.9)",
+        }
+    ]
+
+    table = ujt.converters.datatable_from_slis([sli], id=table_id)
+
+    assert table.id == table_id  # pylint: disable=no-member
+    assert table.columns == expected_columns  # pylint: disable=no-member
+    assert table.data == expected_data  # pylint: disable=no-member
+    assert table.style_data_conditional == ujt.converters.STYLE_DATA_CONDITIONAL  # pylint: disable=no-member
