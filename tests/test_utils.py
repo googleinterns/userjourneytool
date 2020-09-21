@@ -85,7 +85,7 @@ def test_is_client_cytoscape_node():
     }
     assert not ujt.utils.is_client_cytoscape_node(non_client_node)
 
-    client_node = {"classes": ujt.converters.CLIENT_CLASS}
+    client_node = {"classes": ujt.constants.CLIENT_CLASS}
     assert ujt.utils.is_client_cytoscape_node(client_node)
 
 

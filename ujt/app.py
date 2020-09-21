@@ -34,7 +34,7 @@ from graph_structures_pb2 import (
     Status,
     UserJourney)
 
-from . import compute_status, converters, generate_data, utils
+from . import constants, compute_status, converters, generate_data, utils
 
 # Initialize Dash app and Flask-Cache
 cyto.load_extra_layouts()
@@ -212,7 +212,7 @@ def generate_node_info_panel(tap_node):
         out += [
             html.H3("SLI Info"),
             converters.datatable_from_slis(node.slis,
-                                           id="datatable-slis")
+                                           table_id="datatable-slis")
         ]
 
     if node.child_names:
@@ -224,7 +224,7 @@ def generate_node_info_panel(tap_node):
             converters.datatable_from_nodes(
                 child_nodes,
                 use_relative_names=True,
-                id="datatable-child-node")
+                table_id="datatable-child-node")
         ]
 
     if node.dependencies:
@@ -237,7 +237,7 @@ def generate_node_info_panel(tap_node):
             converters.datatable_from_nodes(
                 dependency_nodes,
                 use_relative_names=False,
-                id="datatable-dependency-nodes")
+                table_id="datatable-dependency-nodes")
         ]
 
     return out
@@ -285,87 +285,28 @@ def update_client_dropdown_value(tap_node):
     return tap_node["data"]["id"]
 
 
-CYTO_STYLESHEET = [
-    {
-        "selector": "node",
-        "style": {
-            "content": "data(label)",
-            #"color": "red",
-        }
-    },
-    {
-        "selector": "edge",
-        "style": {
-            "curve-style": "straight",
-            "target-arrow-shape": "triangle",
-        }
-    },
-    {
-        "selector": f".{NodeType.Name(NodeType.NODETYPE_SERVICE)}",
-        "style":
-            {
-                "shape": "rectangle",
-                # set non-compound nodes (services with no endpoints) to match same color as compound nodes
-                "background-color": "lightgrey",
-                "background-blacken": -.5
-            }
-    },
-    {
-        "selector": f".{Status.Name(Status.STATUS_HEALTHY)}",
-        "style": {
-            "background-color": "green"
-        }
-    },
-    {
-        "selector": f".{Status.Name(Status.STATUS_WARN)}",
-        "style": {
-            "background-color": "orange"
-        }
-    },
-    {
-        "selector": f".{Status.Name(Status.STATUS_ERROR)}",
-        "style": {
-            "background-color": "red"
-        }
-    },
-    {
-        "selector": ":selected:",
-        "style":
-            {
-                "border-width": 1,
-                "border-color": "black",
-                #"background-blacken": .5,
-            }
-    }
-]
-
 app.layout = html.Div(
     children=[
         html.H1(
             children="User Journey Tool",
             style={
                 "textAlign": "center",
-                "color": "black",
             }),
         cyto.Cytoscape(
             id="cytoscape-graph",
-            #layout={"name": "breadthfirst", "roots": "#MobileClient, #WebBrowser"},
             layout={
                 "name": "dagre",
                 "nodeDimensionsIncludeLabels": "true",
             },
             style={
-                "width": "100%",
-                "height": "600px",
-                "backgroundColor": "azure"
+                "width": constants.GRAPH_WIDTH,
+                "height": constants.GRAPH_HEIGHT,
+                "backgroundColor": constants.GRAPH_BACKGROUND_COLOR,
             },
-            #elements=generate_graph_elements_from_local_data(),
-            stylesheet=CYTO_STYLESHEET,
+            stylesheet=constants.CYTO_STYLESHEET,
         ),
         dbc.Button(id="refresh-button",
                    children="Refresh"),
-        html.Div(id="refresh-signal",
-                 style={"display": "none"}),
         html.Div(
             children=[
                 dbc.Container(

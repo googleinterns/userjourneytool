@@ -10,9 +10,7 @@ from graph_structures_pb2 import (
     SLIType,
     Status)
 
-from . import utils
-
-CLIENT_CLASS = "CLIENT"
+from . import utils, constants
 
 
 def cytoscape_elements_from_nodes(node_name_message_map: Dict[str, Node]):
@@ -80,7 +78,7 @@ def cytoscape_elements_from_clients(client_name_message_map: Dict[str, Client]):
                     "id": name,
                     "label": name,
                 },
-                "classes": CLIENT_CLASS,
+                "classes": constants.CLIENT_CLASS,
             })
         for user_journey in message.user_journeys:
             for dependency in user_journey.dependencies:
@@ -93,31 +91,6 @@ def cytoscape_elements_from_clients(client_name_message_map: Dict[str, Client]):
                 })
 
     return node_elements + edge_elements
-
-
-STYLE_DATA_CONDITIONAL = [
-    {
-        "if": {
-            "column_id": "Status",
-            "filter_query": "{Status} = HEALTHY"
-        },
-        "color": "green"
-    },
-    {
-        "if": {
-            "column_id": "Status",
-            "filter_query": "{Status} = WARN"
-        },
-        "color": "orange"
-    },
-    {
-        "if": {
-            "column_id": "Status",
-            "filter_query": "{Status} = ERROR"
-        },
-        "color": "red"
-    }
-]
 
 
 def datatable_from_nodes(nodes, use_relative_names, table_id):
@@ -137,7 +110,7 @@ def datatable_from_nodes(nodes, use_relative_names, table_id):
         id=table_id,
         columns=columns,
         data=data,
-        style_data_conditional=STYLE_DATA_CONDITIONAL,
+        style_data_conditional=constants.DATATABLE_CONDITIONAL_STYLE,
     )
 
 
@@ -174,7 +147,7 @@ def datatable_from_slis(slis, table_id):
         id=table_id,
         columns=columns,
         data=data,
-        style_data_conditional=STYLE_DATA_CONDITIONAL,
+        style_data_conditional=constants.DATATABLE_CONDITIONAL_STYLE,
     )
 
 
@@ -199,5 +172,5 @@ def datatable_from_client(client, table_id):
         id=table_id,
         columns=columns,
         data=data,
-        style_data_conditional=STYLE_DATA_CONDITIONAL,
+        style_data_conditional=constants.DATATABLE_CONDITIONAL_STYLE,
     )

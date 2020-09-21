@@ -1,25 +1,7 @@
-/* place css styles for Dash app here */
+/* this file holds global css styles for top level Dash components */
+/* styles for the Cytoscape graph and Datatable are declared in constants.py */
 /*
 .info-panel {
     border: 1px solid black;
 }
 */
-.header-row {
-    background-color: azure;
-}
-
-.data-row {
-    background-color: whitesmoke;
-}
-
-.STATUS_HEALTHY {
-    color: green;
-}
-
-.STATUS_WARN {
-    color: orange;
-}
-
-.STATUS_ERROR {
-    color: red;
-}

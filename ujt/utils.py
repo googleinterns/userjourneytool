@@ -23,7 +23,7 @@ import google.protobuf.text_format as text_format
 import graph_structures_pb2
 from google.protobuf.message import Message
 
-from . import converters
+from . import converters, constants
 
 
 def named_proto_file_name(name: str, proto_type: Type[Message]):
@@ -72,7 +72,7 @@ def read_proto_from_file(file_name: str, proto_type: Type[Message]) -> Message:
 
 
 def is_client_cytoscape_node(tap_node):
-    return converters.CLIENT_CLASS in tap_node["classes"].split(" ")
+    return constants.CLIENT_CLASS in tap_node["classes"].split(" ")
 
 
 def relative_name(full_name):

@@ -11,7 +11,7 @@ from graph_structures_pb2 import (
     Status,
     UserJourney)
 
-import ujt.converters
+import ujt.converters, ujt.constants
 
 
 @pytest.fixture
@@ -292,7 +292,7 @@ def test_cytoscape_elements_from_clients():
                     "id": client_relative_names[0],
                     "label": client_relative_names[0]
                 },
-            "classes": ujt.converters.CLIENT_CLASS,
+            "classes": ujt.constants.CLIENT_CLASS,
         },
         {
             "data":
@@ -300,7 +300,7 @@ def test_cytoscape_elements_from_clients():
                     "id": client_relative_names[1],
                     "label": client_relative_names[1]
                 },
-            "classes": ujt.converters.CLIENT_CLASS,
+            "classes": ujt.constants.CLIENT_CLASS,
         },
     ]
 
@@ -367,7 +367,7 @@ def test_datatable_from_nodes():
     assert table.id == table_id  # pylint: disable=no-member
     assert table.columns == expected_columns  # pylint: disable=no-member
     assert table.data == expected_data  # pylint: disable=no-member
-    assert table.style_data_conditional == ujt.converters.STYLE_DATA_CONDITIONAL  # pylint: disable=no-member
+    assert table.style_data_conditional == ujt.constants.DATATABLE_CONDITIONAL_STYLE  # pylint: disable=no-member
 
 
 def test_datatable_from_slis():
@@ -419,7 +419,7 @@ def test_datatable_from_slis():
     assert table.id == table_id  # pylint: disable=no-member
     assert table.columns == expected_columns  # pylint: disable=no-member
     assert table.data == expected_data  # pylint: disable=no-member
-    assert table.style_data_conditional == ujt.converters.STYLE_DATA_CONDITIONAL  # pylint: disable=no-member
+    assert table.style_data_conditional == ujt.constants.DATATABLE_CONDITIONAL_STYLE  # pylint: disable=no-member
 
 
 def test_datatable_from_client():
@@ -457,4 +457,4 @@ def test_datatable_from_client():
     assert table.id == table_id  # pylint: disable=no-member
     assert table.columns == expected_columns  # pylint: disable=no-member
     assert table.data == expected_data  # pylint: disable=no-member
-    assert table.style_data_conditional == ujt.converters.STYLE_DATA_CONDITIONAL  # pylint: disable=no-member
+    assert table.style_data_conditional == ujt.constants.DATATABLE_CONDITIONAL_STYLE  # pylint: disable=no-member
