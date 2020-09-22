@@ -40,12 +40,23 @@ from .dash_app import app
         Input("refresh-button",
               "n_clicks_timestamp"),
         Input({"datatable-id": ALL},
-              "selected_row_ids")
+              "selected_row_ids"),
+        Input("collapse-validation-signal", "children"),
     ],
     [State("cytoscape-graph",
-           "elements")],
+           "elements"),
+    State("cytoscape-graph", "selectedNodeData"),
+    State("virtual-node-input", "value"),
+    ],
 )
-def update_graph_elements(n_clicks_timestamp, selected_row_ids, elements):
+def update_graph_elements(
+    n_clicks_timestamp, 
+    selected_row_ids, 
+    collapse_validation_signal,
+    elements, 
+    selected_node_data,
+    virtual_node_input_value,
+):
     """ Update the elements of the cytoscape graph.
 
     This function is called on startup, when the refresh button is clicked, and when a row is selected in the User Journey Datatable.
@@ -55,40 +66,41 @@ def update_graph_elements(n_clicks_timestamp, selected_row_ids, elements):
     Returns:
         A dictionary of cytoscape elements describing the nodes and edges of the graph.
     """
-
-    # regenerate elements on initial call and callbacks invoked by refresh button
-    regenerate_elements = True
-
     ctx = dash.callback_context
 
     if ctx.triggered:
         # ctx.triggered[0] is either "cytoscape-graph.tapNode" or "client-dropdown.value"
         triggered_id, triggered_prop = ctx.triggered[0]["prop_id"].split(".")
+        triggered_value = ctx.triggered[0]["value"]
+    else:
+        triggered_id, triggered_prop, triggered_value = None, None, None
+
+    if triggered_id is None or triggered_id == "refresh-button":
+        # in future versions, the refresh button / other triggers to this callback
         if triggered_id == "refresh-button":
             state.clear_cache()
-        else:
-            # don't regenerate elements when triggered by a client datatable row selection
-            regenerate_elements = False
 
-    if regenerate_elements:
         node_name_message_map, client_name_message_map = state.get_message_maps()
 
-        cytoscape_graph_elements = converters.cytoscape_elements_from_maps(
+        return converters.cytoscape_elements_from_maps(
             node_name_message_map,
             client_name_message_map,
         )
-    else:
-        if selected_row_ids != [None]:
-            user_journey_name = selected_row_ids[0][0]
-        else:
-            user_journey_name = None
 
-        cytoscape_graph_elements = transformers.apply_highlighted_edge_class_to_elements(
+    # checking triggered_prop is easier than triggered_ids, since the triggered_id
+    # is a stringified dictionary when used with a pattern matching callback
+    if triggered_prop == "selected_row_ids":
+        if selected_row_ids == [None]:
+            user_journey_name = None
+        else:
+            user_journey_name = selected_row_ids[0][0]
+
+        return transformers.apply_highlighted_edge_class_to_elements(
             elements,
             user_journey_name)
 
-    return cytoscape_graph_elements
-
+    if triggered_id == "collapse-validation-signal" and triggered_value == constants.OK_SIGNAL:
+        return transformers.collapse_nodes(virtual_node_input_value, selected_node_data, elements)
 
 @app.callback(
     Output("node-info-panel",
@@ -186,3 +198,60 @@ def update_client_dropdown_value(tap_node):
     if tap_node is None or not utils.is_client_cytoscape_node(tap_node):
         raise PreventUpdate
     return tap_node["data"]["id"]
+
+
+@app.callback(
+    Output("collapse-validation-signal", "children"),
+    Input("collapse-button", "n_clicks_timestamp"),
+    State("cytoscape-graph", "selectedNodeData"),
+    prevent_initial_call=True,
+)
+def validate_selected_nodes(n_clicks_timestamp, selected_node_data):
+    """ Validate the selected nodes before collapsing them.
+
+    Nodes with parents cannot be collapsed. 
+    Client nodes cannot be collapsed.
+    At least two nodes must be selected to be collapsed at once.
+
+    Returns:
+        A string to be placed in the children property of the collapse-validation-signal hidden div. 
+        This hidden div is used to ensure the callbacks to update the error modal visibility and cytoscape graph
+        are called in the correct order. 
+    """
+    if selected_node_data is None or len(selected_node_data) < 2:
+        return "Error: Must select at least two nodes to collapse."
+    node_name_message_map, client_name_message_map = state.get_message_maps()
+    for node_data in selected_node_data:
+        if node_data["id"] in client_name_message_map:
+            return "Error: Cannot collapse clients."
+        node = node_name_message_map[node_data["id"]]
+        if node.parent_name != "":
+            return "Error: Cannot collapse node with parent."
+    return constants.OK_SIGNAL
+
+
+@app.callback(
+    [
+        Output("collapse-error-modal", "is_open"),
+        Output("collapse-error-modal-body", "children"),
+    ],
+    [
+        Input("collapse-error-modal-close", "n_clicks_timestamp"),
+        Input("collapse-validation-signal", "children"),
+    ],
+    prevent_initial_call=True,
+)
+def toggle_collapse_error_modal(n_clicks_timestamp, signal_message):
+    ctx = dash.callback_context
+
+    triggered_id, triggered_prop = ctx.triggered[0]["prop_id"].split(".")
+    triggered_value = ctx.triggered[0]["value"]
+
+    if triggered_id == "collapse-error-modal-close":
+        print("trying to close")
+        return False, ""
+    
+    if triggered_value != "OK":
+        return True, triggered_value
+
+    return False, ""

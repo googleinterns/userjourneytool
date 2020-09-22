@@ -80,3 +80,7 @@ def relative_name(full_name):
 
 def human_readable_enum_name(enum_value, enum_class):
     return enum_class.Name(enum_value).split("_")[-1]
+
+
+def is_node_element(element):
+    return not "source" in element["data"].keys()

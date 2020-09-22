@@ -1,6 +1,6 @@
-from typing import Dict, Tuple, cast
+from typing import Dict, Tuple, cast, List
 
-from graph_structures_pb2 import Client, Node
+from graph_structures_pb2 import Client, Node, SLI
 
 from . import compute_status, generate_data, utils
 from .dash_app import cache
@@ -11,7 +11,7 @@ def clear_cache():
 
 
 @cache.memoize()
-def read_local_data() -> Tuple[Dict[str, Node], Dict[str, Client]]:
+def get_local_topology() -> Tuple[Dict[str, Node], Dict[str, Client]]:
     """ Reads protobufs in text format from ../data directory into protobuf objects.
 
     This is simply used as a proof-of-concept/test implementation. 
@@ -66,10 +66,22 @@ def read_local_data() -> Tuple[Dict[str, Node], Dict[str, Client]]:
 
 
 @cache.memoize()
+def get_slis() -> List[SLI]:
+    """ Gets a list of updated SLIs.
+
+    Returns:
+        A list of SLIs.
+    """
+
+    # Should read from remote server here.
+    pass
+
+
+@cache.memoize()
 def get_message_maps() -> Tuple[Dict[str, Node], Dict[str, Client]]:
     """ Gets Node and Client protobufs, computes their internal statuses, and return their maps.
 
-    In future versions, the call to read_local_data should be replaced by a RPC call to a reporting server. 
+    In future versions, the call to get_local_topology should be replaced by a RPC call to a reporting server. 
 
     Returns:
         A tuple of two dictionaries.
@@ -77,13 +89,18 @@ def get_message_maps() -> Tuple[Dict[str, Node], Dict[str, Client]]:
         The second dictionary contains a mapping from Client name to the actual Client protobuf message.
     """
 
-    message_maps = read_local_data()
+    message_maps = get_local_topology()
+
+    """
+    slis = get_slis()
+    # apply slis to protobufs in message maps
+    """
+
     compute_status.compute_statuses(*message_maps)
 
     return message_maps
 
 
-@cache.memoize()
 def get_node_name_message_map() -> Dict[str, Node]:
     """ Gets a dictionary mapping Node names to Node messages.
 
@@ -96,7 +113,6 @@ def get_node_name_message_map() -> Dict[str, Node]:
     return get_message_maps()[0]
 
 
-@cache.memoize()
 def get_client_name_message_map() -> Dict[str, Client]:
     """ Gets a dictionary mapping Client names to Client messages.
 
@@ -106,3 +122,11 @@ def get_client_name_message_map() -> Dict[str, Client]:
         A dictionary mapping Client names to Client messages.
     """
     return get_message_maps()[1]
+
+
+def get_virtual_node_map():
+    return cache.get("virtual_node_map")
+
+
+def set_virtual_node_map(virtual_node_map):
+    cache.set("virtual_node_map", virtual_node_map)

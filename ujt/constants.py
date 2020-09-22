@@ -1,7 +1,9 @@
 from graph_structures_pb2 import NodeType, Status
 
 CLIENT_CLASS = "CLIENT"
+VIRTUAL_NODE_CLASS = "VIRTUAL"
 HIGHLIGHTED_UJ_EDGE_CLASS = "HIGHLIGHTED_UJ_EDGE"
+OK_SIGNAL = "OK"
 
 HEALTHY_COLOR = "green"
 WARN_COLOR = "orange"
@@ -62,7 +64,7 @@ CYTO_STYLESHEET = [
         }
     },
     {
-        "selector": ":selected:",
+        "selector": ":selected",
         "style":
             {
                 "border-width": SELECTED_NODE_BORDER_WIDTH,

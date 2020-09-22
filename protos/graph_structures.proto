@@ -80,4 +80,5 @@ enum NodeType {
     NODETYPE_ENDPOINT = 1;
     NODETYPE_SERVICE = 2;
     NODETYPE_SYSTEM = 3;
+    NODETYPE_VIRTUAL = 4;
 }
