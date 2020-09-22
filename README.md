@@ -21,16 +21,19 @@ User Journey Tool simplifies debugging by providing an overview of an applicatio
 
         ./generate_protos
 
-5. Run the tool.
+5. Install generated protobufs as a package.
+
+        pip install --editable generated/
+
+6. Run the tool.
 
         python3 -m ujt.app
 
-
-6. Run tests.
+7. Run tests.
 
         mypy --cov=ujt
 
-7. Before committing, lint and type check the code.
+8. Before committing, lint and type check the code.
 
         ./lint
 

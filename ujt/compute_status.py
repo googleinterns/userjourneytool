@@ -1,10 +1,10 @@
 from collections import defaultdict
 from typing import TYPE_CHECKING, Dict
 
-from generated.graph_structures_pb2 import SLI, Client, Node, Status
+from graph_structures_pb2 import SLI, Client, Node, Status
 
 if TYPE_CHECKING:
-    from generated.graph_structures_pb2 import \
+    from graph_structures_pb2 import \
         StatusValue  # pylint: disable=no-name-in-module
 
 

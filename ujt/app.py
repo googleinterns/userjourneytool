@@ -17,30 +17,46 @@ from collections import defaultdict
 from typing import Dict, List, Set, Tuple, Union, cast
 
 import dash
+import dash_bootstrap_components as dbc
 import dash_cytoscape as cyto
 import dash_html_components as html
 from dash.dependencies import Input, Output
+from dash.exceptions import PreventUpdate
 from flask_caching import Cache
 from google.protobuf.message import Message
-
-from generated.graph_structures_pb2 import (SLI, Client, Node, SLIType, Status,
-                                            UserJourney)
+from graph_structures_pb2 import (SLI, Client, Node, NodeType, SLIType, Status,
+                                  UserJourney)
 
 from . import compute_status, converters, generate_data, utils
 
+# Initialize Dash app and Flask-Cache
+cyto.load_extra_layouts()
+app = dash.Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
+cache = Cache()
+cache.init_app(
+    app.server,
+    config={
+        "CACHE_TYPE": "filesystem",
+        "CACHE_DIR": "cache_dir"
+    },
+)
 
+
+@cache.memoize()
 def read_local_data() -> Tuple[Dict[str, Node], Dict[str, Client]]:
     """ Reads protobufs in text format from ../data directory into protobuf objects.
 
     This is simply used as a proof-of-concept/test implementation. 
     In actual usage, this method should not be used. Instead, protobufs should be read from a reporting server.
-    THis is highly coupled with implementation of mock data storage conventions.
+    This is highly coupled with implementation of mock data storage conventions.
 
     Returns:
         A tuple of two dictionaries.
         The first dictionary contains a mapping from Node name to the actual Node protobuf message.
         The second dictionary contains a mapping from Client name to the actual Client protobuf message.
     """
+
+    cache.clear()
 
     service_names = generate_data.SERVICE_ENDPOINT_NAME_MAP.keys()
     client_names = generate_data.CLIENT_USER_JOURNEY_NAME_MAP.keys()
@@ -75,33 +91,37 @@ def read_local_data() -> Tuple[Dict[str, Node], Dict[str, Client]]:
     return node_name_message_map, client_name_message_map
 
 
-def generate_graph_elements_from_local_data():
-    """ Generates a cytoscape elements dictionary from mock protobufs saved in the ../data directory.
+@cache.memoize()
+def get_node_name_message_map() -> Dict[str, Node]:
+    """ Gets a dictionary mapping Node names to Node messages.
 
-    In actual usage, this method should not be used. Instead, protobufs should be read from a reporting server.
-    In subsequent versions, this method should be replaced with generate_graph_elements_from_remote_data to
-    use a RPC to fetch protobuf data from a reporting server instead of reading local data.
+    Currently reads local data, but should be eventually modified to use remote data.
+    Computes the status of Nodes and their SLIs before returning dictionary.
 
     Returns:
-        A list of dictionary objects, each containing information regarding a single node (Service or Client) or edge (Dependency).
+        A dictionary mapping Node names to Node messages
     """
 
     node_name_message_map, client_name_message_map = read_local_data()
 
-    return generate_graph_elements(node_name_message_map,
-                                   client_name_message_map)
+    compute_status.compute_node_statuses(
+        node_name_message_map,
+        client_name_message_map,
+    )
+
+    return node_name_message_map
 
 
-def generate_graph_elements_from_remote_data():
-    """ Generates a cytoscape elements dictionary from mock protobufs saved in the ../data directory.
+@cache.memoize()
+def get_client_name_message_map() -> Dict[str, Client]:
+    """ Gets a dictionary mapping Client names to Client messages.
 
-    In actual usage, this method should be used to read protobufs from a reporting server.
-    This mthod should replace generate_graph_elements_from_local_data
+    Currently reads local data, but should be eventually modified to use remote data.
 
     Returns:
-        A list of dictionary objects, each containing information regarding a single node (Service or Client) or edge (Dependency).
+        A dictionary mapping Client names to Client messages
     """
-    raise NotImplementedError
+    return read_local_data()[1]
 
 
 def generate_graph_elements(node_name_message_map: Dict[str, Node],
@@ -116,21 +136,21 @@ def generate_graph_elements(node_name_message_map: Dict[str, Node],
         A list of dictionary objects, each containing information regarding a single node (Service or Client) or edge (Dependency).
     """
 
-    compute_status.compute_node_statuses(node_name_message_map,
-                                         client_name_message_map)
-
     return (converters.cytoscape_elements_from_nodes(node_name_message_map) +
             converters.cytoscape_elements_from_clients(client_name_message_map))
 
 
-cyto.load_extra_layouts()
-app = dash.Dash(__name__)
-cache = Cache()
-cache.init_app(app.server,
-               config={
-                   "CACHE_TYPE": "filesystem",
-                   "CACHE_DIR": "cache_dir"
-               })
+@app.callback(
+    Output("cytoscape-graph", "elements"),
+    [Input("refresh-button", "n_clicks_timestamp")],
+)
+def refresh_graph(n_clicks_timestamp):
+    cache.clear()
+    return generate_graph_elements(
+        get_node_name_message_map(),
+        get_client_name_message_map(),
+    )
+
 
 CYTO_STYLESHEET = [
     {
@@ -148,7 +168,7 @@ CYTO_STYLESHEET = [
         }
     },
     {
-        "selector": ".NODETYPE_SERVICE",
+        "selector": f".{NodeType.Name(NodeType.NODETYPE_SERVICE)}",
         "style": {
             "shape": "rectangle",
             # set non-compound nodes (services with no endpoints) to match same color as compound nodes
@@ -157,21 +177,27 @@ CYTO_STYLESHEET = [
         }
     },
     {
-        "selector": ".STATUS_HEALTHY",
+        "selector": f".{Status.Name(Status.STATUS_HEALTHY)}",
         "style": {
             "background-color": "green"
         }
     },
     {
-        "selector": ".STATUS_WARN",
+        "selector": f".{Status.Name(Status.STATUS_WARN)}",
         "style": {
             "background-color": "orange"
         }
     },
     {
-        "selector": ".STATUS_ERROR",
+        "selector": f".{Status.Name(Status.STATUS_ERROR)}",
         "style": {
             "background-color": "red"
+        }
+    },
+    {
+        "selector": ":selected:",
+        "style": {
+            "border-width": 1,
         }
     }
 ]
@@ -194,31 +220,12 @@ app.layout = html.Div(children=[
             "height": "600px",
             "backgroundColor": "azure"
         },
-        elements=generate_graph_elements_from_local_data(),
+        #elements=generate_graph_elements_from_local_data(),
         stylesheet=CYTO_STYLESHEET,
     ),
-    html.Button(id="refresh-button", children="Refresh"),
-    html.Div(id="refresh-signal", style={"display": "none"})
+    dbc.Button(id="refresh-button", children="Refresh"),
+    html.Div(id="refresh-signal", style={"display": "none"}),
 ])
-"""
-@app.callback()
-def refresh_slis():
-    pass
-"""
 
-# on interval:
-#   update the slis
-#   compute status
-#   redraw graph
-"""
-@app.callback(interval)
-def updateData():
-    slis = get_slis_from_server()
-    
-    compute the statuses but don't modify 
-    
-    return generate_elements_from_graph_and_slis(...)
-
-"""
 if __name__ == "__main__":
     app.run_server(debug=True)

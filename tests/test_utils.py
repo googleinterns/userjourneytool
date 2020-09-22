@@ -2,10 +2,10 @@
 
 from unittest.mock import MagicMock, Mock, mock_open, patch, sentinel
 
+import graph_structures_pb2
 import pytest
 
 import ujt.utils
-from generated import graph_structures_pb2
 
 
 @pytest.fixture

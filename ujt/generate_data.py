@@ -4,8 +4,8 @@ import random
 from collections import defaultdict
 from typing import DefaultDict, Dict, List, Tuple
 
-from generated.graph_structures_pb2 import (SLI, Client, Dependency, Node,
-                                            NodeType, UserJourney)
+from graph_structures_pb2 import (SLI, Client, Dependency, Node, NodeType,
+                                  UserJourney)
 
 from . import utils
 
