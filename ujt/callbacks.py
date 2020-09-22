@@ -28,6 +28,7 @@ from . import (
     converters,
     generate_data,
     state,
+    transformers,
     utils)
 from .dash_app import app
 
@@ -77,60 +78,16 @@ def update_graph_elements(n_clicks_timestamp, selected_row_ids, elements):
             client_name_message_map,
         )
     else:
-        edges_map = {}
-        nodes_list = []
-        for element in elements:
-            element_data = element["data"]
-            if "source" in element_data.keys():
-                edges_map[(element_data["source"],
-                           element_data["target"])] = element
-            else:
-                nodes_list.append(element)
-
-        updated_edges_map = remove_highlighted_class_from_edges(edges_map)
         if selected_row_ids != [None]:
-            updated_edges_map = apply_highlighted_class_to_edges(
-                updated_edges_map,
-                selected_row_ids[0][0])
+            user_journey_name = selected_row_ids[0][0]
+        else:
+            user_journey_name = None
 
-        cytoscape_graph_elements = list(updated_edges_map.values()) + nodes_list
+        cytoscape_graph_elements = transformers.apply_highlighted_edge_class_to_elements(
+            elements,
+            user_journey_name)
 
     return cytoscape_graph_elements
-
-
-# refactor the following two methods, but where to put them?
-def remove_highlighted_class_from_edges(edges_map):
-    for edge in edges_map.values():
-        edge["classes"] = ""
-    return edges_map
-
-
-def apply_highlighted_class_to_edges(edges_map, user_journey_name):
-    node_name_message_map, client_name_message_map = state.get_message_maps()
-    client_name = user_journey_name.split(".")[0]
-    client = client_name_message_map[client_name]
-    user_journey = next(
-        user_journey for user_journey in client.user_journeys
-        if user_journey.name == user_journey_name)
-
-    node_frontier = deque()
-
-    # add the initial set of nodes to the frontier
-    for dependency in user_journey.dependencies:
-        node_frontier.append(node_name_message_map[dependency.target_name])
-        edges_map[(client_name,
-                   dependency.target_name
-                  )]["classes"] = constants.HIGHLIGHTED_UJ_EDGE_CLASS
-
-    while node_frontier:
-        node = node_frontier.pop()
-        for dependency in node.dependencies:
-            node_frontier.append(node_name_message_map[dependency.target_name])
-            edges_map[(node.name,
-                       dependency.target_name
-                      )]["classes"] = constants.HIGHLIGHTED_UJ_EDGE_CLASS
-
-    return edges_map
 
 
 @app.callback(
@@ -229,14 +186,3 @@ def update_client_dropdown_value(tap_node):
     if tap_node is None or not utils.is_client_cytoscape_node(tap_node):
         raise PreventUpdate
     return tap_node["data"]["id"]
-
-
-'''
-@app.callback(
-    Output("cytoscape-graph", "elements"),
-    [Input("client_dropdown", "value")],
-    [State("cytoscape_graph", "elements")],
-)
-def highlight_user_joruney_path(value, elements):
-    return elements
-'''

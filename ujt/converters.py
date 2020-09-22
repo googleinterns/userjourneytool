@@ -1,3 +1,10 @@
+""" Module holding converter functions.
+
+In general, we consider converters to modify some UJT-specific data structure
+(e.g. a protobuf, or List/Dict of protobufs) into a Dash-specific data structure
+(e.g. cytoscape elements, dropdown options.)
+"""
+
 from typing import Any, Collection, Dict, List
 
 import dash_table
