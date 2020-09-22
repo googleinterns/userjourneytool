@@ -1,6 +1,5 @@
 from graph_structures_pb2 import NodeType, Status
 
-
 CLIENT_CLASS = "CLIENT"
 
 HEALTHY_COLOR = "green"
@@ -10,7 +9,6 @@ ERROR_COLOR = "red"
 COMPOUND_BACKGROUND_BLACKEN_FACTOR = -.5
 SELECTED_NODE_BORDER_WIDTH = 1
 SELECTED_NODE_BORDER_COLOR = "black"
-
 
 GRAPH_BACKGROUND_COLOR = "azure"
 GRAPH_WIDTH = "100%"
@@ -65,7 +63,6 @@ CYTO_STYLESHEET = [
             }
     }
 ]
-
 
 DATATABLE_CONDITIONAL_STYLE = [
     {

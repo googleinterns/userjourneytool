@@ -34,7 +34,7 @@ from graph_structures_pb2 import (
     Status,
     UserJourney)
 
-from . import constants, compute_status, converters, generate_data, utils
+from . import compute_status, constants, converters, generate_data, utils
 
 # Initialize Dash app and Flask-Cache
 cyto.load_extra_layouts()
@@ -211,8 +211,9 @@ def generate_node_info_panel(tap_node):
     if node.slis:
         out += [
             html.H3("SLI Info"),
-            converters.datatable_from_slis(node.slis,
-                                           table_id="datatable-slis")
+            converters.datatable_from_slis(
+                node.slis,
+                table_id="datatable-slis")
         ]
 
     if node.child_names:
@@ -287,11 +288,10 @@ def update_client_dropdown_value(tap_node):
 
 app.layout = html.Div(
     children=[
-        html.H1(
-            children="User Journey Tool",
-            style={
-                "textAlign": "center",
-            }),
+        html.H1(children="User Journey Tool",
+                style={
+                    "textAlign": "center",
+                }),
         cyto.Cytoscape(
             id="cytoscape-graph",
             layout={

@@ -10,7 +10,7 @@ from graph_structures_pb2 import (
     SLIType,
     Status)
 
-from . import utils, constants
+from . import constants, utils
 
 
 def cytoscape_elements_from_nodes(node_name_message_map: Dict[str, Node]):

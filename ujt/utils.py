@@ -23,7 +23,7 @@ import google.protobuf.text_format as text_format
 import graph_structures_pb2
 from google.protobuf.message import Message
 
-from . import converters, constants
+from . import constants, converters
 
 
 def named_proto_file_name(name: str, proto_type: Type[Message]):

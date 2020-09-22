@@ -11,7 +11,8 @@ from graph_structures_pb2 import (
     Status,
     UserJourney)
 
-import ujt.converters, ujt.constants
+import ujt.constants
+import ujt.converters
 
 
 @pytest.fixture
