@@ -1,13 +1,14 @@
-from .dash_app import cache
-
 from typing import Dict, Tuple, cast
 
-from graph_structures_pb2 import Node, Client
+from graph_structures_pb2 import Client, Node
 
-from . import generate_data, utils, compute_status
+from . import compute_status, generate_data, utils
+from .dash_app import cache
+
 
 def clear_cache():
     cache.clear()
+
 
 @cache.memoize()
 def read_local_data() -> Tuple[Dict[str, Node], Dict[str, Client]]:
@@ -75,11 +76,12 @@ def get_message_maps() -> Tuple[Dict[str, Node], Dict[str, Client]]:
         The first dictionary contains a mapping from Node name to the actual Node protobuf message.
         The second dictionary contains a mapping from Client name to the actual Client protobuf message.
     """
-    
+
     message_maps = read_local_data()
     compute_status.compute_statuses(*message_maps)
-    
+
     return message_maps
+
 
 @cache.memoize()
 def get_node_name_message_map() -> Dict[str, Node]:

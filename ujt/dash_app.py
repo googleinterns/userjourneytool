@@ -5,9 +5,9 @@ App is actually started by ujt.py
 """
 
 import dash
-from flask_caching import Cache
 import dash_bootstrap_components as dbc
 import dash_cytoscape as cyto
+from flask_caching import Cache
 
 # Initialize Dash app and Flask-Cache
 cyto.load_extra_layouts()

@@ -1,10 +1,12 @@
 from graph_structures_pb2 import NodeType, Status
 
 CLIENT_CLASS = "CLIENT"
+HIGHLIGHTED_UJ_EDGE_CLASS = "HIGHLIGHTED_UJ_EDGE"
 
 HEALTHY_COLOR = "green"
 WARN_COLOR = "orange"
 ERROR_COLOR = "red"
+HIGHLIGHTED_UJ_EDGE_COLOR = "purple"
 
 COMPOUND_BACKGROUND_BLACKEN_FACTOR = -.5
 SELECTED_NODE_BORDER_WIDTH = 1
@@ -13,6 +15,11 @@ SELECTED_NODE_BORDER_COLOR = "black"
 GRAPH_BACKGROUND_COLOR = "azure"
 GRAPH_WIDTH = "100%"
 GRAPH_HEIGHT = "600px"
+
+CLIENT_DATATABLE_ID = "datatable-client"
+SLI_DATATABLE_ID = "datatable-slis"
+CHILD_DATATABLE_ID = "datatable-child-nodes"
+DEPENDENCY_DATATABLE_ID = "datatable-dependency-nodes"
 
 CYTO_STYLESHEET = [
     {
@@ -61,6 +68,12 @@ CYTO_STYLESHEET = [
                 "border-width": SELECTED_NODE_BORDER_WIDTH,
                 "border-color": SELECTED_NODE_BORDER_COLOR,
             }
+    },
+    {
+        "selector": f".{HIGHLIGHTED_UJ_EDGE_CLASS}",
+        "style": {
+            "line-color": HIGHLIGHTED_UJ_EDGE_COLOR,
+        }
     }
 ]
 

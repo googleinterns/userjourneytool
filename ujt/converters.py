@@ -1,12 +1,7 @@
 from typing import Any, Collection, Dict, List
 
 import dash_table
-from graph_structures_pb2 import (
-    Client,
-    Node,
-    NodeType,
-    SLIType,
-    Status)
+from graph_structures_pb2 import Client, Node, NodeType, SLIType, Status
 
 from . import constants, utils
 
@@ -77,8 +72,10 @@ def cytoscape_elements_from_node_map(node_name_message_map: Dict[str, Node]):
     return node_elements + edge_elements
 
 
-def cytoscape_elements_from_client_map(client_name_message_map: Dict[str, Client]):
-    """ Converts a dictionary  of Client protobufs to a cytoscape graph format.
+def cytoscape_elements_from_client_map(
+        client_name_message_map: Dict[str,
+                                      Client]):
+    """ Converts a dictionary of Client protobufs to a cytoscape graph format.
 
     Args:
         client_name_message_map: A dictionary mapping Client names to the corresponding Client protobuf message.
@@ -103,7 +100,7 @@ def cytoscape_elements_from_client_map(client_name_message_map: Dict[str, Client
                 edge_elements.append({
                     "data": {
                         "source":
-                            name,  # careful! cytoscape element source is the Client node, but the Dependency's source_name should be a fully qualified UserJourney name 
+                            name,  # careful! cytoscape element source is the Client node, but the Dependency's source_name should be a fully qualified UserJourney name
                         "target": dependency.target_name,
                     }
                 })
@@ -184,17 +181,23 @@ def datatable_from_client(client, table_id):
             "Status":
                 utils.human_readable_enum_name(user_journey.status,
                                                Status),
+            "id":
+                user_journey.name,
         } for user_journey in client.user_journeys
     ]
     return dash_table.DataTable(
-        id=table_id,
+        # We provide a dict as an id here to utilize the callback pattern matching functionality
+        id={"datatable-id": table_id},
         columns=columns,
         data=data,
+        row_selectable="single",
         style_data_conditional=constants.DATATABLE_CONDITIONAL_STYLE,
     )
 
 
-def dropdown_options_from_client_map(client_name_message_map: Dict[str, Client]):
+def dropdown_options_from_client_map(
+        client_name_message_map: Dict[str,
+                                      Client]):
     return [
         {
             "label": name,
