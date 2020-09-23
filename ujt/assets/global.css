@@ -1,5 +1,7 @@
-/* place css styles for Dash app here */
-
+/* this file holds global css styles for top level Dash components */
+/* styles for the Cytoscape graph and Datatable are declared in constants.py */
+/*
 .info-panel {
     border: 1px solid black;
 }
+*/

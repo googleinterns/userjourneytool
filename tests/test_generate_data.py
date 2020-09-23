@@ -1,8 +1,13 @@
 from unittest.mock import Mock, call, patch, sentinel
 
 import pytest
-from graph_structures_pb2 import (SLI, Client, Dependency, Node, NodeType,
-                                  UserJourney)
+from graph_structures_pb2 import (
+    SLI,
+    Client,
+    Dependency,
+    Node,
+    NodeType,
+    UserJourney)
 
 import ujt.generate_data
 
@@ -21,13 +26,17 @@ def test_save_mock_data(patch_path):
         ujt.generate_data.save_mock_data()
 
         assert mock_write_proto_to_file.mock_calls == [
-            call(sentinel.named_proto_file_name, mock_node),
-            call(sentinel.named_proto_file_name, mock_client),
+            call(sentinel.named_proto_file_name,
+                 mock_node),
+            call(sentinel.named_proto_file_name,
+                 mock_client),
         ]
 
         assert mock_named_proto_file_name.mock_calls == [
-            call(mock_node.name, Node),
-            call(mock_client.name, Client),
+            call(mock_node.name,
+                 Node),
+            call(mock_client.name,
+                 Client),
         ]
 
 
@@ -36,19 +45,19 @@ def test_generate_nodes_functional(patch_path):
     endpoint_relative_names = ["Endpoint0", "Endpoint1", "Endpoint2"]
 
     test_service_endpoint_name_map = {
-        service_relative_names[0]: [
-            endpoint_relative_names[0], endpoint_relative_names[1]
-        ],
+        service_relative_names[0]:
+            [endpoint_relative_names[0],
+             endpoint_relative_names[1]],
         service_relative_names[1]: [endpoint_relative_names[2]],
     }
     test_node_dependency_map = {
-        f"{service_relative_names[0]}.{endpoint_relative_names[0]}": [
-            f"{service_relative_names[0]}.{endpoint_relative_names[1]}",
-            f"{service_relative_names[1]}.{endpoint_relative_names[2]}"
-        ],
-        f"{service_relative_names[0]}.{endpoint_relative_names[1]}": [
-            f"{service_relative_names[1]}.{endpoint_relative_names[2]}"
-        ],
+        f"{service_relative_names[0]}.{endpoint_relative_names[0]}":
+            [
+                f"{service_relative_names[0]}.{endpoint_relative_names[1]}",
+                f"{service_relative_names[1]}.{endpoint_relative_names[2]}"
+            ],
+        f"{service_relative_names[0]}.{endpoint_relative_names[1]}":
+            [f"{service_relative_names[1]}.{endpoint_relative_names[2]}"],
         f"{service_relative_names[1]}.{endpoint_relative_names[2]}": [],
     }
     expected_nodes = [
@@ -159,21 +168,19 @@ def test_generate_clients_functional(patch_path):
     service_relative_names = ["Service0", "Service1", "Service2", "Service3"]
 
     test_client_user_journey_name_map = {
-        client_relative_names[0]: [
-            user_journey_relative_names[0], user_journey_relative_names[1]
-        ],
+        client_relative_names[0]:
+            [user_journey_relative_names[0],
+             user_journey_relative_names[1]],
         client_relative_names[1]: [user_journey_relative_names[2]],
     }
     test_user_journey_dependency_map = {
-        f"{client_relative_names[0]}.{user_journey_relative_names[0]}": [
-            service_relative_names[0], service_relative_names[1]
-        ],
-        f"{client_relative_names[0]}.{user_journey_relative_names[1]}": [
-            service_relative_names[2]
-        ],
-        f"{client_relative_names[1]}.{user_journey_relative_names[2]}": [
-            service_relative_names[3]
-        ],
+        f"{client_relative_names[0]}.{user_journey_relative_names[0]}":
+            [service_relative_names[0],
+             service_relative_names[1]],
+        f"{client_relative_names[0]}.{user_journey_relative_names[1]}":
+            [service_relative_names[2]],
+        f"{client_relative_names[1]}.{user_journey_relative_names[2]}":
+            [service_relative_names[3]],
     }
     expected_clients = [
         Client(
@@ -237,8 +244,10 @@ def test_generate_clients_functional(patch_path):
         clients = ujt.generate_data.generate_clients()
         # not the most elegant way to check list equality ignoring order,
         # but can't hash or sort Nodes. This should be fine for small test cases.
-        assert all([
-            expected_client in clients for expected_client in expected_clients
-        ])
+        assert all(
+            [
+                expected_client in clients
+                for expected_client in expected_clients
+            ])
         assert all(
             [actual_client in expected_clients for actual_client in clients])
