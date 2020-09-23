@@ -1,6 +1,3 @@
-from unittest.mock import Mock, patch
-
-import pytest
 from graph_structures_pb2 import (
     SLI,
     Client,
@@ -15,17 +12,7 @@ import ujt.constants
 import ujt.converters
 
 
-@pytest.fixture
-def patch_path():
-    return "ujt.converters"
-
-
-@pytest.fixture
-def current_path():
-    return "tests.test_converters"
-
-
-def test_cytoscape_elements_from_nodes():
+def test_cytoscape_elements_from_node_map():
     service_relative_names = ["Service0", "Service1"]
     endpoint_relative_names = ["Endpoint0", "Endpoint1", "Endpoint2"]
 
@@ -217,11 +204,11 @@ def test_cytoscape_elements_from_nodes():
         },
     ]
 
-    assert expected_node_elements + expected_edge_elements == ujt.converters.cytoscape_elements_from_nodes(
+    assert expected_node_elements + expected_edge_elements == ujt.converters.cytoscape_elements_from_node_map(
         node_name_message_map)
 
 
-def test_cytoscape_elements_from_clients():
+def test_cytoscape_elements_from_client_map():
     client_relative_names = ["Client0", "Client1"]
     user_journey_relative_names = ["UJ0", "UJ1", "UJ2"]
     service_relative_names = ["Service0", "Service1", "Service2", "Service3"]
@@ -336,7 +323,7 @@ def test_cytoscape_elements_from_clients():
         },
     ]
 
-    assert expected_node_elements + expected_edge_elements == ujt.converters.cytoscape_elements_from_clients(
+    assert expected_node_elements + expected_edge_elements == ujt.converters.cytoscape_elements_from_client_map(
         client_name_message_map)
 
 
@@ -445,17 +432,20 @@ def test_datatable_from_client():
             "id": "Status"
         },
     ]
-    expected_data = [{
-        "User Journey": "uj",
-        "Status": "HEALTHY",
-    }]
+    expected_data = [
+        {
+            "User Journey": "uj",
+            "Status": "HEALTHY",
+            "id": client.user_journeys[0].name,
+        }
+    ]
 
     table = ujt.converters.datatable_from_client(
         client,
         table_id=table_id,
     )
 
-    assert table.id == table_id  # pylint: disable=no-member
+    assert table.id == {"datatable-id": table_id}  # pylint: disable=no-member
     assert table.columns == expected_columns  # pylint: disable=no-member
     assert table.data == expected_data  # pylint: disable=no-member
     assert table.style_data_conditional == ujt.constants.DATATABLE_CONDITIONAL_STYLE  # pylint: disable=no-member
