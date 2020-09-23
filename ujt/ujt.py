@@ -29,6 +29,7 @@ def get_top_row_components():
                                             className="mr-3",
                                         ),
                                         dbc.Button(id="collapse-button", children="Collapse"),
+                                        dbc.Button(id="expand-button", children="Expand"),
                                     ],
                                     inline=True,
                                 ),

@@ -76,6 +76,13 @@ CYTO_STYLESHEET = [
         "style": {
             "line-color": HIGHLIGHTED_UJ_EDGE_COLOR,
         }
+    },
+    {
+        "selector": f".{VIRTUAL_NODE_CLASS}",
+        "style": {
+            "border-style": "dashed",
+            "shape": "octagon",
+        }
     }
 ]
 

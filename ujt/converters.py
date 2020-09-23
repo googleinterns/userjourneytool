@@ -109,6 +109,7 @@ def cytoscape_elements_from_client_map(
                         "source":
                             name,  # careful! cytoscape element source is the Client node, but the Dependency's source_name should be a fully qualified UserJourney name
                         "target": dependency.target_name,
+                        "user_journey_name": user_journey.name,
                     }
                 })
 
