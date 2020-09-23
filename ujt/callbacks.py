@@ -93,24 +93,22 @@ def update_graph_elements(
             client_name_message_map,
         )
 
-    # shouldn't directly return when regenerate, should generate elements and apply all the relevant transformations every time
+    # user_journey_table_selected_row_ids == [] when the user journey datatable isn't created yet
+    # it equals [None] when the datatable is created but no row is selected
+    if user_journey_table_selected_row_ids == [] or user_journey_table_selected_row_ids == [None]:
+        active_user_journey_name = None
+    else:
+        active_user_journey_name = user_journey_table_selected_row_ids[0][0]
 
     # To determine if the a row selection from User Journey datatable caused the callback,
     # checking triggered_prop is easier than triggered_ids, since the triggered_id
     # is a stringified dictionary when used with a pattern matching callback
     if triggered_prop == "selected_row_ids":
-        if user_journey_table_selected_row_ids == [None]:
-            user_journey_name = None
-        else:
-            user_journey_name = user_journey_table_selected_row_ids[0][0]
-
         return transformers.apply_highlighted_edge_class_to_elements(
             elements,
-            user_journey_name)
+            active_user_journey_name)
 
     if triggered_id == "collapse-validation-signal" and triggered_value == constants.OK_SIGNAL:
-        # this should be add a new collapsed vnode or change vnode state
-        
         return transformers.collapse_nodes(virtual_node_input_value, selected_node_data, elements)
 
     # Notice we perform validation for collapsing with the valiate_selected_nodes_for_collapse callback,
@@ -118,7 +116,7 @@ def update_graph_elements(
     # However, in the expand case, no additional validation is needed as
     # the button can perform no action if the selected nodes cannot be expanded.
     if triggered_id == "expand-button":
-        return transformers.expand_nodes(selected_node_data, elements)
+        return transformers.expand_nodes(selected_node_data, elements, active_user_journey_name)
 
     raise PreventUpdate
 

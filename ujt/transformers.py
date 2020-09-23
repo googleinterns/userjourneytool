@@ -6,7 +6,7 @@ make a change, and return the same type of data structure.
 
 from collections import deque, defaultdict
 
-from . import constants, state, utils
+from . import constants, state, utils, converters
 
 
 def apply_highlighted_edge_class_to_elements(elements, user_journey_name):
@@ -139,8 +139,21 @@ def collapse_nodes(virtual_node_name, selected_node_data, elements):
 
     return new_elements
 
-def expand_nodes(selected_node_data, elements):
+def expand_nodes(selected_node_data, elements, active_user_journey_name):
     virtual_node_map = state.get_virtual_node_map()
     for node_data in selected_node_data:
-        if node_data["id"] in virtual_node_map.keys():
-            pass
+        if node_data["id"] not in virtual_node_map.keys():
+            continue
+
+        virtual_node = virtual_node_map[node_data["id"]]
+
+
+def expand_node(elements, virtual_node):
+    pass
+    """
+    node_name_message_map = state.get_node_name_message_map()
+    node_map_subset = {name:node for name, node in node_name_message_map if name in virtual_node["child_names"]}
+    elements.append(converters.cytoscape_elements_from_nodes(node_map_subset))
+    """
+    # add back the nodes
+    # reconnect edges ... how to preserve highlighting style?

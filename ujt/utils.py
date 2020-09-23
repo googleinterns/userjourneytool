@@ -78,6 +78,10 @@ def relative_name(full_name):
     return full_name.split(".")[-1]
 
 
+def parent_full_name(full_name):
+    return full_name.rsplit(".", 1)[0]
+
+
 def human_readable_enum_name(enum_value, enum_class):
     return enum_class.Name(enum_value).split("_")[-1]
 
