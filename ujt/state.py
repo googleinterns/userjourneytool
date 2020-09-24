@@ -130,3 +130,10 @@ def get_virtual_node_map():
 
 def set_virtual_node_map(virtual_node_map):
     cache.set("virtual_node_map", virtual_node_map)
+
+
+def get_parent_virtual_node_map():
+    return cache.get("parent_virtual_node_map")
+
+def set_parent_virtual_node_map(parent_virtual_node_map):
+    cache.set("parent_virtual_node_map", parent_virtual_node_map)

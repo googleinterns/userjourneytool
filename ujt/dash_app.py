@@ -24,3 +24,4 @@ cache.init_app(
 # we need to save virtual nodes as protos to disk and read them here.
 # this is a temporary solution.
 cache.set("virtual_node_map", {})
+cache.set("parent_virtual_node_map", {})

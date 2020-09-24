@@ -82,16 +82,32 @@ def update_graph_elements(
         triggered_id, triggered_prop, triggered_value = None, None, None
 
     if triggered_id is None or triggered_id == "refresh-button":
-        # in future versions, the refresh button / other triggers to this callback
         if triggered_id == "refresh-button":
             state.clear_cache()
+        
+    # this should get new SLIs in the future. Will add when implementing example server. 
+    node_name_message_map, client_name_message_map = state.get_message_maps()
 
-        node_name_message_map, client_name_message_map = state.get_message_maps()
+    # this initial call can be memoized -- per Ken's suggestion
+    elements = converters.cytoscape_elements_from_maps(
+        node_name_message_map,
+        client_name_message_map,
+    )
 
-        return converters.cytoscape_elements_from_maps(
-            node_name_message_map,
-            client_name_message_map,
-        )
+    if triggered_id == "collapse-validation-signal" and triggered_value == constants.OK_SIGNAL:
+        if triggered_value != constants.OK_SIGNAL:
+            raise PreventUpdate
+        transformers.add_virtual_node(virtual_node_input_value, selected_node_data)
+
+    # Notice we perform validation for collapsing with the valiate_selected_nodes_for_collapse callback,
+    # because we need to update the popup modal with the appropriate error message.
+    # However, in the expand case, no additional validation is needed as
+    # the button can perform no action if the selected nodes cannot be expanded.
+    if triggered_id == "expand-button":
+        transformers.set_virtual_node_collapsed_state(virtual_node_input_value, collapsed=False)
+
+    elements = transformers.apply_virtual_nodes_to_elements(elements)
+
 
     # user_journey_table_selected_row_ids == [] when the user journey datatable isn't created yet
     # it equals [None] when the datatable is created but no row is selected
@@ -100,25 +116,16 @@ def update_graph_elements(
     else:
         active_user_journey_name = user_journey_table_selected_row_ids[0][0]
 
-    # To determine if the a row selection from User Journey datatable caused the callback,
-    # checking triggered_prop is easier than triggered_ids, since the triggered_id
-    # is a stringified dictionary when used with a pattern matching callback
-    if triggered_prop == "selected_row_ids":
-        return transformers.apply_highlighted_edge_class_to_elements(
+    # For simplicity, we always re-highlight the edges in the selected user journey. 
+    # This greatly simplifies the implementation of virtual node collapsing/expanding, 
+    # but isn't the most efficient approach.
+    elements = transformers.apply_highlighted_edge_class_to_elements(
             elements,
             active_user_journey_name)
 
-    if triggered_id == "collapse-validation-signal" and triggered_value == constants.OK_SIGNAL:
-        return transformers.collapse_nodes(virtual_node_input_value, selected_node_data, elements)
+    print("done")
 
-    # Notice we perform validation for collapsing with the valiate_selected_nodes_for_collapse callback,
-    # because we need to update the popup modal with the appropriate error message.
-    # However, in the expand case, no additional validation is needed as
-    # the button can perform no action if the selected nodes cannot be expanded.
-    if triggered_id == "expand-button":
-        return transformers.expand_nodes(selected_node_data, elements, active_user_journey_name)
-
-    raise PreventUpdate
+    return elements
 
 @app.callback(
     Output("node-info-panel",
