@@ -78,57 +78,6 @@ def apply_highlighted_class_to_edges(edges_map, user_journey_name):
     return edges_map
 
 
-def add_virtual_node(virtual_node_name, selected_node_data):
-    virtual_node_map = state.get_virtual_node_map()
-    parent_virtual_node_map = state.get_parent_virtual_node_map()
-    node_name_message_map = state.get_node_name_message_map()
-
-    virtual_node_child_names = set()
-    node_frontier = deque()  # use this queue to do BFS to flatten non-virtual nodes
-    for node_data in selected_node_data:
-        if node_data["id"] in virtual_node_map:  # nested virtual node
-            virtual_node_child_names.add(node_data["id"])
-            parent_virtual_node_map[node_data["id"]] = virtual_node_name
-        else:
-            node_frontier.append(node_name_message_map[node_data["id"]])
-          
-    while node_frontier:
-        node = node_frontier.popleft()
-        virtual_node_child_names.add(node.name)
-        parent_virtual_node_map[node.name] = virtual_node_name
-        for child_name in node.child_names:
-            node_frontier.append(node_name_message_map[child_name])
-
-    virtual_node = {
-        "name": virtual_node_name,
-        "child_names": virtual_node_child_names,
-        "collapsed": True,
-    }
-    virtual_node_map[virtual_node_name] = virtual_node
-
-    state.set_virtual_node_map(virtual_node_map)
-    state.set_parent_virtual_node_map(parent_virtual_node_map)
-
-
-def delete_virtual_node(virtual_node_name):
-    virtual_node_map = state.get_virtual_node_map()
-    parent_virtual_node_map = state.get_parent_virtual_node_map()
-
-    virtual_node = virtual_node_map[virtual_node_name]
-    for child_name in virtual_node["child_names"]:
-        del parent_virtual_node_map[child_name]
-
-    del virtual_node_map[virtual_node_name]
-
-    state.set_virtual_node_map(virtual_node_map)
-    state.set_parent_virtual_node_map(parent_virtual_node_map)
-
-
-def set_virtual_node_collapsed_state(virtual_node_name, collapsed):
-    virtual_node_map = state.get_virtual_node_map()
-    virtual_node = virtual_node_map[virtual_node_name]
-    virtual_node["collapsed"] = collapsed
-    state.set_virtual_node_map(virtual_node_map)
 
 
 
@@ -185,7 +134,6 @@ def apply_virtual_nodes_to_elements(elements):
             # This if statement determines if the virtual node should be visible
             # first condition: entire stack of virtual nodes is expanded
             # second condition: the virtual node itself is the toplevel, collapsed node
-            print("hello")
             element = {
                 "data": {
                     "label": virtual_node_name,
@@ -196,98 +144,5 @@ def apply_virtual_nodes_to_elements(elements):
             if virtual_node_name in parent_virtual_node_map:
                 element["data"]["parent"] = parent_virtual_node_map[virtual_node_name]
             new_elements.append(element)
-    print(new_elements)
-    return new_elements
-"""
-def collapse_nodes(virtual_node_name, selected_node_data, elements):
-    virtual_node_child_names = set()
-    node_name_message_map = state.get_node_name_message_map()
-    node_frontier = deque([node_name_message_map[node_data["id"]] for node_data in selected_node_data])
-    
-    while node_frontier:
-        node = node_frontier.popleft()
-        virtual_node_child_names.add(node.name)
-        for child_name in node.child_names:
-            node_frontier.append(node_name_message_map[child_name])
-
-    virtual_node_map = state.get_virtual_node_map()
-    # This should probably be a proto. We keep it as a dict for now.
-    # Should virtual nodes be separate from the Node proto?
-    # On one hand, a virtual node can be thought of as a "view" over the graph. 
-    # We don't modify the underlying graph structures, only the elements
-    # used by Cytoscape to render the graph.
-    # On the other hand, we need to do the same status computation with virtual
-    # as we do with normal nodes.
-
-    # Also, modifying the set of existing elements is O(V+E), the same as regenerating the graph elements. 
-    # Is it cleaner to regenerate the graph elements from scratch?
-    # By directly modifying the elements, we can preserve other (stateful) changes made to the elements,
-    # such as highlighting a path through the graph.  
-    virtual_node_map[virtual_node_name] = {
-        "name": virtual_node_name,
-        "child_names": virtual_node_child_names,
-    }
-    state.set_virtual_node_map(virtual_node_map)
-
-    # A simpler approach to collapse/expand virtual nodes is to keep track of
-    # the elements that are added/removed when a node is collapsed/expanded.
-    # However, dicts are unhashable and can't be placed in sets, so we need a workaround.
-    # Added:
-    #   The virtual node itself
-    #   Edges to the virtual node
-    # Removed:
-    #   The nodes within the virtual node
-    #   The edges within the virutal node
-    
-    new_elements = [
-        {
-            "data": {
-                "label": virtual_node_name,
-                "id": virtual_node_name,
-            },
-            "classes": constants.VIRTUAL_NODE_CLASS
-        },
-    ]
-    for element in elements:
-        if utils.is_node_element(element):
-            if element["data"]["id"] not in virtual_node_child_names:
-                new_elements.append(element)
-        else:
-            if element["data"]["source"] in virtual_node_child_names:
-                element["data"]["source"] = virtual_node_name
-
-            if element["data"]["target"] in virtual_node_child_names:
-                element["data"]["target"] = virtual_node_name
-
-            # Can't reuse the id of an existing node, delete it so cytoscape gives a new one
-            # We avoid making a new element dictionary in order to preserve other properties that 
-            # may be in the element, such as classes.
-            del element["data"]["id"]
-            if element["data"]["source"] != element["data"]["target"]:
-                new_elements.append(element)
 
     return new_elements
-
-def expand_nodes(selected_node_data, elements, active_user_journey_name):
-    virtual_node_map = state.get_virtual_node_map()
-    for node_data in selected_node_data:
-        if node_data["id"] not in virtual_node_map.keys():
-            continue
-
-        virtual_node = virtual_node_map[node_data["id"]]
-
-
-def expand_node(elements, virtual_node):
-    node_name_message_map = state.get_node_name_message_map()
-    
-    new_elements = []
-    for element in elements:
-        if utils.is_node_element(element):
-            if element["data"]["id"] in node_name_message_map:
-                pass
-            else:
-                pass
-        else:
-            if element["data"]["target"] != virtual_node["name"] and element["data"]["source"] != virtual_node["name"]:
-                new_elements.append(element)
-"""

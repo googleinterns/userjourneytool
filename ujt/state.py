@@ -1,4 +1,5 @@
-from typing import Dict, Tuple, cast, List
+from typing import Any, Dict, Tuple, cast, List
+from collections import deque
 
 from graph_structures_pb2 import Client, Node, SLI
 
@@ -124,16 +125,134 @@ def get_client_name_message_map() -> Dict[str, Client]:
     return get_message_maps()[1]
 
 
-def get_virtual_node_map():
+def get_virtual_node_map() -> Dict[str, Any]:
+    """ Gets a dictionary mapping virtual node names to virtual node objects.
+
+    Virtual node objects are currently dictionaries with the keys:
+        name
+        child_names
+        collapsed
+
+    THe exact implementation of virtual node objects may change to a UJT specific class, or a new proto.
+
+    Returns:
+        A dictionary mapping virtual node names to virtual node objects.
+    """
     return cache.get("virtual_node_map")
 
 
-def set_virtual_node_map(virtual_node_map):
+def set_virtual_node_map(virtual_node_map: Dict[str, Any]):
+    """ Sets a dictionary mapping virtual node names to virtual node objects.
+    
+    Args:
+        virutal_node_map: The new virtual node map to be saved in the cache.
+    """
     cache.set("virtual_node_map", virtual_node_map)
 
 
-def get_parent_virtual_node_map():
+def get_parent_virtual_node_map() -> Dict[str, str]:
+    """ Gets a dictionary mapping node names to the name of their direct virtual node parent.
+
+    The keys of the dictionary can be names of virtual and non-virtual nodes.
+    The values are always virtual nodes. 
+    This dictionary can be used to re-construct the chain of the virtual nodes that contain a given node. 
+
+    Returns:
+        A dictionary mapping node names to the name of their direct virtual node parent.
+    """
     return cache.get("parent_virtual_node_map")
 
-def set_parent_virtual_node_map(parent_virtual_node_map):
+
+def set_parent_virtual_node_map(parent_virtual_node_map: Dict[str, str]):
+    """ Sets a dictionary mapping node names to the name of their direct virtual node parent.
+    
+    Args:
+        parent_virutal_node_map: The new parent virtual node map to be saved in the cache.
+    """
     cache.set("parent_virtual_node_map", parent_virtual_node_map)
+
+
+def add_virtual_node(virtual_node_name: str, selected_node_data: Dict[str, Any]):
+    """ Adds a virtual node.
+
+    Updates the virtual node map with the newly created virtual node object.
+    Updates the entries in the parent virtual node map corresponding to the virtual node's children,
+    to point to the new virtual node.
+
+    The interface could be refactored to take node_names instead of selected_node_data to be cleaner.
+    However, this function is currently only called in the callback to update the elements of the cytoscape graph.
+    It would be an extraneous transformation that doesn't offer any additional convenience or benefit, currently.
+
+    Args:
+        virutal_node_name: The name of the virtual node to create.
+        selected_node_data: A list of node data dictionaries to include in the virtual node.
+
+    """
+    virtual_node_map = get_virtual_node_map()
+    parent_virtual_node_map = get_parent_virtual_node_map()
+    node_name_message_map = get_node_name_message_map()
+
+    virtual_node_child_names = set()
+    node_frontier = deque()  # use this queue to do BFS to flatten non-virtual nodes
+    for node_data in selected_node_data:
+        if node_data["id"] in virtual_node_map:  # nested virtual node
+            virtual_node_child_names.add(node_data["id"])
+            parent_virtual_node_map[node_data["id"]] = virtual_node_name
+        else:
+            node_frontier.append(node_name_message_map[node_data["id"]])
+          
+    while node_frontier:
+        node = node_frontier.popleft()
+        virtual_node_child_names.add(node.name)
+        parent_virtual_node_map[node.name] = virtual_node_name
+        for child_name in node.child_names:
+            node_frontier.append(node_name_message_map[child_name])
+
+    virtual_node = {
+        "name": virtual_node_name,
+        "child_names": virtual_node_child_names,
+        "collapsed": True,
+    }
+    virtual_node_map[virtual_node_name] = virtual_node
+
+    set_virtual_node_map(virtual_node_map)
+    set_parent_virtual_node_map(parent_virtual_node_map)
+
+
+def delete_virtual_node(virtual_node_name: str):
+    """ Deletes a virtual node.
+
+    Updates the virtual node map to remove the corresponding virtual node object.
+    Updates the entries in the parent virtual node map corresponding to the virtual node's children,
+    to no longer point to the new virtual node.
+
+    Args:
+        virutal_node_name: The name of the virtual node to delete.
+    """
+    virtual_node_map = get_virtual_node_map()
+    parent_virtual_node_map = get_parent_virtual_node_map()
+
+    virtual_node = virtual_node_map[virtual_node_name]
+    # child_names property is convenient but not strictly necessary.
+    for child_name in virtual_node["child_names"]:
+        del parent_virtual_node_map[child_name]
+
+    del virtual_node_map[virtual_node_name]
+
+    set_virtual_node_map(virtual_node_map)
+    set_parent_virtual_node_map(parent_virtual_node_map)
+
+
+def set_virtual_node_collapsed_state(virtual_node_name: str, collapsed: bool):
+    """ Sets the collapsed state of a virtual node.
+
+    Updates the corresponding virtual node object within the virtual node map.
+
+    Args:
+        virutal_node_name: The name of the virtual node to update.
+        collapsed: The new collapsed 
+    """
+    virtual_node_map = get_virtual_node_map()
+    virtual_node = virtual_node_map[virtual_node_name]
+    virtual_node["collapsed"] = collapsed
+    set_virtual_node_map(virtual_node_map)

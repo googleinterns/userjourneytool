@@ -28,8 +28,10 @@ def get_top_row_components():
                                             ],
                                             className="mr-3",
                                         ),
-                                        dbc.Button(id="collapse-button", children="Collapse"),
-                                        dbc.Button(id="expand-button", children="Expand"),
+                                        dbc.Button(id="add-virtual-node-button", children="Add"),
+                                        dbc.Button(id="delete-virtual-node-button", children="Delete"),
+                                        dbc.Button(id="collapse-virtual-node-button", children="Collapse"),
+                                        dbc.Button(id="expand-virtual-node-button", children="Expand"),
                                     ],
                                     inline=True,
                                 ),
@@ -117,7 +119,7 @@ def get_layout():
             get_top_row_components(),
             get_cytoscape_graph(),
             get_bottom_info_panels(),
-            html.Div(id="collapse-validation-signal", style={"display": "none"}),
+            html.Div(id="virtual-node-update-signal", style={"display": "none"}),
             dbc.Modal(
                 children=[
                     dbc.ModalHeader("Error"),

@@ -33,28 +33,39 @@ from . import (
 from .dash_app import app
 
 
+def ctx_triggered_info(ctx):
+    triggered_id, triggered_prop, triggered_value = None, None, None
+    if ctx.triggered:
+        triggered_id, triggered_prop = ctx.triggered[0]["prop_id"].split(".")
+        triggered_value = ctx.triggered[0]["value"]
+    return triggered_id, triggered_prop, triggered_value
+
+
 @app.callback(
-    Output("cytoscape-graph",
-           "elements"),
+    Output("cytoscape-graph", "elements"),
     [
         Input("refresh-button",
               "n_clicks_timestamp"),
         Input({"datatable-id": ALL},
               "selected_row_ids"),
-        Input("collapse-validation-signal", "children"),
-        Input("expand-button", "n_clicks_timestamp"),
+        Input("virtual-node-update-signal", "children"),
+        Input("collapse-virtual-node-button", "n_clicks_timestamp"),
+        Input("expand-virtual-node-button", "n_clicks_timestamp"),
     ],
-    [State("cytoscape-graph",
-           "elements"),
-    State("cytoscape-graph", "selectedNodeData"),
-    State("virtual-node-input", "value"),
+    [
+        State("cytoscape-graph", "elements"),
+        State("cytoscape-graph", "selectedNodeData"),
+        State("virtual-node-input", "value"),
     ],
 )
 def update_graph_elements(
+    # Input
     refresh_n_clicks_timestamp, 
     user_journey_table_selected_row_ids, 
-    collapse_validation_signal,
+    virtual_node_update_signal,
+    collapse_n_clicks_timestamp,
     expand_n_clicks_timestamp,
+    # State
     elements, 
     selected_node_data,
     virtual_node_input_value,
@@ -65,7 +76,8 @@ def update_graph_elements(
         on startup to generate the graph
         when the refresh button is clicked to regenerate the graph
         when row is selected in the User Journey Datatable to highlight the User Journey edges through the path
-        when the collapse button is clicked with valid input to collapse nodes into a virtual node
+        when a virtual node is added or deleted (via the virtual-node-update-signal)
+        when the collapse button is clicked virtual node
         when the expand button is clicked to expand virtual nodes
 
     We need this callback to handle these (generally unrelated) situations because Dash only supports assigning
@@ -75,11 +87,11 @@ def update_graph_elements(
         A dictionary of cytoscape elements describing the nodes and edges of the graph.
     """
     ctx = dash.callback_context
-    if ctx.triggered:
-        triggered_id, triggered_prop = ctx.triggered[0]["prop_id"].split(".")
-        triggered_value = ctx.triggered[0]["value"]
-    else:
-        triggered_id, triggered_prop, triggered_value = None, None, None
+    triggered_id, triggered_prop, triggered_value = ctx_triggered_info(ctx)
+    print(triggered_id, triggered_prop, triggered_value)
+
+    if triggered_id == "virtual-node-update-signal" and triggered_value != constants.OK_SIGNAL:
+        raise PreventUpdate
 
     if triggered_id is None or triggered_id == "refresh-button":
         if triggered_id == "refresh-button":
@@ -94,17 +106,11 @@ def update_graph_elements(
         client_name_message_map,
     )
 
-    if triggered_id == "collapse-validation-signal" and triggered_value == constants.OK_SIGNAL:
-        if triggered_value != constants.OK_SIGNAL:
-            raise PreventUpdate
-        transformers.add_virtual_node(virtual_node_input_value, selected_node_data)
+    if triggered_id == "collapse-virtual-node-button":
+        state.set_virtual_node_collapsed_state(virtual_node_input_value, collapsed=True)
 
-    # Notice we perform validation for collapsing with the valiate_selected_nodes_for_collapse callback,
-    # because we need to update the popup modal with the appropriate error message.
-    # However, in the expand case, no additional validation is needed as
-    # the button can perform no action if the selected nodes cannot be expanded.
-    if triggered_id == "expand-button":
-        transformers.set_virtual_node_collapsed_state(virtual_node_input_value, collapsed=False)
+    if triggered_id == "expand-virtual-node-button":
+        state.set_virtual_node_collapsed_state(virtual_node_input_value, collapsed=False)
 
     elements = transformers.apply_virtual_nodes_to_elements(elements)
 
@@ -190,23 +196,21 @@ def generate_node_info_panel(tap_node):
            "tapNode"),
      Input("client-dropdown",
            "value")],
+    prevent_initial_call=True,
 )
 def generate_client_info_panel(tap_node, dropdown_value):
     ctx = dash.callback_context
-
-    if not ctx.triggered:  # initial callback - no graph clicks or dropdown selection yet
-        raise PreventUpdate
+    triggered_id, triggered_prop, triggered_value = ctx_triggered_info(ctx)
 
     # ctx.triggered[0] is either "cytoscape-graph.tapNode" or "client-dropdown.value"
-    triggered_id, triggered_prop = ctx.triggered[0]["prop_id"].split(".")
     if triggered_id == "cytoscape-graph":
-        tap_node = ctx.triggered[0]["value"]
+        tap_node = triggered_value
         if not utils.is_client_cytoscape_node(tap_node):
             raise PreventUpdate
 
         client_name = tap_node["data"]["id"]
     else:
-        client_name = ctx.triggered[0]["value"]
+        client_name = triggered_value
 
     client_name_message_map = state.get_client_name_message_map()
     client = client_name_message_map[client_name]
@@ -226,37 +230,63 @@ def update_client_dropdown_value(tap_node):
 
 
 @app.callback(
-    Output("collapse-validation-signal", "children"),
-    Input("collapse-button", "n_clicks_timestamp"),
-    State("cytoscape-graph", "selectedNodeData"),
+    Output("virtual-node-update-signal", "children"),
+    [
+        Input("add-virtual-node-button", "n_clicks_timestamp"),
+        Input("delete-virtual-node-button", "n_clicks_timestamp"),
+    ],
+    [
+        State("cytoscape-graph", "selectedNodeData"),
+        State("virtual-node-input", "value"),
+    ],
     prevent_initial_call=True,
 )
-def validate_selected_nodes_for_collapse(n_clicks_timestamp, selected_node_data):
-    """ Validate the selected nodes before collapsing them.
+def validate_selected_nodes_for_virtual_node(
+    add_n_clicks_timestamp, 
+    delete_n_clicks_timestamp, 
+    selected_node_data, 
+    virtual_node_name
+):
+    """ Validate the selected nodes before adding them to virutal node.
 
-    Nodes with parents cannot be collapsed. 
-    Client nodes cannot be collapsed.
+    Nodes with parents cannot be added directly (their parents must be added instead). 
+    Client nodes cannot be added to virtual nodes.
     A single node with no children cannot be collapsed.
 
     Returns:
-        A string to be placed in the children property of the collapse-validation-signal hidden div. 
+        A string to be placed in the children property of the virtual-node-update-signal hidden div. 
         This hidden div is used to ensure the callbacks to update the error modal visibility and cytoscape graph
         are called in the correct order. 
     """
 
-    if selected_node_data is None:
-        return "Error: Must select at least one node to collapse."
+    ctx = dash.callback_context
+    triggered_id, triggered_prop, triggered_value = ctx_triggered_info(ctx)
 
-    node_name_message_map, client_name_message_map = state.get_message_maps()
-    for node_data in selected_node_data:
-        if node_data["id"] in client_name_message_map:
-            return "Error: Cannot collapse clients."
-        node = node_name_message_map[node_data["id"]]
-        if node.parent_name != "":
-            return "Error: Cannot collapse node with parent."
+    if triggered_id == "add-virtual-node-button":
+        if selected_node_data is None:
+            return "Error: Must select at least one node to to add to virutal node."
 
-    if len(selected_node_data) == 1 and not node.child_names:
-        return "Error: A single node with no children cannot be collapsed."
+        node_name_message_map, client_name_message_map = state.get_message_maps()
+        for node_data in selected_node_data:
+            if node_data["id"] in client_name_message_map:
+                return "Error: Cannot add clients to virtual node."
+            node = node_name_message_map[node_data["id"]]
+            if node.parent_name != "":
+                return "Error: Cannot add individual child node to virtual node. Try adding the entire parent."
+
+        if len(selected_node_data) == 1 and not node.child_names:
+            return "Error: A single node with no children cannot be added to virtual node."
+
+        virtual_node_map = state.get_virtual_node_map()
+        if triggered_value in virtual_node_map:
+            return "Error: A virtual node with that name already exists."
+
+        state.add_virtual_node(virtual_node_name, selected_node_data)
+    else:
+        virtual_node_map = state.get_virtual_node_map()
+        if triggered_value not in virtual_node_map:
+            return "Error: The entered name doesn't match any existing virtual nodes."
+        state.delete_virtual_node(virtual_node_name)
     
     return constants.OK_SIGNAL
 
@@ -268,7 +298,7 @@ def validate_selected_nodes_for_collapse(n_clicks_timestamp, selected_node_data)
     ],
     [
         Input("collapse-error-modal-close", "n_clicks_timestamp"),
-        Input("collapse-validation-signal", "children"),
+        Input("virtual-node-update-signal", "children"),
     ],
     prevent_initial_call=True,
 )
