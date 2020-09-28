@@ -112,13 +112,8 @@ def apply_virtual_nodes_to_elements(elements):
             if new_target is not None:
                 element["data"]["target"] = new_target
 
-            try:
-                #pass
-                #del element["data"]["id"]
-                element["data"][
-                    "id"] = f"{element['data']['source']}/{element['data']['target']}"
-            except:
-                pass
+            element["data"][
+                "id"] = f"{element['data']['source']}/{element['data']['target']}"
 
             if element["data"]["source"] != element["data"]["target"]:
                 new_elements.append(element)
@@ -154,6 +149,20 @@ def apply_virtual_nodes_to_elements(elements):
 
 
 def apply_uuid(elements):
+    """ Append a new UUID to the id of each cytoscape element
+
+    This is used as a workaround to update the source/target of edges, and the parent/child relatioship of nodes.
+    In Cytoscape.js, these relationships are immutable, and a move() function has to 
+    be called on the element to update the aforementioned properties.
+    However, Dash Cytoscape doesn't expose this functionality.
+    By providing a new ID, we can avoid this restriction.
+
+    Args:
+        elements: a list of Cytoscape elements
+
+    Returns:
+        A list of Cytoscape elements with an UUID appended to their ID fields. 
+    """
     this_uuid = uuid.uuid4()
     for e in elements:
         e["data"]["id"] += f"#{this_uuid}"

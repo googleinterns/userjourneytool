@@ -11,9 +11,9 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-""" Module providing utility functions.
+""" Module providing various utility functions.
 
-Currently used for protobuf read and write functionality.
+Can be refactored into multiple files if necessary.
 """
 
 import pathlib
@@ -88,6 +88,14 @@ def human_readable_enum_name(enum_value, enum_class):
 
 def is_node_element(element):
     return not "source" in element["data"].keys()
+
+
+def ctx_triggered_info(ctx):
+    triggered_id, triggered_prop, triggered_value = None, None, None
+    if ctx.triggered:
+        triggered_id, triggered_prop = ctx.triggered[0]["prop_id"].split(".")
+        triggered_value = ctx.triggered[0]["value"]
+    return triggered_id, triggered_prop, triggered_value
 
 
 def get_highest_collapsed_virtual_node_name(node_name):

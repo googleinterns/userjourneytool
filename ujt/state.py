@@ -3,7 +3,7 @@ from typing import Any, Deque, Dict, List, Set, Tuple, cast
 
 from graph_structures_pb2 import SLI, Client, Node, NodeType, VirtualNode
 
-from . import compute_status, generate_data, utils
+from . import generate_data, utils
 from .dash_app import cache
 
 

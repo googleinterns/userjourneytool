@@ -1,3 +1,7 @@
+""" Constants for UJT.
+
+Generally contains constants for styling.
+"""
 from graph_structures_pb2 import NodeType, Status
 
 CLIENT_CLASS = "CLIENT"

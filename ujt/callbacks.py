@@ -13,33 +13,16 @@
 # limitations under the License.
 """ Callbacks for Dash app. """
 
-import uuid
-from collections import deque
-from typing import Dict, Tuple, cast
+from typing import Any, Dict, List, Tuple, Union
 
 import dash
 import dash_html_components as html
 from dash.dependencies import ALL, Input, Output, State
 from dash.exceptions import PreventUpdate
-from graph_structures_pb2 import Client, Node, NodeType
+from graph_structures_pb2 import Node, NodeType, VirtualNode
 
-from . import (
-    compute_status,
-    constants,
-    converters,
-    generate_data,
-    state,
-    transformers,
-    utils)
+from . import compute_status, constants, converters, state, transformers, utils
 from .dash_app import app
-
-
-def ctx_triggered_info(ctx):
-    triggered_id, triggered_prop, triggered_value = None, None, None
-    if ctx.triggered:
-        triggered_id, triggered_prop = ctx.triggered[0]["prop_id"].split(".")
-        triggered_value = ctx.triggered[0]["value"]
-    return triggered_id, triggered_prop, triggered_value
 
 
 @app.callback(
@@ -68,15 +51,17 @@ def ctx_triggered_info(ctx):
 )
 def update_graph_elements(
     # Input
-    refresh_n_clicks_timestamp,
-    user_journey_table_selected_row_ids,
-    virtual_node_update_signal,
-    collapse_n_clicks_timestamp,
-    expand_n_clicks_timestamp,
+    refresh_n_clicks_timestamp: int,
+    user_journey_table_selected_row_ids: List[str],
+    virtual_node_update_signal: str,
+    collapse_n_clicks_timestamp: int,
+    expand_n_clicks_timestamp: int,
     # State
-    state_elements,
-    selected_node_data,
-    virtual_node_input_value,
+    state_elements: List[Dict[str,
+                              Any]],
+    selected_node_data: List[Dict[str,
+                                  Any]],
+    virtual_node_input_value: str,
 ):
     """ Update the elements of the cytoscape graph.
 
@@ -91,19 +76,30 @@ def update_graph_elements(
     We need this callback to handle these (generally unrelated) situations because Dash only supports assigning
     a single callback to a given output element.
 
+    Args:
+        refresh_n_clicks_timestamp: Timestamp of when the refresh button was clicked. Value unused, input only provided to register callback.
+        user_journey_table_selected_row_ids: List of selected row ids from the user journey datatable. Should contain only one element. Used for highlighting a path through the graph.  
+        virtual_node_update_signal: String used as a signal to indicate that the virtual node addition/deletion was valid. 
+        collapse_n_clicks_timestamp: Timestamp of when the collapse button was clicked. Value unused, input only provided to register callback.
+        expand_n_clicks_timestamp: Timestamp of when the expand button was clicked. Value unused, input only provided to register callback.
+        state_elements: The list of current cytoscape graph elements. This is unused and can be removed in a later change. 
+        selected_node_data: The list of data dictionaries for selected nodes. Used to create virtual nodes.
+        virtual_node_input_value: The value of the virtual node input box. Used to perform all virtual node operations. 
     Returns:
         A dictionary of cytoscape elements describing the nodes and edges of the graph.
     """
+
     ctx = dash.callback_context
-    triggered_id, triggered_prop, triggered_value = ctx_triggered_info(ctx)
-    print(triggered_id, triggered_prop, triggered_value)
+    triggered_id, triggered_prop, triggered_value = utils.ctx_triggered_info(ctx)
 
     if triggered_id == "virtual-node-update-signal" and triggered_value != constants.OK_SIGNAL:
+        # No-op if the validation signal isn't OK
         raise PreventUpdate
 
     if triggered_id == "refresh-button":
-        state.get_slis()
+        state.get_slis()  # no-op for now.
 
+    # Perform status computation.
     node_name_message_map, client_name_message_map = state.get_message_maps()
     virtual_node_map = state.get_virtual_node_map()
 
@@ -113,7 +109,7 @@ def update_graph_elements(
 
     # combine the two maps of nodes into one dictionary
     # use duck typing -- is this pythonic or a hack?
-    all_nodes_map = {**node_name_message_map, **virtual_node_map}
+    all_nodes_map = {**node_name_message_map, **virtual_node_map}  #type: ignore
     compute_status.compute_statuses(
         all_nodes_map,
         client_name_message_map,
@@ -123,14 +119,19 @@ def update_graph_elements(
     state.set_client_name_message_map(client_name_message_map)
     state.set_virtual_node_map(virtual_node_map)
 
-    # this initial call can be memoized -- per Ken's suggestion.
+    # TODO: memoize this call per Ken's suggestion. This will be refactored when implementing server.
     # something like: elements = state.get_cytoscape_elements()
     elements = converters.cytoscape_elements_from_maps(
         node_name_message_map,
         client_name_message_map,
     )
 
-    # TODO: apply the status styling here instead of in converters
+    # For simplicity, we always perform all graph (view) transformations.
+    # This greatly simplifies the implementation each individual transformation, since each step doesn't
+    # need to account for changes introduced each subsequent step.
+    # However, this isn't the most efficient approach.
+
+    # TODO: apply the status styling here instead of in converters. Will be refactored when implementing server.
     # elements = transformers.apply_status_classes(...)
 
     if triggered_id == "collapse-virtual-node-button":
@@ -154,14 +155,12 @@ def update_graph_elements(
     else:
         active_user_journey_name = user_journey_table_selected_row_ids[0][0]
 
-    # For simplicity, we always re-highlight the edges in the selected user journey.
-    # This greatly simplifies the implementation of virtual node collapsing/expanding,
-    # but isn't the most efficient approach.
     elements = transformers.apply_highlighted_edge_class_to_elements(
         elements,
         active_user_journey_name)
 
-    print("done")
+    # Workaround for https://github.com/plotly/dash-cytoscape/issues/106
+    # Give new ids to Cytoscape to avoid immutability of edges and parent relationships.
     elements = transformers.apply_uuid(elements)
     return elements
 
@@ -172,13 +171,28 @@ def update_graph_elements(
     [Input("cytoscape-graph",
            "tapNode")],
 )
-def generate_node_info_panel(tap_node):
+def generate_node_info_panel(tap_node) -> List[Any]:
+    """ Generate the node info panel.
+
+    This function is called:
+        when a node is clicked
+
+    Args:
+        tap_node: Cytoscape element of the tapped/clicked node.
+
+    Returns:
+        a List of Dash components.
+    """
+
     if tap_node is None or utils.is_client_cytoscape_node(tap_node):
         raise PreventUpdate
 
     node_name = tap_node["data"]["ujt_id"]
     node_name_message_map = state.get_node_name_message_map()
     virutal_node_map = state.get_virtual_node_map()
+
+    # See https://github.com/python/typing/issues/81
+    node = None  # type: Union[Node, VirtualNode]  # type: ignore
     if node_name in node_name_message_map:
         node = node_name_message_map[node_name]
         is_virtual_node = False
@@ -191,8 +205,9 @@ def generate_node_info_panel(tap_node):
     )
     sli_info, child_info, dependency_info = [], [], []
 
+    # Use duck typing for virtual nodes
     if node.child_names:
-        child_nodes = []
+        child_nodes: List[Union[Node, VirtualNode]] = []
         for child_name in node.child_names:
             if child_name in node_name_message_map:
                 child_nodes.append(node_name_message_map[child_name])
@@ -207,18 +222,20 @@ def generate_node_info_panel(tap_node):
                 table_id=constants.CHILD_DATATABLE_ID)
         ]
 
-    if not is_virtual_node and node.slis:
+    # Although we generally prefer "asking forgiveness rather than permission" (try/except) rather than
+    # "look before you leap", we avoid having an empty except block by checking the is_virtual_node_property.
+    if not is_virtual_node and node.slis:  # type: ignore
         sli_info = [
             html.H3("SLI Info"),
             converters.datatable_from_slis(
-                node.slis,
+                node.slis,  # type: ignore
                 table_id=constants.SLI_DATATABLE_ID)
         ]
 
-    if not is_virtual_node and node.dependencies:
+    if not is_virtual_node and node.dependencies:  # type: ignore
         dependency_nodes = [
             node_name_message_map[dependency.target_name]
-            for dependency in node.dependencies
+            for dependency in node.dependencies  # type: ignore
         ]
         dependency_info = [
             html.H3("Dependency Node Info"),
@@ -240,9 +257,23 @@ def generate_node_info_panel(tap_node):
            "value")],
     prevent_initial_call=True,
 )
-def generate_client_info_panel(tap_node, dropdown_value):
+def generate_client_info_panel(tap_node, dropdown_value: str) -> List[Any]:
+    """ Generate the client info panel.
+
+    This function is called:
+        when a client is clicked
+        when the client dropdown value is modified (i.e. a user selects a dropdown option)
+
+    Args:
+        tap_node: Cytoscape element of the tapped/clicked node.
+        dropdown_value: The value of the client dropdown
+
+    Returns:
+        a List of Dash components.
+    """
+
     ctx = dash.callback_context
-    triggered_id, triggered_prop, triggered_value = ctx_triggered_info(ctx)
+    triggered_id, triggered_prop, triggered_value = utils.ctx_triggered_info(ctx)
 
     # ctx.triggered[0] is either "cytoscape-graph.tapNode" or "client-dropdown.value"
     if triggered_id == "cytoscape-graph":
@@ -265,11 +296,17 @@ def generate_client_info_panel(tap_node, dropdown_value):
     [Input("cytoscape-graph",
            "tapNode")],
 )
-def update_client_dropdown_value(tap_node):
+def update_client_dropdown_value(tap_node) -> str:
     """ Updates the client dropdown value.
 
-    Called when a user selects a client in the graph, to ensure the dropdown value matches the selection.
+    This function is called:
+        when a user selects a client in the graph, to ensure the dropdown value matches the selection
 
+    Args:
+        tap_node: Cytoscape element of the tapped/clicked node.
+
+    Returns:
+        the new value of the client dropdown.
     """
     if tap_node is None or not utils.is_client_cytoscape_node(tap_node):
         raise PreventUpdate
@@ -304,6 +341,16 @@ def validate_selected_nodes_for_virtual_node(
     Client nodes cannot be added to virtual nodes.
     A single node with no children cannot be collapsed.
 
+    This function is called:
+        when the add button is clicked
+        when the delete button is clicked
+
+    Args:
+        add_n_clicks_timestamp: Timestamp of when the add button was clicked. Value unused, input only provided to register callback.
+        delete_n_clicks_timestamp: Timestamp of when the delete button was clicked. Value unused, input only provided to register callback.
+        selected_node_data: List of data dictionaries of selected cytoscape elements.
+        virtual_node_name: The name of the virtual node to add or delete.
+
     Returns:
         A string to be placed in the children property of the virtual-node-update-signal hidden div. 
         This hidden div is used to ensure the callbacks to update the error modal visibility and cytoscape graph
@@ -311,9 +358,7 @@ def validate_selected_nodes_for_virtual_node(
     """
 
     ctx = dash.callback_context
-    triggered_id, triggered_prop, triggered_value = ctx_triggered_info(ctx)
-    print("validate call")
-    print(triggered_id, triggered_prop, triggered_value)
+    triggered_id, triggered_prop, triggered_value = utils.ctx_triggered_info(ctx)
 
     if triggered_id == "add-virtual-node-button":
         if selected_node_data is None:
@@ -323,9 +368,11 @@ def validate_selected_nodes_for_virtual_node(
         for node_data in selected_node_data:
             if node_data["ujt_id"] in client_name_message_map:
                 return "Error: Cannot add clients to virtual node."
-            node = node_name_message_map[node_data["ujt_id"]]
-            if node.parent_name != "":
-                return "Error: Cannot add individual child node to virtual node. Try adding the entire parent."
+
+            if node_data["ujt_id"] in node_name_message_map:
+                node = node_name_message_map[node_data["ujt_id"]]
+                if node.parent_name != "":
+                    return "Error: Cannot add individual child node to virtual node. Try adding the entire parent."
 
         if len(selected_node_data) == 1 and not node.child_names:
             return "Error: A single node with no children cannot be added to virtual node."
@@ -360,7 +407,24 @@ def validate_selected_nodes_for_virtual_node(
     ],
     prevent_initial_call=True,
 )
-def toggle_collapse_error_modal(n_clicks_timestamp, signal_message):
+def toggle_collapse_error_modal(n_clicks_timestamp,
+                                signal_message) -> Tuple[bool,
+                                                         str]:
+    """ Close and open the error modal.
+
+    This function is called:
+        when an error occurs during the validation of virtual node creation/deletion
+        when the close button is clicked.
+
+    Args:
+        n_clicks_timestamp: Timestamp of when the close button was clicked. Value unused, input only provided to register callback.
+        signal_message: The valid of the signal from the signal hidden div. Used to determine whether the modal should open.
+
+    Returns:
+        A tuple containing a boolean and string.
+        The boolean indicates whether the modal should open.
+        The string is placed into the body of the modal.
+    """
     ctx = dash.callback_context
 
     triggered_id, triggered_prop = ctx.triggered[0]["prop_id"].split(".")
