@@ -10,6 +10,7 @@ protobuf==3.13.0
 isort==5.5.2
 pylint-protobuf==0.13
 mypy-protobuf==1.23
+grpcio==1.32.0
 grpcio-tools==1.32.0
 Flask-Caching==1.9.0
 dash-bootstrap-components==0.10.6

@@ -1,5 +1,4 @@
 syntax = "proto2";
-
 package ujt_protos;
 
 // functionally required fields declared at the top of each message
