@@ -1,6 +1,7 @@
 """ Temp file to generate mock data. """
 
 import random
+import pathlib
 from collections import defaultdict
 from typing import DefaultDict, Dict, List, Tuple
 
@@ -12,7 +13,7 @@ from graph_structures_pb2 import (
     NodeType,
     UserJourney)
 
-from . import utils
+from . import server_utils
 
 # define the mock data in a convenient format to generate protobufs
 # service and endpoint names correspond 1:1
@@ -213,12 +214,12 @@ def save_mock_data():
         Client: generate_clients(),
     }
 
+    data_path = pathlib.Path(__file__).parent / "data"
+
     for proto_type, messages in proto_type_message_map.items():
         for message in messages:
-            utils.write_proto_to_file(
-                utils.named_proto_file_name(message.name,
-                                            proto_type),
-                message)
+            path = data_path / server_utils.named_proto_file_name(message.name, proto_type)
+            server_utils.write_proto_to_file(path, message)
 
 
 if __name__ == "__main__":

@@ -10,9 +10,19 @@ from graph_structures_pb2 import (
 
 import ujt.constants
 import ujt.converters
+import pytest
+
+@pytest.fixture
+def slo_bounds():
+    return {
+        "slo_error_lower_bound": .1,
+        "slo_warn_lower_bound": .2,
+        "slo_warn_upper_bound": .8,
+        "slo_error_upper_bound": .9,
+    }
 
 
-def test_cytoscape_elements_from_node_map():
+def test_cytoscape_elements_from_node_map(slo_bounds):
     service_relative_names = ["Service0", "Service1"]
     endpoint_relative_names = ["Endpoint0", "Endpoint1", "Endpoint2"]
 
@@ -29,7 +39,7 @@ def test_cytoscape_elements_from_node_map():
                     SLI(
                         node_name=service_relative_names[0],
                         sli_value=.5,
-                        **ujt.generate_data.SLO_BOUNDS,
+                        **slo_bounds,
                     ),
                 ],
             ),
@@ -44,7 +54,7 @@ def test_cytoscape_elements_from_node_map():
                     SLI(
                         node_name=service_relative_names[1],
                         sli_value=.5,
-                        **ujt.generate_data.SLO_BOUNDS,
+                        **slo_bounds,
                     ),
                 ],
             ),
@@ -72,7 +82,7 @@ def test_cytoscape_elements_from_node_map():
                         node_name=
                         f"{service_relative_names[0]}.{endpoint_relative_names[0]}",
                         sli_value=.5,
-                        **ujt.generate_data.SLO_BOUNDS,
+                        **slo_bounds,
                     ),
                 ],
             ),
@@ -94,7 +104,7 @@ def test_cytoscape_elements_from_node_map():
                         node_name=
                         f"{service_relative_names[0]}.{endpoint_relative_names[1]}",
                         sli_value=.5,
-                        **ujt.generate_data.SLO_BOUNDS,
+                        **slo_bounds,
                     ),
                 ],
             ),
@@ -108,7 +118,7 @@ def test_cytoscape_elements_from_node_map():
                         node_name=
                         f"{service_relative_names[1]}.{endpoint_relative_names[2]}",
                         sli_value=.5,
-                        **ujt.generate_data.SLO_BOUNDS,
+                        **slo_bounds,
                     ),
                 ],
             ),
@@ -222,7 +232,7 @@ def test_cytoscape_elements_from_node_map():
         node_name_message_map)
 
 
-def test_cytoscape_elements_from_client_map():
+def test_cytoscape_elements_from_client_map(slo_bounds):
     client_relative_names = ["Client0", "Client1"]
     user_journey_relative_names = ["UJ0", "UJ1", "UJ2"]
     service_relative_names = ["Service0", "Service1", "Service2", "Service3"]
