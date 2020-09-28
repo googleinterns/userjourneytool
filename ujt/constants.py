@@ -1,7 +1,6 @@
 from graph_structures_pb2 import NodeType, Status
 
 CLIENT_CLASS = "CLIENT"
-VIRTUAL_NODE_CLASS = "VIRTUAL"
 HIGHLIGHTED_UJ_EDGE_CLASS = "HIGHLIGHTED_UJ_EDGE"
 OK_SIGNAL = "OK"
 
@@ -11,6 +10,7 @@ ERROR_COLOR = "red"
 HIGHLIGHTED_UJ_EDGE_COLOR = "purple"
 
 COMPOUND_BACKGROUND_BLACKEN_FACTOR = -.5
+VIRTUAL_BACKGROUND_BLACKEN_FACTOR = -.8
 SELECTED_NODE_BORDER_WIDTH = 1
 SELECTED_NODE_BORDER_COLOR = "black"
 
@@ -78,11 +78,13 @@ CYTO_STYLESHEET = [
         }
     },
     {
-        "selector": f".{VIRTUAL_NODE_CLASS}",
-        "style": {
-            "border-style": "dashed",
-            "shape": "octagon",
-        }
+        "selector": f".{NodeType.Name(NodeType.NODETYPE_VIRTUAL)}",
+        "style":
+            {
+                "border-style": "dashed",
+                "shape": "octagon",
+                "background-blacken": VIRTUAL_BACKGROUND_BLACKEN_FACTOR,
+            }
     }
 ]
 

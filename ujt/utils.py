@@ -22,7 +22,7 @@ from typing import Type
 import google.protobuf.text_format as text_format
 from google.protobuf.message import Message
 
-from . import constants
+from . import constants, state
 
 
 def named_proto_file_name(name: str, proto_type: Type[Message]):
@@ -88,3 +88,38 @@ def human_readable_enum_name(enum_value, enum_class):
 
 def is_node_element(element):
     return not "source" in element["data"].keys()
+
+
+def get_highest_collapsed_virtual_node_name(node_name):
+    """ Gets the name of the highest collapsed virtual node, given a node name.
+
+    Node name can be virtual or non virtual.
+    Highest refers to furthest ancestor.
+    This function doesn't feel like it should be in utils, but not sure where else to put it.
+    Can refactor later.
+
+    Args:
+        node_name: a name of a virtual or non-virtual node.
+
+    Returns:
+        The name of the highest collapsed virtual node above the given node.
+    """
+    virtual_node_map = state.get_virtual_node_map()
+    parent_virtual_node_map = state.get_parent_virtual_node_map()
+
+    current_name = node_name
+    highest_collapsed_name = None
+
+    while current_name in parent_virtual_node_map:
+        if current_name in virtual_node_map and virtual_node_map[
+                current_name].collapsed:
+            highest_collapsed_name = current_name
+        current_name = parent_virtual_node_map[current_name]
+
+    # need this for the highest-level (last) virtual node, which isn't registered
+    # in the parent_virtual_node_map.
+    if current_name in virtual_node_map and virtual_node_map[
+            current_name].collapsed:
+        highest_collapsed_name = current_name
+
+    return highest_collapsed_name

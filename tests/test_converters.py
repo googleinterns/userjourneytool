@@ -120,6 +120,7 @@ def test_cytoscape_elements_from_node_map():
                 {
                     "id": service_relative_names[0],
                     "label": service_relative_names[0],
+                    "ujt_id": service_relative_names[0],
                 },
             "classes":
                 f"{NodeType.Name(NodeType.NODETYPE_SERVICE)} {Status.Name(Status.STATUS_UNSPECIFIED)}"
@@ -129,6 +130,7 @@ def test_cytoscape_elements_from_node_map():
                 {
                     "id": service_relative_names[1],
                     "label": service_relative_names[1],
+                    "ujt_id": service_relative_names[1],
                 },
             "classes":
                 f"{NodeType.Name(NodeType.NODETYPE_SERVICE)} {Status.Name(Status.STATUS_UNSPECIFIED)}"
@@ -142,6 +144,8 @@ def test_cytoscape_elements_from_node_map():
                         endpoint_relative_names[0],
                     "parent":
                         service_relative_names[0],
+                    "ujt_id":
+                        f"{service_relative_names[0]}.{endpoint_relative_names[0]}",
                 },
             "classes":
                 f"{NodeType.Name(NodeType.NODETYPE_ENDPOINT)} {Status.Name(Status.STATUS_UNSPECIFIED)}"
@@ -155,6 +159,8 @@ def test_cytoscape_elements_from_node_map():
                         endpoint_relative_names[1],
                     "parent":
                         service_relative_names[0],
+                    "ujt_id":
+                        f"{service_relative_names[0]}.{endpoint_relative_names[1]}",
                 },
             "classes":
                 f"{NodeType.Name(NodeType.NODETYPE_ENDPOINT)} {Status.Name(Status.STATUS_UNSPECIFIED)}"
@@ -168,6 +174,8 @@ def test_cytoscape_elements_from_node_map():
                         endpoint_relative_names[2],
                     "parent":
                         service_relative_names[1],
+                    "ujt_id":
+                        f"{service_relative_names[1]}.{endpoint_relative_names[2]}",
                 },
             "classes":
                 f"{NodeType.Name(NodeType.NODETYPE_ENDPOINT)} {Status.Name(Status.STATUS_UNSPECIFIED)}"
@@ -182,6 +190,8 @@ def test_cytoscape_elements_from_node_map():
                         f"{service_relative_names[0]}.{endpoint_relative_names[0]}",
                     "target":
                         f"{service_relative_names[0]}.{endpoint_relative_names[1]}",
+                    "id":
+                        f"{service_relative_names[0]}.{endpoint_relative_names[0]}/{service_relative_names[0]}.{endpoint_relative_names[1]}",
                 }
         },
         {
@@ -191,6 +201,8 @@ def test_cytoscape_elements_from_node_map():
                         f"{service_relative_names[0]}.{endpoint_relative_names[0]}",
                     "target":
                         f"{service_relative_names[1]}.{endpoint_relative_names[2]}",
+                    "id":
+                        f"{service_relative_names[0]}.{endpoint_relative_names[0]}/{service_relative_names[1]}.{endpoint_relative_names[2]}",
                 }
         },
         {
@@ -200,6 +212,8 @@ def test_cytoscape_elements_from_node_map():
                         f"{service_relative_names[0]}.{endpoint_relative_names[1]}",
                     "target":
                         f"{service_relative_names[1]}.{endpoint_relative_names[2]}",
+                    "id":
+                        f"{service_relative_names[0]}.{endpoint_relative_names[1]}/{service_relative_names[1]}.{endpoint_relative_names[2]}",
                 }
         },
     ]
@@ -278,7 +292,8 @@ def test_cytoscape_elements_from_client_map():
             "data":
                 {
                     "id": client_relative_names[0],
-                    "label": client_relative_names[0]
+                    "label": client_relative_names[0],
+                    "ujt_id": client_relative_names[0],
                 },
             "classes": ujt.constants.CLIENT_CLASS,
         },
@@ -286,7 +301,8 @@ def test_cytoscape_elements_from_client_map():
             "data":
                 {
                     "id": client_relative_names[1],
-                    "label": client_relative_names[1]
+                    "label": client_relative_names[1],
+                    "ujt_id": client_relative_names[1],
                 },
             "classes": ujt.constants.CLIENT_CLASS,
         },
@@ -296,29 +312,53 @@ def test_cytoscape_elements_from_client_map():
         {
             "data":
                 {
-                    "source": client_relative_names[0],
-                    "target": service_relative_names[0],
+                    "source":
+                        client_relative_names[0],
+                    "target":
+                        service_relative_names[0],
+                    "id":
+                        f"{client_relative_names[0]}/{service_relative_names[0]}",
+                    "user_journey_name":
+                        f"{client_relative_names[0]}.{user_journey_relative_names[0]}",
                 }
         },
         {
             "data":
                 {
-                    "source": client_relative_names[0],
-                    "target": service_relative_names[1],
+                    "source":
+                        client_relative_names[0],
+                    "target":
+                        service_relative_names[1],
+                    "id":
+                        f"{client_relative_names[0]}/{service_relative_names[1]}",
+                    "user_journey_name":
+                        f"{client_relative_names[0]}.{user_journey_relative_names[0]}",
                 }
         },
         {
             "data":
                 {
-                    "source": client_relative_names[0],
-                    "target": service_relative_names[2],
+                    "source":
+                        client_relative_names[0],
+                    "target":
+                        service_relative_names[2],
+                    "id":
+                        f"{client_relative_names[0]}/{service_relative_names[2]}",
+                    "user_journey_name":
+                        f"{client_relative_names[0]}.{user_journey_relative_names[1]}",
                 }
         },
         {
             "data":
                 {
-                    "source": client_relative_names[1],
-                    "target": service_relative_names[3],
+                    "source":
+                        client_relative_names[1],
+                    "target":
+                        service_relative_names[3],
+                    "id":
+                        f"{client_relative_names[1]}/{service_relative_names[3]}",
+                    "user_journey_name":
+                        f"{client_relative_names[1]}.{user_journey_relative_names[2]}",
                 }
         },
     ]

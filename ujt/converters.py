@@ -34,20 +34,21 @@ def cytoscape_elements_from_maps(
 
 
 def cytoscape_element_from_node(node):
-    node_element: Dict[str, Any] = {
-        "data":
-            {
-                "id":
-                    node.name,
-                "label": utils.relative_name(node.name)
-            },
-        "classes":
-            " ".join(
-                [
-                    NodeType.Name(node.node_type),
-                    Status.Name(node.status),
-                ])
-    }
+    node_element: Dict[str,
+                       Any] = {
+                           "data":
+                               {
+                                   "id": node.name,
+                                   "label": utils.relative_name(node.name),
+                                   "ujt_id": node.name
+                               },
+                           "classes":
+                               " ".join(
+                                   [
+                                       NodeType.Name(node.node_type),
+                                       Status.Name(node.status),
+                                   ])
+                       }
     if node.parent_name:
         node_element["data"]["parent"] = node.parent_name
     return node_element
@@ -55,10 +56,12 @@ def cytoscape_element_from_node(node):
 
 def cytoscape_element_from_client(client):
     client_element = {
-        "data": {
-            "id": client.name,
-            "label": client.name,
-        },
+        "data":
+            {
+                "id": client.name,
+                "label": client.name,
+                "ujt_id": client.name,
+            },
         "classes": constants.CLIENT_CLASS,
     }
     return client_element
@@ -66,15 +69,20 @@ def cytoscape_element_from_client(client):
 
 def cytoscape_element_from_dependency(dependency):
     edge_element = {
-        "data": {
-            "source": dependency.source_name,
-            "target": dependency.target_name,
-        }
+        "data":
+            {
+                "source": dependency.source_name,
+                "target": dependency.target_name,
+            }
     }
     # careful! cytoscape element source is the Client node, but the Dependency's source_name should be a fully qualified UserJourney name
     if dependency.toplevel:
-        edge_element["data"]["source"] = utils.parent_full_name(dependency.source_name)
+        edge_element["data"]["source"] = utils.parent_full_name(
+            dependency.source_name)
         edge_element["data"]["user_journey_name"] = dependency.source_name
+
+    edge_element["data"][
+        "id"] = f"{edge_element['data']['source']}/{edge_element['data']['target']}"
     return edge_element
 
 
@@ -116,7 +124,8 @@ def cytoscape_elements_from_client_map(
         node_elements.append(cytoscape_element_from_client(client))
         for user_journey in client.user_journeys:
             for dependency in user_journey.dependencies:
-                edge_elements.append(cytoscape_element_from_dependency(dependency))
+                edge_elements.append(
+                    cytoscape_element_from_dependency(dependency))
 
     return node_elements + edge_elements
 

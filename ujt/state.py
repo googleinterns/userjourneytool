@@ -1,7 +1,7 @@
-from typing import Any, Dict, Tuple, cast, List
 from collections import deque
+from typing import Any, Deque, Dict, List, Set, Tuple, cast
 
-from graph_structures_pb2 import Client, Node, SLI
+from graph_structures_pb2 import SLI, Client, Node, NodeType, VirtualNode
 
 from . import compute_status, generate_data, utils
 from .dash_app import cache
@@ -75,10 +75,10 @@ def get_slis() -> List[SLI]:
     """
 
     # Should read from remote server here.
-    pass
+    print("Get SLIs")
+    return []
 
 
-@cache.memoize()
 def get_message_maps() -> Tuple[Dict[str, Node], Dict[str, Client]]:
     """ Gets Node and Client protobufs, computes their internal statuses, and return their maps.
 
@@ -89,23 +89,20 @@ def get_message_maps() -> Tuple[Dict[str, Node], Dict[str, Client]]:
         The first dictionary contains a mapping from Node name to the actual Node protobuf message.
         The second dictionary contains a mapping from Client name to the actual Client protobuf message.
     """
+    node_name_message_map = cache.get("node_name_message_map")
+    client_name_message_map = cache.get("client_name_message_map")
 
-    message_maps = get_local_topology()
+    if node_name_message_map is None or client_name_message_map is None:
+        # Put topology loading here for now. We may want to refactor this (?)
+        node_name_message_map, client_name_message_map = get_local_topology()
+        cache.set("node_name_message_map", node_name_message_map)
+        cache.set("client_name_message_map", client_name_message_map)
 
-    """
-    slis = get_slis()
-    # apply slis to protobufs in message maps
-    """
-
-    compute_status.compute_statuses(*message_maps)
-
-    return message_maps
+    return node_name_message_map, client_name_message_map
 
 
 def get_node_name_message_map() -> Dict[str, Node]:
     """ Gets a dictionary mapping Node names to Node messages.
-
-    Node statuses have already been computed.
 
     Returns:
         A dictionary mapping Node names to Node messages.
@@ -114,10 +111,12 @@ def get_node_name_message_map() -> Dict[str, Node]:
     return get_message_maps()[0]
 
 
+def set_node_name_message_map(node_name_message_map):
+    return cache.set("node_name_message_map", node_name_message_map)
+
+
 def get_client_name_message_map() -> Dict[str, Client]:
     """ Gets a dictionary mapping Client names to Client messages.
-
-    User Journey statuses have already been computed. 
 
     Returns:
         A dictionary mapping Client names to Client messages.
@@ -125,15 +124,12 @@ def get_client_name_message_map() -> Dict[str, Client]:
     return get_message_maps()[1]
 
 
-def get_virtual_node_map() -> Dict[str, Any]:
-    """ Gets a dictionary mapping virtual node names to virtual node objects.
+def set_client_name_message_map(client_name_message_map):
+    cache.set("client_name_message_map", client_name_message_map)
 
-    Virtual node objects are currently dictionaries with the keys:
-        name
-        child_names
-        collapsed
 
-    THe exact implementation of virtual node objects may change to a UJT specific class, or a new proto.
+def get_virtual_node_map() -> Dict[str, VirtualNode]:
+    """ Gets a dictionary mapping virtual node names to virtual node messages.
 
     Returns:
         A dictionary mapping virtual node names to virtual node objects.
@@ -141,7 +137,7 @@ def get_virtual_node_map() -> Dict[str, Any]:
     return cache.get("virtual_node_map")
 
 
-def set_virtual_node_map(virtual_node_map: Dict[str, Any]):
+def set_virtual_node_map(virtual_node_map: Dict[str, VirtualNode]):
     """ Sets a dictionary mapping virtual node names to virtual node objects.
     
     Args:
@@ -172,7 +168,11 @@ def set_parent_virtual_node_map(parent_virtual_node_map: Dict[str, str]):
     cache.set("parent_virtual_node_map", parent_virtual_node_map)
 
 
-def add_virtual_node(virtual_node_name: str, selected_node_data: Dict[str, Any]):
+def add_virtual_node(
+    virtual_node_name: str,
+    selected_node_data: List[Dict[str,
+                                  Any]],
+):
     """ Adds a virtual node.
 
     Updates the virtual node map with the newly created virtual node object.
@@ -192,15 +192,16 @@ def add_virtual_node(virtual_node_name: str, selected_node_data: Dict[str, Any])
     parent_virtual_node_map = get_parent_virtual_node_map()
     node_name_message_map = get_node_name_message_map()
 
-    virtual_node_child_names = set()
-    node_frontier = deque()  # use this queue to do BFS to flatten non-virtual nodes
+    virtual_node_child_names: Set[str] = set()
+    # use this queue to do BFS to flatten non-virtual nodes
+    node_frontier: Deque[Node] = deque()
     for node_data in selected_node_data:
-        if node_data["id"] in virtual_node_map:  # nested virtual node
-            virtual_node_child_names.add(node_data["id"])
-            parent_virtual_node_map[node_data["id"]] = virtual_node_name
+        if node_data["ujt_id"] in virtual_node_map:  # nested virtual node
+            virtual_node_child_names.add(node_data["ujt_id"])
+            parent_virtual_node_map[node_data["ujt_id"]] = virtual_node_name
         else:
-            node_frontier.append(node_name_message_map[node_data["id"]])
-          
+            node_frontier.append(node_name_message_map[node_data["ujt_id"]])
+
     while node_frontier:
         node = node_frontier.popleft()
         virtual_node_child_names.add(node.name)
@@ -208,11 +209,12 @@ def add_virtual_node(virtual_node_name: str, selected_node_data: Dict[str, Any])
         for child_name in node.child_names:
             node_frontier.append(node_name_message_map[child_name])
 
-    virtual_node = {
-        "name": virtual_node_name,
-        "child_names": virtual_node_child_names,
-        "collapsed": True,
-    }
+    virtual_node = VirtualNode(
+        name=virtual_node_name,
+        child_names=virtual_node_child_names,
+        collapsed=True,
+        node_type=NodeType.NODETYPE_VIRTUAL,
+    )
     virtual_node_map[virtual_node_name] = virtual_node
 
     set_virtual_node_map(virtual_node_map)
@@ -234,7 +236,7 @@ def delete_virtual_node(virtual_node_name: str):
 
     virtual_node = virtual_node_map[virtual_node_name]
     # child_names property is convenient but not strictly necessary.
-    for child_name in virtual_node["child_names"]:
+    for child_name in virtual_node.child_names:
         del parent_virtual_node_map[child_name]
 
     del virtual_node_map[virtual_node_name]
@@ -250,9 +252,9 @@ def set_virtual_node_collapsed_state(virtual_node_name: str, collapsed: bool):
 
     Args:
         virutal_node_name: The name of the virtual node to update.
-        collapsed: The new collapsed 
+        collapsed: The new collapsed state
     """
     virtual_node_map = get_virtual_node_map()
     virtual_node = virtual_node_map[virtual_node_name]
-    virtual_node["collapsed"] = collapsed
+    virtual_node.collapsed = collapsed
     set_virtual_node_map(virtual_node_map)

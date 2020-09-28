@@ -8,6 +8,17 @@ if TYPE_CHECKING:
         StatusValue  # pylint: disable=no-name-in-module
 
 
+def reset_node_statuses(node_name_message_map):
+    for node in node_name_message_map.values():
+        node.status = Status.STATUS_UNSPECIFIED
+
+
+def reset_client_statses(client_name_message_map):
+    for client in client_name_message_map.values():
+        for user_journey in client.user_journeys:
+            user_journey.status = Status.STATUS_UNSPECIFIED
+
+
 def compute_statuses(
         node_name_message_map: Dict[str,
                                     Node],
@@ -19,10 +30,6 @@ def compute_statuses(
         node_name_message_map: A dictionary mapping Node names to their corresponding Node protobuf message.
         client_name_message_map: A dictionary mapping Client names to the corresponding Client protobuf message.
     """
-
-    # initially mark all nodes as unspecified
-    for node in node_name_message_map.values():
-        node.status = Status.STATUS_UNSPECIFIED
 
     # starting at the clients, perform a DFS through the graph.
     # update the node's status before popping a stack frame.
@@ -67,13 +74,19 @@ def compute_single_node_status(
             node_name_message_map,
             child_name)] += 1
 
-    for dependency in node.dependencies:
-        status_count_map[compute_single_node_status(
-            node_name_message_map,
-            dependency.target_name)] += 1
+    try:
+        for dependency in node.dependencies:
+            status_count_map[compute_single_node_status(
+                node_name_message_map,
+                dependency.target_name)] += 1
+    except AttributeError:
+        pass
 
-    for sli in node.slis:
-        status_count_map[compute_sli_status(sli)] += 1
+    try:
+        for sli in node.slis:
+            status_count_map[compute_sli_status(sli)] += 1
+    except AttributeError:
+        pass
 
     node.status = compute_status_from_count_map(status_count_map)
     return node.status

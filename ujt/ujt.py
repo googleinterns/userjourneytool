@@ -9,6 +9,7 @@ import dash_table
 from . import callbacks, constants, converters, state
 from .dash_app import app
 
+
 def get_top_row_components():
     return html.Div(
         children=[
@@ -16,7 +17,8 @@ def get_top_row_components():
                 dbc.Row(
                     children=[
                         dbc.Col(
-                            dbc.Button(id="refresh-button",children="Refresh"),
+                            dbc.Button(id="refresh-button",
+                                       children="Refresh"),
                         ),
                         dbc.Col(
                             children=[
@@ -24,16 +26,28 @@ def get_top_row_components():
                                     children=[
                                         dbc.FormGroup(
                                             children=[
-                                                dbc.Input(id="virtual-node-input", type="text", placeholder="Virtual Node Name"),
+                                                dbc.Input(
+                                                    id="virtual-node-input",
+                                                    type="text",
+                                                    placeholder=
+                                                    "Virtual Node Name"),
                                             ],
                                             className="mr-3",
                                         ),
-                                        dbc.Button(id="add-virtual-node-button", children="Add"),
-                                        dbc.Button(id="delete-virtual-node-button", children="Delete"),
-                                        dbc.Button(id="collapse-virtual-node-button", children="Collapse"),
-                                        dbc.Button(id="expand-virtual-node-button", children="Expand"),
+                                        dbc.Button(
+                                            id="add-virtual-node-button",
+                                            children="Add"),
+                                        dbc.Button(
+                                            id="delete-virtual-node-button",
+                                            children="Delete"),
+                                        dbc.Button(
+                                            id="collapse-virtual-node-button",
+                                            children="Collapse"),
+                                        dbc.Button(
+                                            id="expand-virtual-node-button",
+                                            children="Expand"),
                                     ],
-                                    inline=True,
+                                    inline=False,
                                 ),
                             ],
                         ),
@@ -85,8 +99,7 @@ def get_bottom_info_panels():
                                     searchable=False,
                                     options=converters.
                                     dropdown_options_from_client_map(
-                                        state.
-                                        get_client_name_message_map())),
+                                        state.get_client_name_message_map())),
                                 html.Div(
                                     id="client-info-panel",
                                     className="info-panel",
@@ -98,6 +111,7 @@ def get_bottom_info_panels():
         ],
         className="mb-5",
     )
+
 
 def get_layout():
     """ Generate the top-level layout for the Dash app.
@@ -119,17 +133,21 @@ def get_layout():
             get_top_row_components(),
             get_cytoscape_graph(),
             get_bottom_info_panels(),
-            html.Div(id="virtual-node-update-signal", style={"display": "none"}),
+            html.Div(
+                id="virtual-node-update-signal",
+                style={"display": "none"}),
             dbc.Modal(
                 children=[
                     dbc.ModalHeader("Error"),
                     dbc.ModalBody(id="collapse-error-modal-body"),
                     dbc.ModalFooter(
-                        dbc.Button("Close", id="collapse-error-modal-close", className="ml-auto")
-                    ),
+                        dbc.Button(
+                            "Close",
+                            id="collapse-error-modal-close",
+                            className="ml-auto")),
                 ],
                 id="collapse-error-modal",
-        ),
+            ),
         ],
     )
 
