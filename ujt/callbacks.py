@@ -109,7 +109,7 @@ def update_graph_elements(
 
     # Perform status computation.
     compute_status.reset_node_statuses(node_name_message_map)
-    compute_status.reset_client_statses(client_name_message_map)
+    compute_status.reset_client_statuses(client_name_message_map)
     compute_status.reset_node_statuses(virtual_node_map)
 
     # combine the two maps of nodes into one dictionary

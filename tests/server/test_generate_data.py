@@ -43,7 +43,7 @@ def test_save_mock_data(patch_path):
         ]
 
 
-def test_generate_nodes_functional(patch_path):
+def test_generate_nodes_functional(patch_path, assert_same_elements):
     service_relative_names = ["Service0", "Service1"]
     endpoint_relative_names = ["Endpoint0", "Endpoint1", "Endpoint2"]
 
@@ -159,13 +159,10 @@ def test_generate_nodes_functional(patch_path):
         patch(f"{patch_path}.NODE_DEPENDENCY_MAP", test_node_dependency_map), \
         patch(f"{patch_path}.random.random", Mock(return_value=.5)):
         nodes = ujt.server.generate_data.generate_nodes()
-        # not the most elegant way to check list equality ignoring order,
-        # but can't hash or sort Nodes. This should be fine for small test cases.
-        assert all([expected_node in nodes for expected_node in expected_nodes])
-        assert all([actual_node in expected_nodes for actual_node in nodes])
+        assert_same_elements(nodes, expected_nodes)
 
 
-def test_generate_clients_functional(patch_path):
+def test_generate_clients_functional(patch_path, assert_same_elements):
     client_relative_names = ["Client0", "Client1"]
     user_journey_relative_names = ["UJ0", "UJ1", "UJ2"]
     service_relative_names = ["Service0", "Service1", "Service2", "Service3"]
@@ -245,12 +242,4 @@ def test_generate_clients_functional(patch_path):
     with patch(f"{patch_path}.CLIENT_USER_JOURNEY_NAME_MAP", test_client_user_journey_name_map), \
         patch(f"{patch_path}.USER_JOURNEY_DEPENDENCY_MAP", test_user_journey_dependency_map):
         clients = ujt.server.generate_data.generate_clients()
-        # not the most elegant way to check list equality ignoring order,
-        # but can't hash or sort Nodes. This should be fine for small test cases.
-        assert all(
-            [
-                expected_client in clients
-                for expected_client in expected_clients
-            ])
-        assert all(
-            [actual_client in expected_clients for actual_client in clients])
+        assert_same_elements(clients, expected_clients)
