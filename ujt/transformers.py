@@ -175,3 +175,30 @@ def apply_uuid(elements):
             e["data"]["parent"] += f"#{this_uuid}"
 
     return elements
+
+
+def apply_slis_to_node_map(sli_list, node_map):
+    for sli in sli_list:
+        node = node_map[sli.node_name]
+        # find the index of the node's SLI with the same SLI type as the SLI from sli_list
+
+        new_node_slis = []
+
+        for node_sli in node.slis:
+            if node_sli.sli_type == sli.sli_type:
+                new_node_slis.append(sli)
+            else:
+                new_node_slis.append(node_sli)
+
+        del node.slis[:]
+        node.slis.extend(new_node_slis)
+        """
+        # this is a more elegant solution, but not sure why assignment doesn't work
+        existing_matching_sli_type_idx = next((idx for idx, node_sli in enumerate(node.slis) if sli.sli_type == node_sli.sli_type), None)
+        if existing_matching_sli_type_idx is None:  # we need "is None" condition to support idx = 0 case, this is generally good practice
+            node.slis.append(sli)
+        else:
+            node.slis[existing_matching_sli_type_idx] = sli
+        """
+
+    return node_map

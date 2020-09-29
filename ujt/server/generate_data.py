@@ -1,7 +1,7 @@
 """ Temp file to generate mock data. """
 
-import random
 import pathlib
+import random
 from collections import defaultdict
 from typing import DefaultDict, Dict, List, Tuple
 
@@ -218,7 +218,9 @@ def save_mock_data():
 
     for proto_type, messages in proto_type_message_map.items():
         for message in messages:
-            path = data_path / server_utils.named_proto_file_name(message.name, proto_type)
+            path = data_path / server_utils.named_proto_file_name(
+                message.name,
+                proto_type)
             server_utils.write_proto_to_file(path, message)
 
 

@@ -1,7 +1,9 @@
 import pathlib
 from typing import Type
-from google.protobuf.message import Message
+
 import google.protobuf.text_format as text_format
+from google.protobuf.message import Message
+
 
 def named_proto_file_name(name: str, proto_type: Type[Message]):
     """ Generates the default file name for messages with a name field.
@@ -28,7 +30,9 @@ def write_proto_to_file(path: pathlib.Path, message: Message) -> None:
     path.write_text(text_format.MessageToString(message))
 
 
-def read_proto_from_file(path: pathlib.Path, proto_type: Type[Message]) -> Message:
+def read_proto_from_file(
+        path: pathlib.Path,
+        proto_type: Type[Message]) -> Message:
     """Reads a protobuf message from a file.
 
     Args:

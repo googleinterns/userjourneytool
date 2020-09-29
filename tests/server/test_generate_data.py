@@ -1,4 +1,4 @@
-from unittest.mock import Mock, call, patch, sentinel, MagicMock
+from unittest.mock import MagicMock, Mock, call, patch, sentinel
 
 import pytest
 from graph_structures_pb2 import (

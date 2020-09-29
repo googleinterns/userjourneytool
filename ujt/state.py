@@ -3,14 +3,18 @@ from typing import Any, Deque, Dict, List, Set, Tuple, cast
 
 from graph_structures_pb2 import SLI, Client, Node, NodeType, VirtualNode
 
-from . import utils
+from . import rpc_client, utils
 from .dash_app import cache
 
 
-def clear_cache():
-    cache.clear()
+def clear_sli_cache():
+    cache.delete_memoized(get_slis)
 
 
+# We use cache.memoize here since the UJT doesn't write to the list of SLIs,
+# unlike the node or client message maps.
+# This memoization prevents multiple UJT frontends from requesting the reporting server
+# for new data within the same interval.
 @cache.memoize()
 def get_slis() -> List[SLI]:
     """ Gets a list of updated SLIs.
@@ -19,15 +23,16 @@ def get_slis() -> List[SLI]:
         A list of SLIs.
     """
 
-    # Should read from remote server here.
-    print("Get SLIs")
-    return []
+    sli_response = rpc_client.get_slis()
+    return list(
+        sli_response.slis
+    )  # convert to list to support memoization (via pickling)
 
 
 def get_message_maps() -> Tuple[Dict[str, Node], Dict[str, Client]]:
     """ Gets Node and Client protobufs, computes their internal statuses, and return their maps.
 
-    In future versions, the call to get_local_topology should be replaced by a RPC call to a reporting server. 
+    If the cache doesn't contain the message maps, this function reads the Nodes and Clients from the remote reporting server.
 
     Returns:
         A tuple of two dictionaries.
@@ -37,9 +42,15 @@ def get_message_maps() -> Tuple[Dict[str, Node], Dict[str, Client]]:
     node_name_message_map = cache.get("node_name_message_map")
     client_name_message_map = cache.get("client_name_message_map")
 
+    # If initial call (or cache was manually cleared) to get_message_maps, read from remote server.
     if node_name_message_map is None or client_name_message_map is None:
-        # Put topology loading here for now. We may want to refactor this (?)
-        node_name_message_map, client_name_message_map = get_local_topology()
+        node_response, client_response = rpc_client.get_nodes(), rpc_client.get_clients()
+
+        node_name_message_map = utils.proto_list_to_name_map(
+            node_response.nodes)
+        client_name_message_map = utils.proto_list_to_name_map(
+            client_response.clients)
+
         cache.set("node_name_message_map", node_name_message_map)
         cache.set("client_name_message_map", client_name_message_map)
 

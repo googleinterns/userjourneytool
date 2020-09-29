@@ -1,3 +1,4 @@
+import pytest
 from graph_structures_pb2 import (
     SLI,
     Client,
@@ -10,7 +11,7 @@ from graph_structures_pb2 import (
 
 import ujt.constants
 import ujt.converters
-import pytest
+
 
 @pytest.fixture
 def slo_bounds():

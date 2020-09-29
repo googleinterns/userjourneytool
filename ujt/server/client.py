@@ -1,6 +1,5 @@
-import grpc
-
 import graph_structures_pb2
+import grpc
 import server_pb2
 import server_pb2_grpc
 
@@ -11,3 +10,7 @@ with grpc.insecure_channel("localhost:50051") as channel:
     node_response = stub.GetNodes(node_request)
     print(node_response.nodes)
 
+    sli_request = server_pb2.SLIRequest()
+    #sli_response = stub.get_slis(sli_request)
+    sli_response = stub.GetSLIs(sli_request)
+    print(sli_response.slis)

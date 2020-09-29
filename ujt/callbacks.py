@@ -29,7 +29,7 @@ from .dash_app import app
     Output("cytoscape-graph",
            "elements"),
     [
-        Input("refresh-button",
+        Input("refresh-sli-button",
               "n_clicks_timestamp"),
         Input({"datatable-id": ALL},
               "selected_row_ids"),
@@ -96,13 +96,18 @@ def update_graph_elements(
         # No-op if the validation signal isn't OK
         raise PreventUpdate
 
-    if triggered_id == "refresh-button":
-        state.get_slis()  # no-op for now.
-
-    # Perform status computation.
     node_name_message_map, client_name_message_map = state.get_message_maps()
     virtual_node_map = state.get_virtual_node_map()
 
+    if triggered_id == "refresh-sli-button":
+        state.clear_sli_cache(
+        )  # in future, conditionally clear this based on timestamp
+        sli_list = state.get_slis()
+        node_name_message_map = transformers.apply_slis_to_node_map(
+            sli_list,
+            node_name_message_map)
+
+    # Perform status computation.
     compute_status.reset_node_statuses(node_name_message_map)
     compute_status.reset_client_statses(client_name_message_map)
     compute_status.reset_node_statuses(virtual_node_map)

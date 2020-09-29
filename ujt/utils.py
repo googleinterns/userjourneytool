@@ -16,7 +16,6 @@
 Can be refactored into multiple files if necessary.
 """
 
-
 from . import constants, state
 
 
@@ -81,3 +80,7 @@ def get_highest_collapsed_virtual_node_name(node_name):
         highest_collapsed_name = current_name
 
     return highest_collapsed_name
+
+
+def proto_list_to_name_map(proto_list):
+    return {proto.name: proto for proto in proto_list}
