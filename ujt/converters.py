@@ -33,6 +33,59 @@ def cytoscape_elements_from_maps(
         cytoscape_elements_from_client_map(client_name_message_map))
 
 
+def cytoscape_element_from_node(node):
+    node_element: Dict[str,
+                       Any] = {
+                           "data":
+                               {
+                                   "id": node.name,
+                                   "label": utils.relative_name(node.name),
+                                   "ujt_id": node.name
+                               },
+                           "classes":
+                               " ".join(
+                                   [
+                                       NodeType.Name(node.node_type),
+                                       Status.Name(node.status),
+                                   ])
+                       }
+    if node.parent_name:
+        node_element["data"]["parent"] = node.parent_name
+    return node_element
+
+
+def cytoscape_element_from_client(client):
+    client_element = {
+        "data":
+            {
+                "id": client.name,
+                "label": client.name,
+                "ujt_id": client.name,
+            },
+        "classes": constants.CLIENT_CLASS,
+    }
+    return client_element
+
+
+def cytoscape_element_from_dependency(dependency):
+    edge_element = {
+        "data":
+            {
+                "source": dependency.source_name,
+                "target": dependency.target_name,
+            }
+    }
+    # careful! cytoscape element source is the Client node, but the Dependency's source_name should be a fully qualified UserJourney name
+    if dependency.toplevel:
+        edge_element["data"]["source"] = utils.parent_full_name(
+            dependency.source_name)
+        edge_element["data"]["user_journey_name"] = dependency.source_name
+
+    edge_element["data"][
+        "id"] = f"{edge_element['data']['source']}/{edge_element['data']['target']}"
+    return edge_element
+
+
 def cytoscape_elements_from_node_map(node_name_message_map: Dict[str, Node]):
     """ Converts a dictionary of Node protobufs to a cytoscape graph format.
 
@@ -45,36 +98,10 @@ def cytoscape_elements_from_node_map(node_name_message_map: Dict[str, Node]):
     node_elements: List[Dict[str, Any]] = []
     edge_elements: List[Dict[str, Any]] = []
 
-    for name, node in node_name_message_map.items():
-        node_element: Dict[str,
-                           Any] = {
-                               "data":
-                                   {
-                                       "id":
-                                           name,
-                                       "label":
-                                           name.split(".")
-                                           [-1]  # the node's relative name
-                                   },
-                               "classes":
-                                   " ".join(
-                                       [
-                                           NodeType.Name(node.node_type),
-                                           Status.Name(node.status),
-                                       ])
-                           }
-        if node.parent_name:
-            node_element["data"]["parent"] = node.parent_name
-        node_elements.append(node_element)
-
+    for node in node_name_message_map.values():
+        node_elements.append(cytoscape_element_from_node(node))
         for dependency in node.dependencies:
-            edge_element = {
-                "data": {
-                    "source": name,
-                    "target": dependency.target_name,
-                }
-            }
-            edge_elements.append(edge_element)
+            edge_elements.append(cytoscape_element_from_dependency(dependency))
 
     return node_elements + edge_elements
 
@@ -93,24 +120,12 @@ def cytoscape_elements_from_client_map(
     node_elements: List[Dict[str, Collection[str]]] = []
     edge_elements: List[Dict[str, Collection[str]]] = []
 
-    for name, message in client_name_message_map.items():
-        node_elements.append(
-            {
-                "data": {
-                    "id": name,
-                    "label": name,
-                },
-                "classes": constants.CLIENT_CLASS,
-            })
-        for user_journey in message.user_journeys:
+    for client in client_name_message_map.values():
+        node_elements.append(cytoscape_element_from_client(client))
+        for user_journey in client.user_journeys:
             for dependency in user_journey.dependencies:
-                edge_elements.append({
-                    "data": {
-                        "source":
-                            name,  # careful! cytoscape element source is the Client node, but the Dependency's source_name should be a fully qualified UserJourney name
-                        "target": dependency.target_name,
-                    }
-                })
+                edge_elements.append(
+                    cytoscape_element_from_dependency(dependency))
 
     return node_elements + edge_elements
 

@@ -1,7 +1,12 @@
+""" Constants for UJT.
+
+Generally contains constants for styling.
+"""
 from graph_structures_pb2 import NodeType, Status
 
 CLIENT_CLASS = "CLIENT"
 HIGHLIGHTED_UJ_EDGE_CLASS = "HIGHLIGHTED_UJ_EDGE"
+OK_SIGNAL = "OK"
 
 HEALTHY_COLOR = "green"
 WARN_COLOR = "orange"
@@ -9,6 +14,7 @@ ERROR_COLOR = "red"
 HIGHLIGHTED_UJ_EDGE_COLOR = "purple"
 
 COMPOUND_BACKGROUND_BLACKEN_FACTOR = -.5
+VIRTUAL_BACKGROUND_BLACKEN_FACTOR = -.8
 SELECTED_NODE_BORDER_WIDTH = 1
 SELECTED_NODE_BORDER_COLOR = "black"
 
@@ -62,7 +68,7 @@ CYTO_STYLESHEET = [
         }
     },
     {
-        "selector": ":selected:",
+        "selector": ":selected",
         "style":
             {
                 "border-width": SELECTED_NODE_BORDER_WIDTH,
@@ -74,6 +80,15 @@ CYTO_STYLESHEET = [
         "style": {
             "line-color": HIGHLIGHTED_UJ_EDGE_COLOR,
         }
+    },
+    {
+        "selector": f".{NodeType.Name(NodeType.NODETYPE_VIRTUAL)}",
+        "style":
+            {
+                "border-style": "dashed",
+                "shape": "octagon",
+                "background-blacken": VIRTUAL_BACKGROUND_BLACKEN_FACTOR,
+            }
     }
 ]
 
