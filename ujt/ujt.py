@@ -98,10 +98,11 @@ def get_bottom_info_panels():
                                     id="client-dropdown",
                                     clearable=False,
                                     searchable=False,
-                                    #options=converters.
-                                    #dropdown_options_from_client_map(
-                                    #    state.get_client_name_message_map())
-                                ),
+                                    # This seems bad/confusing, the first call to the server is actually through here.
+                                    # We should find a place to explicitly call get_message_maps.
+                                    options=converters.
+                                    dropdown_options_from_client_map(
+                                        state.get_client_name_message_map())),
                                 html.Div(
                                     id="client-info-panel",
                                     className="info-panel",

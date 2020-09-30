@@ -4,14 +4,87 @@ from collections import defaultdict
 from unittest.mock import Mock, call, patch, sentinel
 
 import pytest
-from graph_structures_pb2 import VirtualNode
+from graph_structures_pb2 import Client, Node, NodeType, Status, VirtualNode
 
+import ujt.constants
 import ujt.transformers
 
 
 @pytest.fixture
 def patch_path():
     return "ujt.transformers"
+
+
+def test_apply_node_classes(assert_same_elements):
+    node_name = "node"
+    node_name_message_map = {
+        node_name:
+            Node(
+                name=node_name,
+                status=Status.STATUS_HEALTHY,
+                node_type=NodeType.NODETYPE_SERVICE,
+            ),
+    }
+    client_name = "client"
+    client_name_message_map = {
+        client_name: Client(name=client_name,
+                           ),
+    }
+    virtual_node_name = "virtual_node"
+    virtual_node_name_message_map = {
+        virtual_node_name:
+            VirtualNode(
+                name=virtual_node_name,
+                status=Status.STATUS_HEALTHY,
+                node_type=NodeType.NODETYPE_VIRTUAL,
+            )
+    }
+
+    elements = [
+        {
+            "data": {
+                "ujt_id": node_name,
+            },
+        },
+        {
+            "data": {
+                "ujt_id": client_name,
+            },
+        },
+        {
+            "data": {
+                "ujt_id": virtual_node_name,
+            },
+        },
+    ]
+
+    expected_elements = [
+        {
+            "data": {
+                "ujt_id": node_name,
+            },
+            "classes": "NODETYPE_SERVICE STATUS_HEALTHY",
+        },
+        {
+            "data": {
+                "ujt_id": client_name,
+            },
+            "classes": ujt.constants.CLIENT_CLASS,
+        },
+        {
+            "data": {
+                "ujt_id": virtual_node_name,
+            },
+            "classes": "NODETYPE_VIRTUAL STATUS_HEALTHY",
+        },
+    ]
+
+    ujt.transformers.apply_node_classes(
+        elements,
+        node_name_message_map,
+        client_name_message_map,
+        virtual_node_name_message_map)
+    assert_same_elements(elements, expected_elements)
 
 
 def test_apply_highlighted_edge_class_to_elements(
@@ -153,7 +226,7 @@ def test_apply_virtual_nodes_to_elements(patch_path, assert_same_elements):
                 {
                     "source": virtual_node_names[0],
                     "target": node_names[2],
-                    "ujt_id": f"{virtual_node_names[0]}/{node_names[2]}",
+                    "id": f"{virtual_node_names[0]}/{node_names[2]}",
                 },
         },
         {

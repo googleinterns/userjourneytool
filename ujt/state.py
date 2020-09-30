@@ -3,7 +3,7 @@ from typing import Any, Deque, Dict, List, Set, Tuple, cast
 
 from graph_structures_pb2 import SLI, Client, Node, NodeType, VirtualNode
 
-from . import rpc_client, utils
+from . import converters, rpc_client, utils
 from .dash_app import cache
 
 
@@ -11,8 +11,8 @@ def clear_sli_cache():
     cache.delete_memoized(get_slis)
 
 
-# We use cache.memoize here since the UJT doesn't write to the list of SLIs,
-# unlike the node or client message maps.
+# We use cache.memoize here since the UJT doesn't explicitly write
+# to the list of SLIs, unlike the node or client message maps.
 # This memoization prevents multiple UJT frontends from requesting the reporting server
 # for new data within the same interval.
 @cache.memoize()
@@ -84,6 +84,17 @@ def set_client_name_message_map(client_name_message_map):
     cache.set("client_name_message_map", client_name_message_map)
 
 
+@cache.memoize()
+def get_cytoscape_elements():
+    node_name_message_map, client_name_message_map = get_message_maps()
+    elements = converters.cytoscape_elements_from_maps(
+        node_name_message_map,
+        client_name_message_map,
+    )
+    return elements
+
+
+# region virtual node functions
 def get_virtual_node_map() -> Dict[str, VirtualNode]:
     """ Gets a dictionary mapping virtual node names to virtual node messages.
 
@@ -214,3 +225,6 @@ def set_virtual_node_collapsed_state(virtual_node_name: str, collapsed: bool):
     virtual_node = virtual_node_map[virtual_node_name]
     virtual_node.collapsed = collapsed
     set_virtual_node_map(virtual_node_map)
+
+
+# endregion
