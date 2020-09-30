@@ -3,6 +3,17 @@
 
 User Journey Tool simplifies debugging by providing an overview of an application's status and dependency topology from a user journey-based perspective.
 
+## Run Locally
+
+1. Start the reporting server.
+
+        python3 -m ujt.server.server
+
+2. Run the Dash server to host the UI.
+
+        python3 -m ujt.ujt
+
+
 ## Development Setup
 
 1. Create a venv.
@@ -25,15 +36,11 @@ User Journey Tool simplifies debugging by providing an overview of an applicatio
 
         pip install --editable generated/
 
-6. Run the tool.
+6. Run tests.
 
-        python3 -m ujt.ujt
+        ./test
 
-7. Run tests.
-
-        mypy --cov=ujt
-
-8. Before committing, lint and type check the code.
+7. Before committing, lint and type check the code.
 
         ./lint
 
