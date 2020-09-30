@@ -63,7 +63,7 @@ message VirtualNode {
     optional string name = 1;
     repeated string child_names = 2;
     optional bool collapsed = 3;
-    optional NodeType node_type = 4; // should always be NODETYPE_VIRTUAL, used for duck typing
+    optional NodeType node_type = 4 [default = NODETYPE_VIRTUAL]; // should always be NODETYPE_VIRTUAL, used for duck typing
 
     // ---
     optional Status status = 5;

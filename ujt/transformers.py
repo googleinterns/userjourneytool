@@ -155,6 +155,7 @@ def apply_uuid(elements):
     In Cytoscape.js, these relationships are immutable, and a move() function has to 
     be called on the element to update the aforementioned properties.
     However, Dash Cytoscape doesn't expose this functionality.
+    See https://github.com/plotly/dash-cytoscape/issues/106.
     By providing a new ID, we can avoid this restriction.
 
     Args:
