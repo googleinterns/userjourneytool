@@ -30,7 +30,7 @@ jobs:
         pip install .
     - name: Compile protobufs
       run: |
-        python -m grpc.tools.protoc --proto_path=protos --python_out=generated --mypy_out=generated protos/*
+        ./generate_protos
         pip install --editable generated/
     - name: Lint
       run: |
@@ -41,4 +41,4 @@ jobs:
         mypy ujt tests
     - name: Test
       run: |
-        pytest --cov=ujt
+        ./test
