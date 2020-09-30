@@ -47,7 +47,11 @@ def ctx_triggered_info(ctx):
     return triggered_id, triggered_prop, triggered_value
 
 
-def get_highest_collapsed_virtual_node_name(node_name):
+def get_highest_collapsed_virtual_node_name(
+    node_name,
+    virtual_node_map,
+    parent_virtual_node_map,
+):
     """ Gets the name of the highest collapsed virtual node, given a node name.
 
     Node name can be virtual or non virtual.
@@ -56,14 +60,13 @@ def get_highest_collapsed_virtual_node_name(node_name):
     Can refactor later.
 
     Args:
-        node_name: a name of a virtual or non-virtual node.
+        node_name: A name of a virtual or non-virtual node.
+        virtual_node_map: A dict mapping virtual node names to virtual node protos.
+        parent_virtual_node_map: A parent mapping node names (virtual or non-virtual) to the name of their virtual parent. 
 
     Returns:
         The name of the highest collapsed virtual node above the given node.
     """
-    virtual_node_map = state.get_virtual_node_map()
-    parent_virtual_node_map = state.get_parent_virtual_node_map()
-
     current_name = node_name
     highest_collapsed_name = None
 

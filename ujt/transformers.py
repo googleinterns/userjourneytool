@@ -14,6 +14,8 @@ from . import constants, converters, state, utils
 
 
 def apply_highlighted_edge_class_to_elements(elements, user_journey_name):
+    # we may want to refactor the edge map creation for testability.
+    # No other function currently requires us to map edge source to edge element.
     edges_map = defaultdict(list)
     nodes_list = []
 
@@ -28,12 +30,11 @@ def apply_highlighted_edge_class_to_elements(elements, user_journey_name):
             else:
                 edges_map[element["data"]["source"]].append(element)
 
-    updated_edges_map = remove_highlighted_class_from_edges(edges_map)
+    # notice that remove/apply highlighted class mutate the edges map
+    remove_highlighted_class_from_edges(edges_map)
 
     if user_journey_name:
-        updated_edges_map = apply_highlighted_class_to_edges(
-            updated_edges_map,
-            user_journey_name)
+        apply_highlighted_class_to_edges(edges_map, user_journey_name)
 
     # Usually, we avoid multiple for clauses in a list comprehension,
     # but this is the canonical way to flattern lists in Python.
@@ -49,15 +50,12 @@ def remove_highlighted_class_from_edges(edges_map):
 
     Args:
         edges_map: A dictionary mapping edge sources to a list of cytoscape elements describing edges originating from the source
-
-    Returns:
-        An updated dictionary mapping edge sources to a list of edge cytoscape elements, with the highlighted class removed.
     """
 
     for edge_list in edges_map.values():
         for edge in edge_list:
+            # in the future, if we apply other classes to edges, need to change this to only remove highlighted class.
             edge["classes"] = ""
-    return edges_map
 
 
 def apply_highlighted_class_to_edges(edges_map, user_journey_name):
@@ -69,9 +67,6 @@ def apply_highlighted_class_to_edges(edges_map, user_journey_name):
     Args:
         edges_map: A dictionary mapping edge sources to a list of cytoscape elements describing edges originating from the source
         user_journey_name: The fully qualified user journey name to highlight.
-
-    Returns:
-        An updated dictionary mapping edge sources to a list of edge cytoscape elements, with the new highlighted class applied.
     """
     node_frontier_names = deque([user_journey_name])
     while node_frontier_names:
@@ -79,8 +74,6 @@ def apply_highlighted_class_to_edges(edges_map, user_journey_name):
         for edge in edges_map[source_name]:
             edge["classes"] = constants.HIGHLIGHTED_UJ_EDGE_CLASS
             node_frontier_names.append(edge["data"]["target"])
-
-    return edges_map
 
 
 def apply_virtual_nodes_to_elements(elements):
@@ -91,11 +84,13 @@ def apply_virtual_nodes_to_elements(elements):
     for element in elements:
         if utils.is_node_element(element):
             highest_collapsed_virtual_node_name = utils.get_highest_collapsed_virtual_node_name(
-                element["data"]["ujt_id"])
+                element["data"]["ujt_id"],
+                virtual_node_map,
+                parent_virtual_node_map)
             if highest_collapsed_virtual_node_name is None:
                 # not within collapsed node
                 if element["data"][
-                        "id"] in parent_virtual_node_map and "parent" not in element[
+                        "ujt_id"] in parent_virtual_node_map and "parent" not in element[
                             "data"]:
                     element["data"]["parent"] = parent_virtual_node_map[
                         element["data"]["ujt_id"]]
@@ -103,9 +98,13 @@ def apply_virtual_nodes_to_elements(elements):
 
         else:
             new_source = utils.get_highest_collapsed_virtual_node_name(
-                element["data"]["source"])
+                element["data"]["source"],
+                virtual_node_map,
+                parent_virtual_node_map)
             new_target = utils.get_highest_collapsed_virtual_node_name(
-                element["data"]["target"])
+                element["data"]["target"],
+                virtual_node_map,
+                parent_virtual_node_map)
 
             if new_source is not None:
                 element["data"]["source"] = new_source
@@ -113,14 +112,16 @@ def apply_virtual_nodes_to_elements(elements):
                 element["data"]["target"] = new_target
 
             element["data"][
-                "id"] = f"{element['data']['source']}/{element['data']['target']}"
+                "ujt_id"] = f"{element['data']['source']}/{element['data']['target']}"
 
             if element["data"]["source"] != element["data"]["target"]:
                 new_elements.append(element)
 
     for virtual_node_name in virtual_node_map:
         highest_collapsed_virtual_node_name = utils.get_highest_collapsed_virtual_node_name(
-            virtual_node_name)
+            virtual_node_name,
+            virtual_node_map,
+            parent_virtual_node_map)
         if highest_collapsed_virtual_node_name is None or highest_collapsed_virtual_node_name == virtual_node_name:
             # This if statement determines if the virtual node should be visible
             # first condition: entire stack of virtual nodes is expanded
@@ -148,7 +149,7 @@ def apply_virtual_nodes_to_elements(elements):
     return new_elements
 
 
-def apply_uuid(elements):
+def apply_uuid_to_elements(elements):
     """ Append a new UUID to the id of each cytoscape element
 
     This is used as a workaround to update the source/target of edges, and the parent/child relatioship of nodes.
@@ -193,7 +194,10 @@ def apply_slis_to_node_map(sli_list, node_map):
         del node.slis[:]
         node.slis.extend(new_node_slis)
         """
-        # this is a more elegant solution, but not sure why assignment doesn't work
+        # this following is a more elegant solution, but not sure why assignment doesn't work.
+        # it seems to be supported in the documentation. This appears to be related to 
+        # a similar issue in server.py.
+
         existing_matching_sli_type_idx = next((idx for idx, node_sli in enumerate(node.slis) if sli.sli_type == node_sli.sli_type), None)
         if existing_matching_sli_type_idx is None:  # we need "is None" condition to support idx = 0 case, this is generally good practice
             node.slis.append(sli)

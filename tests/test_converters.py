@@ -12,212 +12,26 @@ from graph_structures_pb2 import (
 import ujt.constants
 import ujt.converters
 
+# TODO: write individual test cases for cytoscape_element_from_node, client, dependency
+# They are currently exercised through test_cytoscape_elements_from_node_map and
+# test_cytoscape_elements_from_client map, but should be tested on their own as well.
+
 
 def test_cytoscape_elements_from_node_map(
-    slo_bounds,
     example_node_name_message_map,
-    example_node_name_message_map_service_relative_names,
-    example_node_name_message_map_endpoint_relative_names,
+    example_node_elements_from_node_map,
+    example_edge_elements_from_node_map,
 ):
-    service_relative_names = example_node_name_message_map_service_relative_names
-    endpoint_relative_names = example_node_name_message_map_endpoint_relative_names
-
-    expected_node_elements = [
-        {
-            "data":
-                {
-                    "id": service_relative_names[0],
-                    "label": service_relative_names[0],
-                    "ujt_id": service_relative_names[0],
-                },
-            "classes":
-                f"{NodeType.Name(NodeType.NODETYPE_SERVICE)} {Status.Name(Status.STATUS_UNSPECIFIED)}"
-        },
-        {
-            "data":
-                {
-                    "id": service_relative_names[1],
-                    "label": service_relative_names[1],
-                    "ujt_id": service_relative_names[1],
-                },
-            "classes":
-                f"{NodeType.Name(NodeType.NODETYPE_SERVICE)} {Status.Name(Status.STATUS_UNSPECIFIED)}"
-        },
-        {
-            "data":
-                {
-                    "id":
-                        f"{service_relative_names[0]}.{endpoint_relative_names[0]}",
-                    "label":
-                        endpoint_relative_names[0],
-                    "parent":
-                        service_relative_names[0],
-                    "ujt_id":
-                        f"{service_relative_names[0]}.{endpoint_relative_names[0]}",
-                },
-            "classes":
-                f"{NodeType.Name(NodeType.NODETYPE_ENDPOINT)} {Status.Name(Status.STATUS_UNSPECIFIED)}"
-        },
-        {
-            "data":
-                {
-                    "id":
-                        f"{service_relative_names[0]}.{endpoint_relative_names[1]}",
-                    "label":
-                        endpoint_relative_names[1],
-                    "parent":
-                        service_relative_names[0],
-                    "ujt_id":
-                        f"{service_relative_names[0]}.{endpoint_relative_names[1]}",
-                },
-            "classes":
-                f"{NodeType.Name(NodeType.NODETYPE_ENDPOINT)} {Status.Name(Status.STATUS_UNSPECIFIED)}"
-        },
-        {
-            "data":
-                {
-                    "id":
-                        f"{service_relative_names[1]}.{endpoint_relative_names[2]}",
-                    "label":
-                        endpoint_relative_names[2],
-                    "parent":
-                        service_relative_names[1],
-                    "ujt_id":
-                        f"{service_relative_names[1]}.{endpoint_relative_names[2]}",
-                },
-            "classes":
-                f"{NodeType.Name(NodeType.NODETYPE_ENDPOINT)} {Status.Name(Status.STATUS_UNSPECIFIED)}"
-        },
-    ]
-
-    expected_edge_elements = [
-        {
-            "data":
-                {
-                    "source":
-                        f"{service_relative_names[0]}.{endpoint_relative_names[0]}",
-                    "target":
-                        f"{service_relative_names[0]}.{endpoint_relative_names[1]}",
-                    "id":
-                        f"{service_relative_names[0]}.{endpoint_relative_names[0]}/{service_relative_names[0]}.{endpoint_relative_names[1]}",
-                }
-        },
-        {
-            "data":
-                {
-                    "source":
-                        f"{service_relative_names[0]}.{endpoint_relative_names[0]}",
-                    "target":
-                        f"{service_relative_names[1]}.{endpoint_relative_names[2]}",
-                    "id":
-                        f"{service_relative_names[0]}.{endpoint_relative_names[0]}/{service_relative_names[1]}.{endpoint_relative_names[2]}",
-                }
-        },
-        {
-            "data":
-                {
-                    "source":
-                        f"{service_relative_names[0]}.{endpoint_relative_names[1]}",
-                    "target":
-                        f"{service_relative_names[1]}.{endpoint_relative_names[2]}",
-                    "id":
-                        f"{service_relative_names[0]}.{endpoint_relative_names[1]}/{service_relative_names[1]}.{endpoint_relative_names[2]}",
-                }
-        },
-    ]
-
-    assert expected_node_elements + expected_edge_elements == ujt.converters.cytoscape_elements_from_node_map(
+    assert example_node_elements_from_node_map + example_edge_elements_from_node_map == ujt.converters.cytoscape_elements_from_node_map(
         example_node_name_message_map)
 
 
 def test_cytoscape_elements_from_client_map(
-    slo_bounds,
     example_client_name_message_map,
-    example_client_name_message_map_client_relative_names,
-    example_client_name_message_map_user_journey_relative_names,
-    example_client_name_message_map_service_relative_names,
+    example_node_elements_from_client_map,
+    example_edge_elements_from_client_map,
 ):
-    client_relative_names = example_client_name_message_map_client_relative_names
-    user_journey_relative_names = example_client_name_message_map_user_journey_relative_names
-    service_relative_names = example_client_name_message_map_service_relative_names
-
-    expected_node_elements = [
-        {
-            "data":
-                {
-                    "id": client_relative_names[0],
-                    "label": client_relative_names[0],
-                    "ujt_id": client_relative_names[0],
-                },
-            "classes": ujt.constants.CLIENT_CLASS,
-        },
-        {
-            "data":
-                {
-                    "id": client_relative_names[1],
-                    "label": client_relative_names[1],
-                    "ujt_id": client_relative_names[1],
-                },
-            "classes": ujt.constants.CLIENT_CLASS,
-        },
-    ]
-
-    expected_edge_elements = [
-        {
-            "data":
-                {
-                    "source":
-                        client_relative_names[0],
-                    "target":
-                        service_relative_names[0],
-                    "id":
-                        f"{client_relative_names[0]}/{service_relative_names[0]}",
-                    "user_journey_name":
-                        f"{client_relative_names[0]}.{user_journey_relative_names[0]}",
-                }
-        },
-        {
-            "data":
-                {
-                    "source":
-                        client_relative_names[0],
-                    "target":
-                        service_relative_names[1],
-                    "id":
-                        f"{client_relative_names[0]}/{service_relative_names[1]}",
-                    "user_journey_name":
-                        f"{client_relative_names[0]}.{user_journey_relative_names[0]}",
-                }
-        },
-        {
-            "data":
-                {
-                    "source":
-                        client_relative_names[0],
-                    "target":
-                        service_relative_names[2],
-                    "id":
-                        f"{client_relative_names[0]}/{service_relative_names[2]}",
-                    "user_journey_name":
-                        f"{client_relative_names[0]}.{user_journey_relative_names[1]}",
-                }
-        },
-        {
-            "data":
-                {
-                    "source":
-                        client_relative_names[1],
-                    "target":
-                        service_relative_names[3],
-                    "id":
-                        f"{client_relative_names[1]}/{service_relative_names[3]}",
-                    "user_journey_name":
-                        f"{client_relative_names[1]}.{user_journey_relative_names[2]}",
-                }
-        },
-    ]
-
-    assert expected_node_elements + expected_edge_elements == ujt.converters.cytoscape_elements_from_client_map(
+    assert example_node_elements_from_client_map + example_edge_elements_from_client_map == ujt.converters.cytoscape_elements_from_client_map(
         example_client_name_message_map)
 
 

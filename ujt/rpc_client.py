@@ -1,4 +1,10 @@
-""" Module providing access points for RPCs to the reporting server. """
+""" Module providing access points for RPCs to the reporting server. 
+
+Although we can directly expose the reporting_service_stub, seems like
+a better design to provide an abstraction layer on top of it. 
+These functions are 1:1 passthroughs right now, but we may need to do
+some additional data processing as the application grows.
+"""
 
 import grpc
 import server_pb2

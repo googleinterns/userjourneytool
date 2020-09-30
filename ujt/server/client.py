@@ -3,7 +3,7 @@ import grpc
 import server_pb2
 import server_pb2_grpc
 
-with grpc.insecure_channel("localhost:50051") as channel:
+with grpc.insecure_channel("localhost:50051") as channel:  # pragma: no cover
     stub = server_pb2_grpc.ReportingServiceStub(channel)
 
     node_request = server_pb2.NodeRequest()

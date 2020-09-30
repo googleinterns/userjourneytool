@@ -1,7 +1,9 @@
+# pylint: disable=redefined-outer-name
+
 from unittest.mock import Mock, call, patch, sentinel
 
 import pytest
-from graph_structures_pb2 import NodeType
+from graph_structures_pb2 import NodeType, VirtualNode
 
 import ujt.state
 
@@ -151,11 +153,10 @@ def test_add_virtual_node(
         ujt.state.add_virtual_node(virtual_node_name, selected_node_data)
 
         set_virtual_node_map_args, _ = mock_set_virtual_node_map.call_args
-        assert len(set_virtual_node_map_args) == 1
+        assert len(set_virtual_node_map_args) == 1  # only one non-kw arg
 
         new_virtual_node_map = set_virtual_node_map_args[0]
-        assert len(new_virtual_node_map) == 1
-        assert virtual_node_name in new_virtual_node_map
+        assert len(new_virtual_node_map) == 1  # only one item in dict
 
         virtual_node = new_virtual_node_map[virtual_node_name]
         assert virtual_node.name == virtual_node_name
@@ -180,3 +181,63 @@ def test_add_virtual_node(
         for name in expected_virtual_node_child_names:  # careful! virtual node itself isn't added to parent map
             assert name in new_parent_virtual_node_map
             assert new_parent_virtual_node_map[name] == virtual_node_name
+
+
+def test_delete_virtual_node(patch_path):
+    child_names = ["child0", "child1", "child2"]
+    virtual_node_name = "virtual_node"
+    virtual_node_map = {
+        virtual_node_name:
+            VirtualNode(
+                name=virtual_node_name,
+                child_names=child_names,
+            ),
+    }
+    parent_virtual_node_map = {
+        child_name: virtual_node_name
+        for child_name in child_names
+    }
+
+    with patch(f"{patch_path}.get_virtual_node_map", Mock(return_value=virtual_node_map)),\
+        patch(f"{patch_path}.get_parent_virtual_node_map", Mock(return_value=parent_virtual_node_map)),\
+        patch(f"{patch_path}.set_virtual_node_map") as mock_set_virtual_node_map,\
+        patch(f"{patch_path}.set_parent_virtual_node_map") as mock_set_parent_virtual_node_map:
+
+        ujt.state.delete_virtual_node(virtual_node_name)
+
+        set_virtual_node_map_args, _ = mock_set_virtual_node_map.call_args
+        assert len(set_virtual_node_map_args) == 1
+
+        new_virtual_node_map = set_virtual_node_map_args[0]
+        assert len(new_virtual_node_map) == 0
+
+        # ---
+
+        set_parent_virtual_node_map_args, _ = mock_set_parent_virtual_node_map.call_args
+        assert len(set_parent_virtual_node_map_args) == 1
+
+        new_parent_virtual_node_map = set_parent_virtual_node_map_args[0]
+        assert len(new_parent_virtual_node_map) == 0
+
+
+def test_set_virtual_node_collapsed_state(patch_path):
+    virtual_node_name = "virtual_node"
+    virtual_node_map = {
+        virtual_node_name: VirtualNode(
+            name=virtual_node_name,
+            collapsed=True,
+        ),
+    }
+    with patch(f"{patch_path}.get_virtual_node_map", Mock(return_value=virtual_node_map)),\
+        patch(f"{patch_path}.set_virtual_node_map") as mock_set_virtual_node_map:
+        ujt.state.set_virtual_node_collapsed_state(
+            virtual_node_name,
+            collapsed=False)
+
+        set_virtual_node_map_args, _ = mock_set_virtual_node_map.call_args
+        assert len(set_virtual_node_map_args) == 1
+
+        new_virtual_node_map = set_virtual_node_map_args[0]
+        assert len(new_virtual_node_map) == 1
+
+        assert new_virtual_node_map[virtual_node_name].collapsed == False

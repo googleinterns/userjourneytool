@@ -70,7 +70,9 @@ class ReportingServiceServicer(server_pb2_grpc.ReportingServiceServicer):
         sli_name_map = {sli.node_name: sli for sli in slis}
         for node in self.nodes:
             # not sure why node.slis[:] = [sli_name_map[node.name]] doesn't work
-            # it's in the official documentation. TODO: investigate proto repeated field assignmnt
+            # it seems to be supported in the official documentation.
+            # TODO: investigate proto repeated field assignmnt
+
             del node.slis[:]
             node.slis.extend([sli_name_map[node.name]])
         return server_pb2.SLIResponse(slis=slis)

@@ -91,7 +91,7 @@ def update_graph_elements(
 
     ctx = dash.callback_context
     triggered_id, triggered_prop, triggered_value = utils.ctx_triggered_info(ctx)
-
+    print(triggered_id, triggered_prop, triggered_value)
     if triggered_id == "virtual-node-update-signal" and triggered_value != constants.OK_SIGNAL:
         # No-op if the validation signal isn't OK
         raise PreventUpdate
@@ -166,7 +166,9 @@ def update_graph_elements(
 
     # Workaround for https://github.com/plotly/dash-cytoscape/issues/106
     # Give new ids to Cytoscape to avoid immutability of edges and parent relationships.
-    elements = transformers.apply_uuid(elements)
+    # TODO: fix this to call only when changing an immutable relationship
+    # i.e. don't call when selecting client node -> user_journey_table_selected_row_ids changes to [None]
+    elements = transformers.apply_uuid_to_elements(elements)
     return elements
 
 

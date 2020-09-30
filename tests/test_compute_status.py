@@ -1,3 +1,5 @@
+# pylint: disable=redefined-outer-name
+
 from unittest.mock import ANY, Mock, call, patch, sentinel
 
 import pytest

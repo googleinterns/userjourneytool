@@ -34,13 +34,22 @@ def cytoscape_elements_from_maps(
 
 
 def cytoscape_element_from_node(node):
+    """ Generates a cytoscape element from a Node proto.
+
+    Args:
+        node: A Node proto.
+    
+    Returns:
+        A cytoscape element dictionary with values derived from the proto.
+    """
     node_element: Dict[str,
                        Any] = {
                            "data":
                                {
-                                   "id": node.name,
+                                   "id": node.name,  # this field later modified by appending guid
                                    "label": utils.relative_name(node.name),
-                                   "ujt_id": node.name
+                                   # ujt_id is left unmodified, used for internal indexing into maps
+                                   "ujt_id": node.name,
                                },
                            "classes":
                                " ".join(
@@ -55,6 +64,14 @@ def cytoscape_element_from_node(node):
 
 
 def cytoscape_element_from_client(client):
+    """ Generates a cytoscape element from a Client proto.
+
+    Args:
+        client: A Client proto.
+    
+    Returns:
+        A cytoscape element dictionary with values derived from the proto.
+    """
     client_element = {
         "data":
             {
@@ -68,6 +85,14 @@ def cytoscape_element_from_client(client):
 
 
 def cytoscape_element_from_dependency(dependency):
+    """ Generates a cytoscape element from a Dependency proto.
+
+    Args:
+        dependency: A Dependency proto.
+    
+    Returns:
+        A cytoscape element dictionary with values derived from the proto.
+    """
     edge_element = {
         "data":
             {
