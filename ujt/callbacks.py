@@ -16,12 +16,20 @@
 from typing import Any, Dict, List, Tuple, Union
 
 import dash
+import dash_bootstrap_components as dbc
 import dash_html_components as html
-from dash.dependencies import ALL, Input, Output, State
+from dash.dependencies import ALL, MATCH, Input, Output, State
 from dash.exceptions import PreventUpdate
 from graph_structures_pb2 import Node, NodeType, VirtualNode
 
-from . import compute_status, constants, converters, state, transformers, utils
+from . import (
+    compute_status,
+    constants,
+    converters,
+    rpc_client,
+    state,
+    transformers,
+    utils)
 from .dash_app import app
 
 
@@ -267,7 +275,58 @@ def generate_node_info_panel(tap_node) -> List[Any]:
                 table_id=constants.DEPENDENCY_DATATABLE_ID)
         ]
 
-    return [header] + sli_info + child_info + dependency_info
+    # We let the id fields be dictionaries here, to prevent Dash errors
+    # when registering callbacks to dynamically created components.
+    # Although we can directly assign an id and register a callback,
+    # an error appears in the Dash app saying that no such ID exists.
+    # The callback still works despite the error.
+    # It can be supressed, but only at a global granularity (for all callbacks),
+    # which seems too heavy handed.
+
+    # Instead, we use the pattern matching callback feature to
+    # match the dictionary fields in the id.
+    # This is the same approach taken in update_graph_elements to
+    # register the callback from the client datatable.
+
+    # Notice that the value of the dictionary doesn't matter,
+    # since we keep the key unique and match the value with ALL.
+    # Unfortunately, we can't do something like id={"id": "component-unique-id"},
+    # and match with Output/Input/State({"id": "component-unique-id"})
+    # since the callback requires a wildcard (ALL/MATCH) to match.
+    # We have to add an unused field, such as
+    # id={"id": "component-unique-id", "index": 0} and match with
+    # Output/Input/State({"id": "component-unique-id", "index": ALL/MATCH})
+    # Neither solution is ideal, but have to work with it.
+
+    comment_components = [
+        dbc.Textarea(
+            id={"node-comment-textarea": "node-comment-textarea"},
+            value=node.comment,
+        ),
+        dbc.Button(
+            id={"save-comment-textarea-button": "save-comment-textarea-button"},
+            children="Save Comment",
+        ),
+        dbc.Button(
+            id={
+                "discard-comment-textarea-button":
+                    "discard-comment-textarea-button"
+            },
+            children="Discard Comment Changes",
+        ),
+        dbc.Toast(
+            id={"save-comment-toast": "save-comment-toast"},
+            header="Successfully saved comment!",
+            icon="success",
+            duration=3000,
+            dismissable=True,
+            body_style={"display": "none"},
+            is_open=False)
+    ]
+
+    return [
+        header
+    ] + sli_info + child_info + dependency_info + comment_components
 
 
 @app.callback(
@@ -432,7 +491,7 @@ def validate_selected_nodes_for_virtual_node(
 def toggle_collapse_error_modal(n_clicks_timestamp,
                                 signal_message) -> Tuple[bool,
                                                          str]:
-    """ Close and open the error modal.
+    """ Closes and opens the error modal.
 
     This function is called:
         when an error occurs during the validation of virtual node creation/deletion
@@ -440,7 +499,7 @@ def toggle_collapse_error_modal(n_clicks_timestamp,
 
     Args:
         n_clicks_timestamp: Timestamp of when the close button was clicked. Value unused, input only provided to register callback.
-        signal_message: The valid of the signal from the signal hidden div. Used to determine whether the modal should open.
+        signal_message: The value of the signal from the signal hidden div. Used to determine whether the modal should open.
 
     Returns:
         A tuple containing a boolean and string.
@@ -459,3 +518,77 @@ def toggle_collapse_error_modal(n_clicks_timestamp,
         return True, triggered_value
 
     return False, ""
+
+
+@app.callback(
+    # We can't use ALL in the output, so we use MATCH.
+    # However, since there's only one component with this key, the functionality is identical.
+    Output({"node-comment-textarea": MATCH},
+           "value"),
+    Input({"discard-comment-textarea-button": ALL},
+          "n_clicks_timestamp"),
+    State("cytoscape-graph",
+          "tapNode"),
+    prevent_initial_call=True,
+)
+def discard_comment(discard_n_clicks_timestamp, tap_node):
+    """ Handles the functionality for discarding comments.
+.
+    This function is called:
+        when the discard comment is clicked.
+
+    Args:
+        discard_n_clicks_timestamp: List of the timestamps of when components matching the close id were clicked. 
+            Should only contain one element if the key is unique.
+            Value unused, input only provided to register callback.
+        tap_node: Cytoscape element of the tapped/clicked node.
+
+    Returns:
+        The updated value of the textarea.
+    """
+
+    node_name = tap_node["data"]["ujt_id"]
+    node_name_message_map = state.get_node_name_message_map()
+    virtual_node_map = state.get_virtual_node_map()
+
+    if node_name in node_name_message_map:
+        return node_name_message_map[node_name].comment
+    else:
+        return virtual_node_map[node_name].comment
+
+
+@app.callback(
+    Output({"save-comment-toast": MATCH},
+           "is_open"),
+    Input({"save-comment-textarea-button": ALL},
+          "n_clicks_timestamp"),
+    [
+        State("cytoscape-graph",
+              "tapNode"),
+        State({"node-comment-textarea": ALL},
+              "value"),
+    ],
+    prevent_initial_call=True,
+)
+def save_discard_comment(save_n_clicks_timestamp, tap_node, new_comment):
+    """ Handles the functionality for saving comments
+.
+    This function is called:
+        when the save comment button is clicked.
+
+    Args:
+        save_n_clicks_timestamp: List of the timestamps of when components matching the save id were clicked. 
+            Should only contain one element if the key is unique.
+            Value unused, input only provided to register callback.
+        tap_node: Cytoscape element of the tapped/clicked node.
+        new_comment: List of values of components matching the textarea id. 
+            Should only contain one element if the key is unique.
+
+    Returns:
+        The updated value of the textarea.
+    """
+
+    new_comment = new_comment[0]
+    node_name = tap_node["data"]["ujt_id"]
+    state.set_node_comment(node_name, new_comment)
+    return True

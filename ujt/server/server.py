@@ -77,6 +77,13 @@ class ReportingServiceServicer(server_pb2_grpc.ReportingServiceServicer):
             node.slis.extend([sli_name_map[node.name]])
         return server_pb2.SLIResponse(slis=slis)
 
+    def SetComment(self, request, context):
+        for node in self.nodes:
+            if node.name == request.node_name:
+                node.comment = request.comment
+
+        return server_pb2.CommentResponse()
+
 
 def serve():
     server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))

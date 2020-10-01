@@ -228,3 +228,23 @@ def set_virtual_node_collapsed_state(virtual_node_name: str, collapsed: bool):
 
 
 # endregion
+
+
+def set_node_comment(node_name: str, comment: str):
+    node_name_message_map = get_node_name_message_map()
+    virtual_node_map = get_virtual_node_map()
+
+    if node_name in node_name_message_map:
+        node = node_name_message_map[node_name]
+        is_virtual_node = False
+    else:
+        node = virtual_node_map[node]
+        is_virtual_node = True
+
+    node.comment = comment
+
+    if not is_virtual_node:
+        set_node_name_message_map(node_name_message_map)
+        rpc_client.set_comment(node.name, node.comment)
+    else:
+        set_virtual_node_map(virtual_node_map)

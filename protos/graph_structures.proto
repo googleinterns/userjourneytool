@@ -66,6 +66,7 @@ message VirtualNode {
 
     // ---
     optional Status status = 5;
+    optional string comment = 6;
 }
 
 enum Status {

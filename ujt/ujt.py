@@ -136,9 +136,6 @@ def get_layout():
             get_top_row_components(),
             get_cytoscape_graph(),
             get_bottom_info_panels(),
-            html.Div(
-                id="virtual-node-update-signal",
-                style={"display": "none"}),
             dbc.Modal(
                 children=[
                     dbc.ModalHeader("Error"),
@@ -152,6 +149,9 @@ def get_layout():
                 ],
                 id="collapse-error-modal",
             ),
+            html.Div(
+                id="virtual-node-update-signal",
+                style={"display": "none"}),
         ],
     )
 

@@ -226,7 +226,8 @@ def datatable_from_client(client, table_id):
         } for user_journey in client.user_journeys
     ]
     return dash_table.DataTable(
-        # We provide a dict as an id here to utilize the callback pattern matching functionality
+        # We provide a dict as an id here to utilize the callback
+        # pattern matching functionality, since no datatable exists on startup
         id={"datatable-id": table_id},
         columns=columns,
         data=data,

@@ -29,3 +29,15 @@ def get_clients():
 def get_slis():
     """ Reads a list of SLIs from the remote Reporting Service. """
     return reporting_service_stub.GetSLIs(server_pb2.SLIRequest())
+
+
+def set_comment(node_name: str, comment: str):
+    """ Requests the reporting server to update the comment for a given node.
+    
+    Args:
+        node_name: The name of the node to update.
+        comment: The comment to give to the node.
+    """
+    reporting_service_stub.SetComment(
+        server_pb2.CommentRequest(node_name=node_name,
+                                  comment=comment))
