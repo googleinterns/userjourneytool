@@ -17,10 +17,11 @@ from typing import Any, Dict, List, Tuple, Union
 
 import dash
 import dash_bootstrap_components as dbc
+import dash_core_components as dcc
 import dash_html_components as html
 from dash.dependencies import ALL, MATCH, Input, Output, State
 from dash.exceptions import PreventUpdate
-from graph_structures_pb2 import Node, NodeType, VirtualNode
+from graph_structures_pb2 import Node, NodeType, Status, VirtualNode
 
 from . import (
     compute_status,
@@ -39,7 +40,7 @@ from .dash_app import app
     [
         Input("refresh-sli-button",
               "n_clicks_timestamp"),
-        Input({"datatable-id": ALL},
+        Input({constants.CLIENT_DATATABLE_ID: ALL},
               "selected_row_ids"),
         Input("virtual-node-update-signal",
               "children"),
@@ -47,6 +48,8 @@ from .dash_app import app
               "n_clicks_timestamp"),
         Input("expand-virtual-node-button",
               "n_clicks_timestamp"),
+        Input({"override-dropdown": ALL},
+              "value"),
     ],
     [
         State("cytoscape-graph",
@@ -55,22 +58,26 @@ from .dash_app import app
               "selectedNodeData"),
         State("virtual-node-input",
               "value"),
+        State("cytoscape-graph",
+              "tapNode"),
     ],
 )
 def update_graph_elements(
-    # Input
-    refresh_n_clicks_timestamp: int,
-    user_journey_table_selected_row_ids: List[str],
-    virtual_node_update_signal: str,
-    collapse_n_clicks_timestamp: int,
-    expand_n_clicks_timestamp: int,
-    # State
-    state_elements: List[Dict[str,
-                              Any]],
-    selected_node_data: List[Dict[str,
+        # Input
+        refresh_n_clicks_timestamp: int,
+        user_journey_table_selected_row_ids: List[str],
+        virtual_node_update_signal: str,
+        collapse_n_clicks_timestamp: int,
+        expand_n_clicks_timestamp: int,
+        override_dropdown_value: int,
+        # State
+        state_elements: List[Dict[str,
                                   Any]],
-    virtual_node_input_value: str,
-):
+        selected_node_data: List[Dict[str,
+                                      Any]],
+        virtual_node_input_value: str,
+        tap_node: Dict[str,
+                       Any]):
     """ Update the elements of the cytoscape graph.
 
     This function is called:
@@ -90,9 +97,12 @@ def update_graph_elements(
         virtual_node_update_signal: String used as a signal to indicate that the virtual node addition/deletion was valid. 
         collapse_n_clicks_timestamp: Timestamp of when the collapse button was clicked. Value unused, input only provided to register callback.
         expand_n_clicks_timestamp: Timestamp of when the expand button was clicked. Value unused, input only provided to register callback.
+        override_dropdown_value: Status enum value of the status to override for the node.
+        
         state_elements: The list of current cytoscape graph elements. This is unused and can be removed in a later change. 
         selected_node_data: The list of data dictionaries for selected nodes. Used to create virtual nodes.
         virtual_node_input_value: The value of the virtual node input box. Used to perform all virtual node operations. 
+        tap_node: The cytoscape element of the latest tapped node. Used check which node to override the status of. 
     Returns:
         A dictionary of cytoscape elements describing the nodes and edges of the graph.
     """
@@ -100,7 +110,7 @@ def update_graph_elements(
     ctx = dash.callback_context
     triggered_id, triggered_prop, triggered_value = utils.ctx_triggered_info(ctx)
 
-    print(triggered_id, triggered_prop, triggered_value)
+    # print(triggered_id, triggered_prop, triggered_value)  # for debugging...
 
     if triggered_id == "virtual-node-update-signal" and triggered_value != constants.OK_SIGNAL:
         # No-op if the validation signal isn't OK
@@ -112,14 +122,12 @@ def update_graph_elements(
     elements = state.get_cytoscape_elements()
 
     # This condition determines if we need to recompute node statuses.
-    # We recompute node statuses on startup and when SLIs are refreshed
-    # The two following if statements can be combined later.
-    # Getting SLIs will return random values from the server,
-    # while the message maps are already populated on startup with fixed SLI values from disk.
-    # Not overwriting these values is more consistent behavior for manual testing for now.
-    if triggered_id in [None,
-                        "refresh-sli-button",
-                        "virtual-node-update-signal"]:
+    if triggered_id in [
+            None,
+            "refresh-sli-button",
+            "virtual-node-update-signal",
+            r"""{"override-dropdown":"override-dropdown"}"""  # Dash provides the value as a stringified dict
+    ]:
         if triggered_id == "refresh-sli-button":
             state.clear_sli_cache(
             )  # in future, conditionally clear this based on timestamp
@@ -127,6 +135,14 @@ def update_graph_elements(
             node_name_message_map = transformers.apply_slis_to_node_map(
                 sli_list,
                 node_name_message_map)
+
+        if triggered_id == r"""{"override-dropdown":"override-dropdown"}""":
+            node_name = tap_node["data"]["ujt_id"]
+            if node_name in node_name_message_map:
+                node_name_message_map[
+                    node_name].override_status = triggered_value
+            else:
+                virtual_node_map[node_name].override_status = triggered_value
 
         # Perform status computation.
         # We can refactor this block later as well, but no other function should call it...
@@ -154,12 +170,6 @@ def update_graph_elements(
     # need to account for changes introduced each subsequent step.
     # However, this isn't the most efficient approach.
 
-    transformers.apply_node_classes(
-        elements,
-        node_name_message_map,
-        client_name_message_map,
-        virtual_node_map)
-
     if triggered_id == "collapse-virtual-node-button":
         state.set_virtual_node_collapsed_state(
             virtual_node_input_value,
@@ -182,6 +192,13 @@ def update_graph_elements(
     elements = transformers.apply_highlighted_edge_class_to_elements(
         elements,
         active_user_journey_name)
+
+    transformers.apply_node_classes(
+        elements,
+        node_name_message_map,
+        client_name_message_map,
+        virtual_node_map,
+    )
 
     # Determine if we need to generate a new UUID. This minimizes the choppyness of the animation.
     if triggered_id in [None, "virtual-node-update-signal"]:
@@ -233,6 +250,17 @@ def generate_node_info_panel(tap_node) -> List[Any]:
     header = html.H2(
         f"{utils.relative_name(node_name)} ({utils.human_readable_enum_name(node.node_type, NodeType)})"
     )
+
+    status_override_components = [
+        html.H3("Status"),
+        dcc.Dropdown(
+            id={"override-dropdown": "override-dropdown"},
+            clearable=False,
+            searchable=False,
+            options=converters.override_dropdown_options_from_node(node),
+            value=node.override_status)
+    ]
+
     sli_info, child_info, dependency_info = [], [], []
 
     # Use duck typing for virtual nodes
@@ -324,9 +352,9 @@ def generate_node_info_panel(tap_node) -> List[Any]:
             is_open=False)
     ]
 
-    return [
-        header
-    ] + sli_info + child_info + dependency_info + comment_components
+    return (
+        [header] + status_override_components + sli_info + child_info +
+        dependency_info + comment_components)
 
 
 @app.callback(

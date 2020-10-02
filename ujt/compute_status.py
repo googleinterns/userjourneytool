@@ -65,7 +65,8 @@ def compute_single_node_status(
     """
 
     node = node_name_message_map[node_name]
-    if node.status != Status.STATUS_UNSPECIFIED:
+
+    if node.status != Status.STATUS_UNSPECIFIED:  # if the current node's status was already computed
         return node.status
 
     status_count_map: Dict["StatusValue", int] = defaultdict(int)
@@ -89,6 +90,12 @@ def compute_single_node_status(
         pass
 
     node.status = compute_status_from_count_map(status_count_map)
+
+    if node.override_status != Status.STATUS_UNSPECIFIED:  # if the current node's status was manually overwritten
+        # notice we place this at the end, since we still want to compute the node's status
+        # to display in the dropdown menu (regardless of the override)
+        return node.override_status
+
     return node.status
 
 

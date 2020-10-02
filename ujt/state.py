@@ -238,7 +238,7 @@ def set_node_comment(node_name: str, comment: str):
         node = node_name_message_map[node_name]
         is_virtual_node = False
     else:
-        node = virtual_node_map[node]
+        node = virtual_node_map[node_name]  # type: ignore
         is_virtual_node = True
 
     node.comment = comment

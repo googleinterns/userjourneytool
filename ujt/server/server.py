@@ -4,6 +4,7 @@ import glob
 import pathlib
 import random
 from concurrent import futures
+from typing import List
 
 import google.protobuf.text_format as text_format
 import grpc
@@ -49,14 +50,14 @@ class ReportingServiceServicer(server_pb2_grpc.ReportingServiceServicer):
     """Provides methods that implement functionality of Reporting Service."""
 
     def __init__(self, nodes, clients):
-        self.nodes = nodes
-        self.clients = clients
+        self.nodes: List[Node] = nodes
+        self.clients: List[Client] = clients
 
     def GetNodes(self, request, context):
-        return server_pb2.NodeResponse(nodes=self.nodes)
+        return server_pb2.GetNodesResponse(nodes=self.nodes)
 
     def GetClients(self, request, context):
-        return server_pb2.ClientResponse(clients=self.clients)
+        return server_pb2.GetClientsResponse(clients=self.clients)
 
     def GetSLIs(self, request, context):
         """ Returns updated SLI values to clients.
@@ -75,14 +76,23 @@ class ReportingServiceServicer(server_pb2_grpc.ReportingServiceServicer):
 
             del node.slis[:]
             node.slis.extend([sli_name_map[node.name]])
-        return server_pb2.SLIResponse(slis=slis)
+        return server_pb2.GetSLIsResponse(slis=slis)
 
     def SetComment(self, request, context):
         for node in self.nodes:
             if node.name == request.node_name:
                 node.comment = request.comment
 
-        return server_pb2.CommentResponse()
+        return server_pb2.SetCommentResponse()
+
+    def SetOverrideStatus(self, request, context):
+        # Same code structure as SetComment,
+        # maybe should change nodes and clients from lists to dicts
+        for node in self.nodes:
+            if node.name == request.node_name:
+                node.override_status = request.override_status
+
+        return server_pb2.SetOverrideStatusResponse()
 
 
 def serve():

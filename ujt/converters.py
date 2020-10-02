@@ -228,7 +228,7 @@ def datatable_from_client(client, table_id):
     return dash_table.DataTable(
         # We provide a dict as an id here to utilize the callback
         # pattern matching functionality, since no datatable exists on startup
-        id={"datatable-id": table_id},
+        id={table_id: table_id},
         columns=columns,
         data=data,
         row_selectable="single",
@@ -245,3 +245,24 @@ def dropdown_options_from_client_map(
             "value": name,
         } for name in client_name_message_map.keys()
     ]
+
+
+def override_dropdown_options_from_node(node):
+    options = [
+        {
+            "label":
+                f"OVERRIDE: {utils.human_readable_enum_name(value_descriptor.number, Status)}",
+            "value":
+                value_descriptor.number,
+        }
+        for value_descriptor in Status.DESCRIPTOR.values
+        if value_descriptor.number != Status.STATUS_UNSPECIFIED
+    ]
+    options.append(
+        {
+            "label":
+                f"AUTOMATIC ({utils.human_readable_enum_name(node.status, Status)})",
+            "value":
+                Status.STATUS_UNSPECIFIED  # this should be zero
+        })
+    return options

@@ -153,7 +153,7 @@ def test_datatable_from_client():
         table_id=table_id,
     )
 
-    assert table.id == {"datatable-id": table_id}  # pylint: disable=no-member
+    assert table.id == {table_id: table_id}  # pylint: disable=no-member
     assert table.columns == expected_columns  # pylint: disable=no-member
     assert table.data == expected_data  # pylint: disable=no-member
     assert table.style_data_conditional == ujt.constants.DATATABLE_CONDITIONAL_STYLE  # pylint: disable=no-member
