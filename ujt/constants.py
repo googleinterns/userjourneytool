@@ -25,7 +25,7 @@ GRAPH_BACKGROUND_COLOR = "azure"
 GRAPH_WIDTH = "100%"
 GRAPH_HEIGHT = "600px"
 
-CLIENT_DATATABLE_ID = "datatable-client"
+USER_JOURNEY_DATATABLE_ID = "user-journey-datatable"
 SLI_DATATABLE_ID = "datatable-slis"
 CHILD_DATATABLE_ID = "datatable-child-nodes"
 DEPENDENCY_DATATABLE_ID = "datatable-dependency-nodes"

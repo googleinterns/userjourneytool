@@ -1,4 +1,4 @@
-from collections import deque
+from collections import deque, defaultdict
 from typing import TYPE_CHECKING, Any, Deque, Dict, List, Set, Tuple, cast
 
 from graph_structures_pb2 import (
@@ -7,7 +7,7 @@ from graph_structures_pb2 import (
     Node,
     NodeType,
     Status,
-    VirtualNode)
+    VirtualNode, UserJourney)
 
 from . import converters, rpc_client, utils
 from .dash_app import cache
@@ -349,3 +349,31 @@ def set_node_override_status(
     else:
         override_status_map[node_name] = override_status
     cache.set("override_status_map", override_status_map)
+
+
+#@cache.memoize()
+def get_node_to_user_journey_map() -> Dict[str, List[UserJourney]]:
+    # map the node name to user journey names that pass through the node
+    # should this be in state? it's memoized but doesn't seem like its affecting state
+    node_name_message_map, client_name_message_map = get_message_maps()
+    output_map = defaultdict(list)  # we would prefer to use a set here, but protobufs are not hashable
+    for client in client_name_message_map.values():
+        for user_journey in client.user_journeys:
+            node_frontier = deque([dependency.target_name for dependency in user_journey.dependencies])
+
+            while node_frontier:
+                current_node_name = node_frontier.popleft()
+                if user_journey not in output_map[current_node_name]:  # since we don't use a set, we check if it exists in the list already
+                    output_map[current_node_name].append(user_journey)
+                
+                # add all the node's parents
+                parent_name = node_name_message_map[current_node_name].parent_name
+                while parent_name != "":
+                    if user_journey not in output_map[parent_name]:
+                        output_map[parent_name].append(user_journey)
+                    parent_name = node_name_message_map[parent_name].parent_name
+
+                for dependency in node_name_message_map[current_node_name].dependencies:
+                    node_frontier.append(dependency.target_name)
+
+    return output_map
