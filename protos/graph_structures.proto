@@ -57,6 +57,8 @@ message Client {
     optional string name = 1;
     repeated UserJourney user_journeys = 2;
     // ---
+
+    optional string comment = 3;
 }
 
 message VirtualNode {

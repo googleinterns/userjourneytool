@@ -138,11 +138,11 @@ def update_graph_elements(
 
         if triggered_id == r"""{"override-dropdown":"override-dropdown"}""":
             node_name = tap_node["data"]["ujt_id"]
-            if node_name in node_name_message_map:
-                node_name_message_map[
-                    node_name].override_status = triggered_value
-            else:
-                virtual_node_map[node_name].override_status = triggered_value
+            state.set_node_override_status(
+                node_name,
+                triggered_value,
+                node_name_message_map=node_name_message_map,
+                virtual_node_map=virtual_node_map)
 
         # Perform status computation.
         # We can refactor this block later as well, but no other function should call it...
@@ -474,6 +474,9 @@ def validate_selected_nodes_for_virtual_node(
             return "Error: Must select at least one node to to add to virtual node."
 
         node_name_message_map, client_name_message_map = state.get_message_maps()
+        if virtual_node_name in node_name_message_map or virtual_node_name in client_name_message_map:
+            return "Error: Virtual node cannot share a name with a real node or client."
+
         for node_data in selected_node_data:
             if node_data["ujt_id"] in client_name_message_map:
                 return "Error: Cannot add clients to virtual node."
@@ -598,7 +601,7 @@ def discard_comment(discard_n_clicks_timestamp, tap_node):
     ],
     prevent_initial_call=True,
 )
-def save_discard_comment(save_n_clicks_timestamp, tap_node, new_comment):
+def save_comment(save_n_clicks_timestamp, tap_node, new_comment):
     """ Handles the functionality for saving comments
 .
     This function is called:
@@ -618,5 +621,5 @@ def save_discard_comment(save_n_clicks_timestamp, tap_node, new_comment):
 
     new_comment = new_comment[0]
     node_name = tap_node["data"]["ujt_id"]
-    state.set_node_comment(node_name, new_comment)
+    state.set_comment(node_name, new_comment)
     return True

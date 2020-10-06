@@ -20,9 +20,3 @@ cache.init_app(
         "CACHE_DIR": "cache_dir"
     },
 )
-# To persist virtual nodes across server sessions,
-# we need to save virtual nodes as protos to disk and read them here.
-# this is a temporary solution.
-cache.clear()
-cache.set("virtual_node_map", {})
-cache.set("parent_virtual_node_map", {})

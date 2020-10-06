@@ -35,28 +35,3 @@ def get_clients():
 def get_slis():
     """ Reads a list of SLIs from the remote Reporting Service. """
     return reporting_service_stub.GetSLIs(server_pb2.GetSLIsRequest())
-
-
-def set_comment(node_name: str, comment: str):
-    """ Requests the reporting server to update the comment for a given node.
-    
-    Args:
-        node_name: The name of the node to update.
-        comment: The comment to give to the node.
-    """
-    reporting_service_stub.SetComment(
-        server_pb2.SetCommentRequest(node_name=node_name,
-                                     comment=comment))
-
-
-def set_override_status(node_name: str, override_status: "StatusValue"):
-    """ Requests the reporting server to update the override status for a given node.
-    
-    Args:
-        node_name: The name of the node to update.
-        override_status: The new status to give to the node.
-    """
-    reporting_service_stub.SetOverrideStatus(
-        server_pb2.SetOverrideStatusRequest(
-            node_name=node_name,
-            override_status=override_status))

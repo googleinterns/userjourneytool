@@ -78,22 +78,6 @@ class ReportingServiceServicer(server_pb2_grpc.ReportingServiceServicer):
             node.slis.extend([sli_name_map[node.name]])
         return server_pb2.GetSLIsResponse(slis=slis)
 
-    def SetComment(self, request, context):
-        for node in self.nodes:
-            if node.name == request.node_name:
-                node.comment = request.comment
-
-        return server_pb2.SetCommentResponse()
-
-    def SetOverrideStatus(self, request, context):
-        # Same code structure as SetComment,
-        # maybe should change nodes and clients from lists to dicts
-        for node in self.nodes:
-            if node.name == request.node_name:
-                node.override_status = request.override_status
-
-        return server_pb2.SetOverrideStatusResponse()
-
 
 def serve():
     server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))

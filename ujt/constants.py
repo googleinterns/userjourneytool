@@ -4,6 +4,8 @@ Generally contains constants for styling.
 """
 from graph_structures_pb2 import NodeType, Status
 
+CLEAR_CACHE_ON_STARTUP = False
+
 CLIENT_CLASS = "CLIENT"
 HIGHLIGHTED_UJ_EDGE_CLASS = "HIGHLIGHTED_UJ_EDGE"
 OVERRIDE_CLASS = "OVERRIDE"

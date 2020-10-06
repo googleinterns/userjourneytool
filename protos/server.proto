@@ -10,9 +10,6 @@ service ReportingService {
     // for user journeys
     rpc GetClients(GetClientsRequest) returns (GetClientsResponse) {}
 
-    rpc SetComment(SetCommentRequest) returns (SetCommentResponse) {}
-
-    rpc SetOverrideStatus(SetOverrideStatusRequest) returns (SetOverrideStatusResponse) {}
 }
 
 message GetNodesRequest {
@@ -40,22 +37,4 @@ message GetClientsRequest {
 
 message GetClientsResponse {
     repeated Client clients = 1;
-}
-
-message SetCommentRequest {
-    optional string node_name = 1;
-    optional string comment = 2;
-}
-
-message SetCommentResponse {
-    // ...
-}
-
-message SetOverrideStatusRequest {
-    optional string node_name = 1;
-    optional Status override_status = 2;
-}
-
-message SetOverrideStatusResponse {
-    // ...
 }
