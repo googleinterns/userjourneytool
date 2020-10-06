@@ -8,7 +8,7 @@ In general, we consider converters to modify some UJT-specific data structure
 from typing import Any, Collection, Dict, List
 
 import dash_table
-from graph_structures_pb2 import Client, Node, NodeType, SLIType, Status
+from graph_structures_pb2 import Client, Node, NodeType, SLIType, Status, VirtualNode
 
 from . import constants, utils
 
@@ -206,13 +206,13 @@ def datatable_from_slis(slis, table_id):
     )
 
 
-def datatable_from_client(client, table_id):
+def user_journey_datatable_from_user_journeys(user_journeys, table_id):
     columns = [
         {
             "name": name,
             "id": name,
         } for name in ["User Journey",
-                       "Status"]
+                       "Status", "Originating Client"]
     ]
     data = [
         {
@@ -221,9 +221,10 @@ def datatable_from_client(client, table_id):
             "Status":
                 utils.human_readable_enum_name(user_journey.status,
                                                Status),
+            "Originating Client": user_journey.client_name,
             "id":
                 user_journey.name,
-        } for user_journey in client.user_journeys
+        } for user_journey in user_journeys
     ]
     return dash_table.DataTable(
         # We provide a dict as an id here to utilize the callback
@@ -236,16 +237,25 @@ def datatable_from_client(client, table_id):
     )
 
 
-def dropdown_options_from_client_map(
-        client_name_message_map: Dict[str,
-                                      Client]):
-    return [
-        {
-            "label": name,
-            "value": name,
-        } for name in client_name_message_map.keys()
-    ]
+def dropdown_options_from_maps(
+    node_name_message_map: Dict[str, Node],
+    client_name_message_map: Dict[str, Client],
+    virtual_node_map: Dict[str, VirtualNode]):
 
+    type_labels = ["NODE", "CLIENT", "VIRTUAL NODE"]
+    maps = [node_name_message_map, client_name_message_map, virtual_node_map]
+
+    options = []
+
+    for type_label, proto_map in zip(type_labels, maps):
+        options += [
+            {
+                "label": f"{type_label}: {name}",
+                "value": name,
+            } for name in sorted(proto_map.keys())
+        ]
+
+    return options
 
 def override_dropdown_options_from_node(node):
     options = [

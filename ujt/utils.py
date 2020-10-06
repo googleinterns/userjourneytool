@@ -17,6 +17,7 @@ Can be refactored into multiple files if necessary.
 """
 
 from . import constants, state
+from collections import deque
 
 
 def is_client_cytoscape_node(tap_node):
@@ -91,3 +92,18 @@ def proto_list_to_name_map(proto_list):
 
 def get_existing_uuid(elements):
     return elements[0]["data"]["id"].rsplit("#", 1)[1]
+
+
+def get_all_node_names_within_virtual_node(virtual_node_name, node_name_message_map, virtual_node_map):
+    node_names = set()
+    node_frontier = deque(virtual_node_map[virtual_node_name].child_names)
+
+    while node_frontier:
+        current_node_name = node_frontier.popleft()
+        if current_node_name in node_name_message_map:
+            node_names.add(current_node_name)
+        if current_node_name in virtual_node_map:
+            for child_name in virtual_node_map[current_node_name].child_names:
+                node_frontier.append(child_name)
+
+    return node_names

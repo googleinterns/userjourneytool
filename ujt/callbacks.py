@@ -13,7 +13,7 @@
 # limitations under the License.
 """ Callbacks for Dash app. """
 
-from typing import Any, Dict, List, Tuple, Union
+from typing import Any, Dict, List, Tuple, Union, Set
 
 import dash
 import dash_bootstrap_components as dbc
@@ -21,7 +21,7 @@ import dash_core_components as dcc
 import dash_html_components as html
 from dash.dependencies import ALL, MATCH, Input, Output, State
 from dash.exceptions import PreventUpdate
-from graph_structures_pb2 import Node, NodeType, Status, VirtualNode
+from graph_structures_pb2 import Node, NodeType, Status, VirtualNode, UserJourney
 
 from . import (
     compute_status,
@@ -40,7 +40,7 @@ from .dash_app import app
     [
         Input("refresh-sli-button",
               "n_clicks_timestamp"),
-        Input({constants.CLIENT_DATATABLE_ID: ALL},
+        Input({constants.USER_JOURNEY_DATATABLE_ID: ALL},
               "selected_row_ids"),
         Input("virtual-node-update-signal",
               "children"),
@@ -213,7 +213,7 @@ def update_graph_elements(
 
 
 @app.callback(
-    Output("node-info-panel",
+    Output("selected-info-panel",
            "children"),
     [Input("cytoscape-graph",
            "tapNode")],
@@ -358,68 +358,51 @@ def generate_node_info_panel(tap_node) -> List[Any]:
 
 
 @app.callback(
-    Output("client-info-panel",
+    Output("user-journey-info-panel",
            "children"),
-    [Input("cytoscape-graph",
-           "tapNode"),
-     Input("client-dropdown",
-           "value")],
+    Input("user-journey-dropdown",
+           "value"),
     prevent_initial_call=True,
 )
-def generate_client_info_panel(tap_node, dropdown_value: str) -> List[Any]:
+def generate_user_journey_info_panel(dropdown_value: str) -> List[Any]:
     """ Generate the client info panel.
 
     This function is called:
-        when a client is clicked
-        when the client dropdown value is modified (i.e. a user selects a dropdown option)
+        when the user journey dropdown value is modified (i.e. a user selects a dropdown option)
 
     Args:
-        tap_node: Cytoscape element of the tapped/clicked node.
         dropdown_value: The value of the client dropdown
 
     Returns:
         a List of Dash components.
     """
 
-    ctx = dash.callback_context
-    triggered_id, triggered_prop, triggered_value = utils.ctx_triggered_info(ctx)
+    node_name_message_map, client_name_message_map = state.get_message_maps()
+    virtual_node_map = state.get_virtual_node_map()
 
-    # ctx.triggered[0] is either "cytoscape-graph.tapNode" or "client-dropdown.value"
-    if triggered_id == "cytoscape-graph":
-        tap_node = triggered_value
-        if not utils.is_client_cytoscape_node(tap_node):
-            raise PreventUpdate
+    if dropdown_value in client_name_message_map:
+        client = client_name_message_map[dropdown_value]
+        return converters.user_journey_datatable_from_user_journeys(client.user_journeys, constants.USER_JOURNEY_DATATABLE_ID)
 
-        client_name = tap_node["data"]["ujt_id"]
-    else:
-        client_name = triggered_value
+    # associate the name of the user journey with the nodes that it passes through
+    node_user_journey_map: Dict[str, List[UserJourney]] = state.get_node_to_user_journey_map()
 
-    client_name_message_map = state.get_client_name_message_map()
-    client = client_name_message_map[client_name]
-    return converters.datatable_from_client(client, "datatable-client")
+    if dropdown_value in node_name_message_map:
+        return converters.user_journey_datatable_from_user_journeys(node_user_journey_map[dropdown_value], constants.USER_JOURNEY_DATATABLE_ID)
+    
+    if dropdown_value in virtual_node_map:
+        node_names_in_virtual_node = utils.get_all_node_names_within_virtual_node(dropdown_value, node_name_message_map, virtual_node_map)
+        user_journeys = []
+        for node_name in node_names_in_virtual_node:
+            for user_journey in node_user_journey_map[node_name]:
+                if user_journey not in user_journeys:  # this is sphagetti
+                    user_journeys.append(user_journey)
+                    
+        return converters.user_journey_datatable_from_user_journeys(user_journeys, constants.USER_JOURNEY_DATATABLE_ID)
 
+    raise Exception
+    #if dropdown_value in node_name_messgae_map:
 
-@app.callback(
-    Output("client-dropdown",
-           "value"),
-    [Input("cytoscape-graph",
-           "tapNode")],
-)
-def update_client_dropdown_value(tap_node) -> str:
-    """ Updates the client dropdown value.
-
-    This function is called:
-        when a user selects a client in the graph, to ensure the dropdown value matches the selection
-
-    Args:
-        tap_node: Cytoscape element of the tapped/clicked node.
-
-    Returns:
-        the new value of the client dropdown.
-    """
-    if tap_node is None or not utils.is_client_cytoscape_node(tap_node):
-        raise PreventUpdate
-    return tap_node["data"]["ujt_id"]
 
 
 @app.callback(
@@ -623,3 +606,13 @@ def save_comment(save_n_clicks_timestamp, tap_node, new_comment):
     node_name = tap_node["data"]["ujt_id"]
     state.set_comment(node_name, new_comment)
     return True
+
+@app.callback(
+    Output("user-journey-dropdown", "options"),
+    [Input("virtual-node-update-signal", "children")],
+)
+def update_user_journey_dropdown_options(virtual_node_update_signal):
+    node_name_message_map, client_name_message_map = state.get_message_maps()
+    virtual_node_map = state.get_virtual_node_map()
+
+    return converters.dropdown_options_from_maps(node_name_message_map, client_name_message_map, virtual_node_map)

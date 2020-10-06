@@ -76,7 +76,7 @@ def get_cytoscape_graph():
     )
 
 
-def get_bottom_info_panels():
+def get_bottom_panels():
     return html.Div(
         children=[
             dbc.Container(
@@ -84,28 +84,28 @@ def get_bottom_info_panels():
                     children=[
                         dbc.Col(
                             [
-                                html.H1("Node Info"),
+                                html.H1("Tagging"),
+                                html.Div(id="tagging-panel"),
+                            ],
+                        ),
+                        dbc.Col(
+                            [
+                                html.H1("Selected Info"),
                                 html.Div(
-                                    id="node-info-panel",
-                                    className="info-panel",
+                                    id="selected-info-panel",
                                 ),
                             ],
                         ),
                         dbc.Col(
                             [
-                                html.H1("Client Info"),
+                                html.H1("User Journey Info"),
                                 dcc.Dropdown(
-                                    id="client-dropdown",
+                                    id="user-journey-dropdown",
                                     clearable=False,
                                     searchable=False,
-                                    # This seems bad/confusing, the first call to the server is actually through here.
-                                    # We should find a place to explicitly call get_message_maps.
-                                    options=converters.
-                                    dropdown_options_from_client_map(
-                                        state.get_client_name_message_map())),
+                                ),
                                 html.Div(
-                                    id="client-info-panel",
-                                    className="info-panel",
+                                    id="user-journey-info-panel",
                                 ),
                             ]),
                     ],
@@ -135,7 +135,7 @@ def get_layout():
                 }),
             get_top_row_components(),
             get_cytoscape_graph(),
-            get_bottom_info_panels(),
+            get_bottom_panels(),
             dbc.Modal(
                 children=[
                     dbc.ModalHeader("Error"),
