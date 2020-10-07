@@ -354,7 +354,9 @@ def set_node_override_status(
 #@cache.memoize()
 def get_node_to_user_journey_map() -> Dict[str, List[UserJourney]]:
     # map the node name to user journey names that pass through the node
-    # should this be in state? it's memoized but doesn't seem like its affecting state
+    # should this be in state? it's memoized but doesn't really affect state
+    # however, it's kind of similar to the other maps we expose in state.py,
+    # only this one is dynamically generated once...
     node_name_message_map, client_name_message_map = get_message_maps()
     output_map = defaultdict(list)  # we would prefer to use a set here, but protobufs are not hashable
     for client in client_name_message_map.values():
@@ -377,3 +379,56 @@ def get_node_to_user_journey_map() -> Dict[str, List[UserJourney]]:
                     node_frontier.append(dependency.target_name)
 
     return output_map
+
+def get_tag_list() -> List[str]:
+    """ Return the list of tags.
+
+    We use a list since the order matters when using pattern matching callbacks to remove tags.
+
+    """
+    return cache.get("tag_list")
+
+def set_tag_list(tag_list):
+    return cache.set("tag_list", tag_list)
+
+def create_tag(new_tag):
+    tag_list = get_tag_list()
+    if " " in new_tag:  # where should validation be done? in the callback or here?
+        raise ValueError("Tags cannot contain spaces!")
+    tag_list.append(new_tag)
+    set_tag_list(tag_list)
+
+def delete_tag(tag_index):
+    tag_list = get_tag_list()
+    del tag_list[tag_index]
+    set_tag_list(tag_list)
+
+def update_tag(tag_index, new_tag):
+    tag_list = get_tag_list()
+    tag_list[tag_index] = new_tag
+    set_tag_list(tag_list)
+
+
+def get_tag_map() -> Dict[str, List[str]]:
+    """ Returns the map of tags.
+    
+    The tag map associates names of nodes/virtual nodes/clients with a list of the tags that they contain.
+    Maybe we should break this map up into separate maps for nodes, virtual nodes, and clients, but their names should be unique,
+    so I leave it as one map for now.
+    We use lists as the value type of the dictionary since we need an ordering to use the pattern matching callbacks to add/remove tags. 
+    
+    """
+    return cache.get("tag_map")
+
+def set_tag_map(tag_map):
+    return cache.set("tag_map", tag_map)
+
+def add_tag_to_element(ujt_id, tag):
+    tag_map = get_tag_map()
+    tag_map[ujt_id].append(tag)
+    set_tag_map(tag_map)
+
+def remove_tag_from_element(ujt_id, tag_idx):
+    tag_map = get_tag_map()
+    del tag_map[ujt_id][tag_idx]
+    set_tag_map(tag_map)

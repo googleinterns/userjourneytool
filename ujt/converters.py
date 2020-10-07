@@ -101,6 +101,8 @@ def cytoscape_element_from_dependency(dependency):
 
     edge_element["data"][
         "id"] = f"{edge_element['data']['source']}/{edge_element['data']['target']}"
+    edge_element["data"][
+        "ujt_id"] = f"{edge_element['data']['source']}/{edge_element['data']['target']}"
     return edge_element
 
 
@@ -276,3 +278,9 @@ def override_dropdown_options_from_node(node):
                 Status.STATUS_UNSPECIFIED  # this should be zero
         })
     return options
+
+def tag_dropdown_options_from_tags(tags):
+        return [{
+            "label": tag,
+            "value": tag,
+        } for tag in tags]
