@@ -55,6 +55,10 @@ def get_layout():
                 style={"display": "none"},
             ),
             html.Div(
+                id="update-applied-tag-dummy-signal",
+                style={"display": "none"},
+            ),
+            html.Div(
                 id="tag-update-signal",
                 style={"display": "none"},
             ),
@@ -197,7 +201,8 @@ def get_node_info_panel_components(node_name):
             clearable=False,
             searchable=False,
             options=converters.override_dropdown_options_from_node(node),
-            value=node.override_status),
+            value=node.override_status,
+        ),
     ]
 
     sli_info, child_info, dependency_info = [], [], []
@@ -279,6 +284,7 @@ def get_comment_components(initial_value=""):
     """
 
     comment_components = [
+        html.H3("Comments"),
         dbc.Textarea(
             id={"node-comment-textarea": "node-comment-textarea"},
             value=initial_value,
@@ -310,7 +316,7 @@ def get_apply_tag_components(ujt_id):
     tag_map = state.get_tag_map()
     tag_list = state.get_tag_list()
 
-    out = []
+    out = [html.H3("Tagging")]
     for idx, tag in enumerate(tag_map[ujt_id]):
         out += [
             dbc.Row(
@@ -356,17 +362,24 @@ def get_apply_tag_components(ujt_id):
         ],
         no_gutters=True,
     )
+
     # This is a pretty bad hack.
     # The update_graph_elements callback is called (via pattern matching)
-    # when the override-dropdown component is removed (a node was previously selected, then a client was selected).
+    # when the override-dropdown component is removed (a node was previously selected, then a client/edge was selected).
     # This causes us to update the UUID and re-render the graph, which is functionally OK but visually distracting.
-    # By providing a hidden override dropdown with the same ID, we prevent the callback from firing.
+    # The callback is fired with triggered_id = triggered_prop = triggered_value = None, making it indistinguishible
+    # from the initial callback (at load time) from the arguments only (without perhaps creating an additional flag).
+    
+    # By providing this hidden override dropdown with the same ID key, the callback fires but we can indicate that
+    # it was triggered by the removal of the override dropdown.
     # The other workaround is to implement more complicated logic in determining when we need to append the UUID.
     # There are a lot of different cases because the callback handles a wide variety of inputs. 
     # Although this is a hack, I feel it's preferable to complicating the logic in update_graph_elements further.
-
+    # I'd like to keep complexity out of update_graph_elements to ensure that it's flexible and maintainable, as
+    # that function is likely to be modified when adding additional features in the future.
+    
     dummy_override_dropdown = dcc.Dropdown(
-        id={"override-dropdown": "override-dropdown"},
+        id={"override-dropdown": "override-dropdown-hidden"},
         style={"display": "none"},
     )
     

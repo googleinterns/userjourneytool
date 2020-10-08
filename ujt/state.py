@@ -408,7 +408,6 @@ def update_tag(tag_index, new_tag):
     tag_list[tag_index] = new_tag
     set_tag_list(tag_list)
 
-
 def get_tag_map() -> Dict[str, List[str]]:
     """ Returns the map of tags.
     
@@ -431,4 +430,9 @@ def add_tag_to_element(ujt_id, tag):
 def remove_tag_from_element(ujt_id, tag_idx):
     tag_map = get_tag_map()
     del tag_map[ujt_id][tag_idx]
+    set_tag_map(tag_map)
+
+def update_applied_tag(ujt_id, tag_idx, tag):
+    tag_map = get_tag_map()
+    tag_map[ujt_id][tag_idx] = tag
     set_tag_map(tag_map)
