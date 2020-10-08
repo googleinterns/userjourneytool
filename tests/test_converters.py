@@ -1,13 +1,6 @@
 import pytest
-from graph_structures_pb2 import (
-    SLI,
-    Client,
-    Dependency,
-    Node,
-    NodeType,
-    SLIType,
-    Status,
-    UserJourney)
+from graph_structures_pb2 import (SLI, Client, Dependency, Node, NodeType,
+                                  SLIType, Status, UserJourney)
 
 import ujt.constants
 import ujt.converters
@@ -119,37 +112,39 @@ def test_datatable_from_slis():
 
 
 def test_datatable_from_client():
-    client = Client(
-        name="client",
-        user_journeys=[
-            UserJourney(
-                name="client.uj",
-                status=Status.STATUS_HEALTHY,
-            ),
-        ],
+    user_journey = UserJourney(
+        name="client.uj",
+        status=Status.STATUS_HEALTHY,
+        client_name="client",
     )
+    
     table_id = "test-table"
 
     expected_columns = [
         {
             "name": "User Journey",
-            "id": "User Journey"
+            "id": "User Journey",
         },
         {
             "name": "Status",
-            "id": "Status"
+            "id": "Status",
+        },
+        {
+            "name": "Originating Client",
+            "id": "Originating Client",
         },
     ]
     expected_data = [
         {
             "User Journey": "uj",
             "Status": "HEALTHY",
-            "id": client.user_journeys[0].name,
+            "Originating Client": user_journey.client_name,
+            "id": user_journey.name,
         }
     ]
 
-    table = ujt.converters.datatable_from_client(
-        client,
+    table = ujt.converters.user_journey_datatable_from_user_journeys(
+        [user_journey],
         table_id=table_id,
     )
 

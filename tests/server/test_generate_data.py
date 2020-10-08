@@ -1,13 +1,8 @@
 from unittest.mock import MagicMock, Mock, call, patch, sentinel
 
 import pytest
-from graph_structures_pb2 import (
-    SLI,
-    Client,
-    Dependency,
-    Node,
-    NodeType,
-    UserJourney)
+from graph_structures_pb2 import (SLI, Client, Dependency, Node, NodeType,
+                                  UserJourney)
 
 import ujt.server.generate_data
 
