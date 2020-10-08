@@ -2,7 +2,7 @@
 
 from collections import defaultdict
 
-from . import callbacks, constants, converters, state, components
+from . import callbacks, components, constants, converters, state
 from .dash_app import app, cache
 
 

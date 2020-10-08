@@ -3,8 +3,13 @@
 from unittest.mock import ANY, Mock, call, patch, sentinel
 
 import pytest
-from graph_structures_pb2 import (SLI, Client, Dependency, Node, Status,
-                                  UserJourney)
+from graph_structures_pb2 import (
+    SLI,
+    Client,
+    Dependency,
+    Node,
+    Status,
+    UserJourney)
 
 import ujt.compute_status
 

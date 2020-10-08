@@ -1,6 +1,13 @@
 import pytest
-from graph_structures_pb2 import (SLI, Client, Dependency, Node, NodeType,
-                                  SLIType, Status, UserJourney)
+from graph_structures_pb2 import (
+    SLI,
+    Client,
+    Dependency,
+    Node,
+    NodeType,
+    SLIType,
+    Status,
+    UserJourney)
 
 import ujt.constants
 import ujt.converters
@@ -117,7 +124,7 @@ def test_datatable_from_client():
         status=Status.STATUS_HEALTHY,
         client_name="client",
     )
-    
+
     table_id = "test-table"
 
     expected_columns = [

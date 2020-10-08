@@ -8,7 +8,13 @@ In general, we consider converters to modify some UJT-specific data structure
 from typing import Any, Collection, Dict, List
 
 import dash_table
-from graph_structures_pb2 import Client, Node, NodeType, SLIType, Status, VirtualNode
+from graph_structures_pb2 import (
+    Client,
+    Node,
+    NodeType,
+    SLIType,
+    Status,
+    VirtualNode)
 
 from . import constants, utils
 
@@ -214,7 +220,8 @@ def user_journey_datatable_from_user_journeys(user_journeys, table_id):
             "name": name,
             "id": name,
         } for name in ["User Journey",
-                       "Status", "Originating Client"]
+                       "Status",
+                       "Originating Client"]
     ]
     data = [
         {
@@ -223,7 +230,8 @@ def user_journey_datatable_from_user_journeys(user_journeys, table_id):
             "Status":
                 utils.human_readable_enum_name(user_journey.status,
                                                Status),
-            "Originating Client": user_journey.client_name,
+            "Originating Client":
+                user_journey.client_name,
             "id":
                 user_journey.name,
         } for user_journey in user_journeys
@@ -240,12 +248,20 @@ def user_journey_datatable_from_user_journeys(user_journeys, table_id):
 
 
 def dropdown_options_from_maps(
-    node_name_message_map: Dict[str, Node],
-    client_name_message_map: Dict[str, Client],
-    virtual_node_map: Dict[str, VirtualNode]):
+        node_name_message_map: Dict[str,
+                                    Node],
+        client_name_message_map: Dict[str,
+                                      Client],
+        virtual_node_map: Dict[str,
+                               VirtualNode]):
 
     type_labels = ["NODE", "CLIENT", "VIRTUAL NODE"]
-    maps = [node_name_message_map, client_name_message_map, virtual_node_map]
+    maps: List[Dict[str,
+                    Any]] = [
+                        node_name_message_map,
+                        client_name_message_map,
+                        virtual_node_map
+                    ]
 
     options = []
 
@@ -258,6 +274,7 @@ def dropdown_options_from_maps(
         ]
 
     return options
+
 
 def override_dropdown_options_from_node(node):
     options = [
@@ -279,8 +296,9 @@ def override_dropdown_options_from_node(node):
         })
     return options
 
+
 def tag_dropdown_options_from_tags(tags):
-        return [{
-            "label": tag,
-            "value": tag,
-        } for tag in tags]
+    return [{
+        "label": tag,
+        "value": tag,
+    } for tag in tags]

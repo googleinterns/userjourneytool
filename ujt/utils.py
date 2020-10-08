@@ -16,9 +16,10 @@
 Can be refactored into multiple files if necessary.
 """
 
-from . import constants, state
-from collections import deque
 import json
+from collections import deque
+
+from . import constants, state
 
 
 def is_client_cytoscape_node(tap_node):
@@ -95,7 +96,10 @@ def get_existing_uuid(elements):
     return elements[0]["data"]["id"].rsplit("#", 1)[1]
 
 
-def get_all_node_names_within_virtual_node(virtual_node_name, node_name_message_map, virtual_node_map):
+def get_all_node_names_within_virtual_node(
+        virtual_node_name,
+        node_name_message_map,
+        virtual_node_map):
     node_names = set()
     node_frontier = deque(virtual_node_map[virtual_node_name].child_names)
 
@@ -109,13 +113,16 @@ def get_all_node_names_within_virtual_node(virtual_node_name, node_name_message_
 
     return node_names
 
+
 def string_to_dict(stringified_dict):
     return json.loads(stringified_dict)
+
 
 def get_latest_tapped_element(tap_node, tap_edge):
     # is this a hack?
     try:
-        element = tap_node if tap_node["timeStamp"] > tap_edge["timeStamp"] else tap_edge
+        element = tap_node if tap_node["timeStamp"] > tap_edge[
+            "timeStamp"] else tap_edge
     except TypeError:  # either tap_node or tap_edge are None
         element = tap_node if tap_edge is None else tap_edge
 

@@ -1,8 +1,14 @@
 # pylint: disable=redefined-outer-name
 
 import pytest
-from graph_structures_pb2 import (SLI, Client, Dependency, Node, NodeType,
-                                  Status, UserJourney)
+from graph_structures_pb2 import (
+    SLI,
+    Client,
+    Dependency,
+    Node,
+    NodeType,
+    Status,
+    UserJourney)
 
 import ujt.constants
 
@@ -254,7 +260,6 @@ def example_edge_elements_from_node_map(
                         f"{service_relative_names[0]}.{endpoint_relative_names[0]}/{service_relative_names[0]}.{endpoint_relative_names[1]}",
                     "ujt_id":
                         f"{service_relative_names[0]}.{endpoint_relative_names[0]}/{service_relative_names[0]}.{endpoint_relative_names[1]}",
-
                 }
         },
         {

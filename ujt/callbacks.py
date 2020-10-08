@@ -13,7 +13,7 @@
 # limitations under the License.
 """ Callbacks for Dash app. """
 
-from typing import Any, Dict, List, Tuple, Union, Set
+from typing import Any, Dict, List, Set, Tuple, Union
 
 import dash
 import dash_bootstrap_components as dbc
@@ -21,7 +21,12 @@ import dash_core_components as dcc
 import dash_html_components as html
 from dash.dependencies import ALL, MATCH, Input, Output, State
 from dash.exceptions import PreventUpdate
-from graph_structures_pb2 import Node, NodeType, Status, VirtualNode, UserJourney
+from graph_structures_pb2 import (
+    Node,
+    NodeType,
+    Status,
+    UserJourney,
+    VirtualNode)
 
 from . import (
     components,
@@ -113,7 +118,10 @@ def update_graph_elements(
     #print(ctx.triggered)
     #print(triggered_id, triggered_prop, triggered_value)  # for debugging...
 
-    if (triggered_id == "virtual-node-update-signal" and triggered_value != constants.OK_SIGNAL) or (triggered_id == r"""{"override-dropdown":"override-dropdown-hidden"}"""):
+    if (triggered_id == "virtual-node-update-signal" and
+            triggered_value != constants.OK_SIGNAL) or (
+                triggered_id
+                == r"""{"override-dropdown":"override-dropdown-hidden"}"""):
         # No-op if :
         #   the validation signal isn't OK
         #   callback fired from dummy override dropdown
@@ -218,14 +226,19 @@ def update_graph_elements(
 @app.callback(
     Output("selected-info-panel",
            "children"),
-    [Input("cytoscape-graph",
-           "tapNode"),
-    Input("cytoscape-graph", "tapEdge"),
-    Input("applied-tag-update-signal", "children"),
+    [
+        Input("cytoscape-graph",
+              "tapNode"),
+        Input("cytoscape-graph",
+              "tapEdge"),
+        Input("applied-tag-update-signal",
+              "children"),
     ],
     prevent_initial_call=True,
 )
-def generate_selected_info_panel(tap_node, tap_edge, applied_tag_update_signal) -> List[Any]:
+def generate_selected_info_panel(tap_node,
+                                 tap_edge,
+                                 applied_tag_update_signal) -> List[Any]:
     """ Generate the node info panel.
 
     This function is called:
@@ -256,18 +269,21 @@ def generate_selected_info_panel(tap_node, tap_edge, applied_tag_update_signal) 
         # just generate this header here for now,
         # probably don't need to make a new component function for it.
         source, target = ujt_id.split("/")
-        header = html.P(f"Edge from {utils.relative_name(source)} to {utils.relative_name(target)}")
+        header = html.P(
+            f"Edge from {utils.relative_name(source)} to {utils.relative_name(target)}"
+        )
         out.append(header)
 
     out += components.get_apply_tag_components(ujt_id)
 
     return out
 
+
 @app.callback(
     Output("user-journey-info-panel",
            "children"),
     Input("user-journey-dropdown",
-           "value"),
+          "value"),
     prevent_initial_call=True,
 )
 def generate_user_journey_info_panel(dropdown_value: str) -> List[Any]:
@@ -288,23 +304,36 @@ def generate_user_journey_info_panel(dropdown_value: str) -> List[Any]:
 
     if dropdown_value in client_name_message_map:
         client = client_name_message_map[dropdown_value]
-        return converters.user_journey_datatable_from_user_journeys(client.user_journeys, constants.USER_JOURNEY_DATATABLE_ID)
+        return converters.user_journey_datatable_from_user_journeys(
+            client.user_journeys,
+            constants.USER_JOURNEY_DATATABLE_ID)
 
     # associate the name of the user journey with the nodes that it passes through
-    node_user_journey_map: Dict[str, List[UserJourney]] = state.get_node_to_user_journey_map()
+    node_user_journey_map: Dict[
+        str,
+        List[UserJourney]] = state.get_node_to_user_journey_map()
 
     if dropdown_value in node_name_message_map:
-        return converters.user_journey_datatable_from_user_journeys(node_user_journey_map[dropdown_value], constants.USER_JOURNEY_DATATABLE_ID)
-    
+        return converters.user_journey_datatable_from_user_journeys(
+            node_user_journey_map[dropdown_value],
+            constants.USER_JOURNEY_DATATABLE_ID)
+
     if dropdown_value in virtual_node_map:
-        node_names_in_virtual_node = utils.get_all_node_names_within_virtual_node(dropdown_value, node_name_message_map, virtual_node_map)
+        node_names_in_virtual_node = utils.get_all_node_names_within_virtual_node(
+            dropdown_value,
+            node_name_message_map,
+            virtual_node_map)
         user_journeys = []
         for node_name in node_names_in_virtual_node:
             for user_journey in node_user_journey_map[node_name]:
                 if user_journey not in user_journeys:  # this is sphagetti
                     user_journeys.append(user_journey)
-                    
-        return converters.user_journey_datatable_from_user_journeys(user_journeys, constants.USER_JOURNEY_DATATABLE_ID)
+
+        return converters.user_journey_datatable_from_user_journeys(
+            user_journeys,
+            constants.USER_JOURNEY_DATATABLE_ID)
+
+    raise ValueError
 
 
 @app.callback(
@@ -474,7 +503,7 @@ def discard_comment(discard_n_clicks_timestamp, tap_node):
 
 
 @app.callback(
-    Output({"save-comment-toast": ALL}, 
+    Output({"save-comment-toast": ALL},
            "is_open"),
     Input({"save-comment-textarea-button": ALL},
           "n_clicks_timestamp"),
@@ -507,23 +536,41 @@ def save_comment(save_n_clicks_timestamp, tap_node, new_comment):
     new_comment = new_comment[0]
     node_name = tap_node["data"]["ujt_id"]
     state.set_comment(node_name, new_comment)
-    return [True]  # wrap in a list since we used pattern matching. should only ever be one toast.
+    return [
+        True
+    ]  # wrap in a list since we used pattern matching. should only ever be one toast.
+
 
 @app.callback(
-    Output("user-journey-dropdown", "options"),
-    [Input("virtual-node-update-signal", "children")],
+    Output("user-journey-dropdown",
+           "options"),
+    [Input("virtual-node-update-signal",
+           "children")],
 )
 def update_user_journey_dropdown_options(virtual_node_update_signal):
     node_name_message_map, client_name_message_map = state.get_message_maps()
     virtual_node_map = state.get_virtual_node_map()
 
-    return converters.dropdown_options_from_maps(node_name_message_map, client_name_message_map, virtual_node_map)
+    return converters.dropdown_options_from_maps(
+        node_name_message_map,
+        client_name_message_map,
+        virtual_node_map)
 
 
 @app.callback(
-    Output({"save-tag-toast": ALL}, "is_open"),
-    Input({"save-tag-button": "save-tag-button", "index": ALL}, "n_clicks_timestamp"),
-    State({"tag-input": "tag-input", "index": ALL}, "value"),
+    Output({"save-tag-toast": ALL},
+           "is_open"),
+    Input(
+        {
+            "save-tag-button": "save-tag-button",
+            "index": ALL
+        },
+        "n_clicks_timestamp"),
+    State({
+        "tag-input": "tag-input",
+        "index": ALL
+    },
+          "value"),
     prevent_initial_call=True,
 )
 def save_tag(n_clicks_timestamp, input_values):
@@ -561,13 +608,23 @@ def save_tag(n_clicks_timestamp, input_values):
         raise PreventUpdate  # TODO: display an error UI element or something
 
     state.update_tag(tag_idx, tag_value)
-    return [True]  # since we pattern matched the save-tag-toast, we need to provide output as a list
+    return [
+        True
+    ]  # since we pattern matched the save-tag-toast, we need to provide output as a list
+
 
 @app.callback(
-    Output("tag-update-signal", "children"),
+    Output("tag-update-signal",
+           "children"),
     [
-        Input({"delete-tag-button": "delete-tag-button", "index": ALL}, "n_clicks_timestamp"),
-        Input({"create-tag-button": ALL}, "n_clicks_timestamp"),
+        Input(
+            {
+                "delete-tag-button": "delete-tag-button",
+                "index": ALL
+            },
+            "n_clicks_timestamp"),
+        Input({"create-tag-button": ALL},
+              "n_clicks_timestamp"),
     ],
     prevent_initial_call=True,
 )
@@ -610,9 +667,12 @@ def create_delete_tag(remove_timestamps, add_timestamps):
 
     return constants.OK_SIGNAL
 
+
 @app.callback(
-    Output("tag-panel", "children"),
-    Input("tag-update-signal", "children"),
+    Output("tag-panel",
+           "children"),
+    Input("tag-update-signal",
+          "children"),
 )
 def generate_tag_panel(tag_update_signal):
     """ Handles generating the tag creation and deletion panel.
@@ -632,19 +692,31 @@ def generate_tag_panel(tag_update_signal):
 
 
 @app.callback(
-    Output("applied-tag-update-signal", "children"),
+    Output("applied-tag-update-signal",
+           "children"),
     [
-        Input({"remove-applied-tag-button": "remove-applied-tag-button", "index": ALL}, "n_clicks_timestamp"),
-        Input({"add-applied-tag-button": ALL}, "n_clicks_timestamp"),
+        Input(
+            {
+                "remove-applied-tag-button": "remove-applied-tag-button",
+                "index": ALL
+            },
+            "n_clicks_timestamp"),
+        Input({"add-applied-tag-button": ALL},
+              "n_clicks_timestamp"),
     ],
     [
-        State("cytoscape-graph", "tapNode"),
+        State("cytoscape-graph",
+              "tapNode"),
         State("cytoscape-graph",
               "tapEdge"),
     ],
     prevent_initial_call=True,
 )
-def apply_empty_tag_remove_tag(remove_timestamps, add_timestamps, tap_node, tap_edge):
+def apply_empty_tag_remove_tag(
+        remove_timestamps,
+        add_timestamps,
+        tap_node,
+        tap_edge):
     """ Handles applying empty tags and removing tags from the tag map.
 
     This function is called:
@@ -662,7 +734,7 @@ def apply_empty_tag_remove_tag(remove_timestamps, add_timestamps, tap_node, tap_
     Returns:
         A signal to add to the applied-tag-update-signal hidden div.
     """
-    
+
     ctx = dash.callback_context
     triggered_id, triggered_prop, triggered_value = utils.ctx_triggered_info(ctx)
 
@@ -676,7 +748,8 @@ def apply_empty_tag_remove_tag(remove_timestamps, add_timestamps, tap_node, tap_
     # This isn't very elegant, but I don't see any other way to proceed.
     id_dict = utils.string_to_dict(triggered_id)
 
-    ujt_id = utils.get_latest_tapped_element(tap_node, tap_edge)["data"]["ujt_id"]
+    ujt_id = utils.get_latest_tapped_element(tap_node,
+                                             tap_edge)["data"]["ujt_id"]
 
     if "add-applied-tag-button" in id_dict:
         state.add_tag_to_element(ujt_id, "")
@@ -688,13 +761,20 @@ def apply_empty_tag_remove_tag(remove_timestamps, add_timestamps, tap_node, tap_
 
     return constants.OK_SIGNAL
 
+
 @app.callback(
-    Output("update-applied-tag-dummy-signal", "children"),
-    Input({"apply-tag-dropdown": "apply-tag-dropdown", "index": ALL}, "value"),
+    Output("update-applied-tag-dummy-signal",
+           "children"),
+    Input({
+        "apply-tag-dropdown": "apply-tag-dropdown",
+        "index": ALL
+    },
+          "value"),
     [
         State("cytoscape-graph",
-           "tapNode"),
-        State("cytoscape-graph", "tapEdge"),
+              "tapNode"),
+        State("cytoscape-graph",
+              "tapEdge"),
     ],
     prevent_initial_call=True,
 )

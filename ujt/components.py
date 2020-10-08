@@ -9,15 +9,16 @@ Admittedly, this line is blurry, but it's nice to have a separate module to cont
 level functions to generate components, rather than placing them in ujt or callbacks.
 """
 
+from typing import List, Union
+
 import dash_bootstrap_components as dbc
 import dash_core_components as dcc
 import dash_cytoscape as cyto
 import dash_html_components as html
 import dash_table
+from graph_structures_pb2 import Node, NodeType, VirtualNode
 
 from . import callbacks, constants, converters, state, utils
-from typing import List, Union
-from graph_structures_pb2 import Node, VirtualNode, NodeType
 
 
 def get_layout():
@@ -178,6 +179,7 @@ def get_bottom_panel_components():
         className="mb-5",  # add margin to bottom
     )
 
+
 def get_node_info_panel_components(node_name):
     node_name_message_map = state.get_node_name_message_map()
     virutal_node_map = state.get_virtual_node_map()
@@ -254,6 +256,7 @@ def get_node_info_panel_components(node_name):
         [header] + status_override_components + sli_info + child_info +
         dependency_info + comment_components)
 
+
 def get_comment_components(initial_value=""):
     """ Generates a list of components for use in comment related interactions. 
 
@@ -313,6 +316,7 @@ def get_comment_components(initial_value=""):
     ]
     return comment_components
 
+
 def get_apply_tag_components(ujt_id):
     tag_map = state.get_tag_map()
     tag_list = state.get_tag_list()
@@ -324,10 +328,14 @@ def get_apply_tag_components(ujt_id):
                 children=[
                     dbc.Col(
                         children=dcc.Dropdown(
-                            id={"apply-tag-dropdown": "apply-tag-dropdown", "index": idx},
+                            id={
+                                "apply-tag-dropdown": "apply-tag-dropdown",
+                                "index": idx
+                            },
                             clearable=False,
                             searchable=False,
-                            options=converters.tag_dropdown_options_from_tags(tag_list),
+                            options=converters.tag_dropdown_options_from_tags(
+                                tag_list),
                             value=tag,
                         ),
                         width=11,
@@ -336,7 +344,12 @@ def get_apply_tag_components(ujt_id):
                     dbc.Col(
                         children=dbc.Button(
                             children="x",
-                            id={"remove-applied-tag-button": "remove-applied-tag-button", "index": idx},
+                            id={
+                                "remove-applied-tag-button":
+                                    "remove-applied-tag-button",
+                                "index":
+                                    idx
+                            },
                         ),
                         width="auto",
                         className=constants.BOOTSTRAP_BUTTON_COLUMN_CLASSES,
@@ -359,8 +372,7 @@ def get_apply_tag_components(ujt_id):
             ),
         ],
         no_gutters=True,
-        justify="end"
-    )
+        justify="end")
 
     # This is a pretty bad hack.
     # The update_graph_elements callback is called (via pattern matching)
@@ -368,21 +380,22 @@ def get_apply_tag_components(ujt_id):
     # This causes us to update the UUID and re-render the graph, which is functionally OK but visually distracting.
     # The callback is fired with triggered_id = triggered_prop = triggered_value = None, making it indistinguishible
     # from the initial callback (at load time) from the arguments only (without perhaps creating an additional flag).
-    
+
     # By providing this hidden override dropdown with the same ID key, the callback fires but we can indicate that
     # it was triggered by the removal of the override dropdown.
     # The other workaround is to implement more complicated logic in determining when we need to append the UUID.
-    # There are a lot of different cases because the callback handles a wide variety of inputs. 
+    # There are a lot of different cases because the callback handles a wide variety of inputs.
     # Although this is a hack, I feel it's preferable to complicating the logic in update_graph_elements further.
     # I'd like to keep complexity out of update_graph_elements to ensure that it's flexible and maintainable, as
     # that function is likely to be modified when adding additional features in the future.
-    
+
     dummy_override_dropdown = dcc.Dropdown(
         id={"override-dropdown": "override-dropdown-hidden"},
         style={"display": "none"},
     )
-    
+
     return out + [add_button_row, dummy_override_dropdown]
+
 
 def get_tag_panel():
     tag_list = state.get_tag_list()
