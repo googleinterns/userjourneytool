@@ -172,9 +172,10 @@ def get_bottom_panel_components():
                             ]),
                     ],
                 ),
+                fluid=True,
             ),
         ],
-        className="mb-5",
+        className="mb-5",  # add margin to bottom
     )
 
 def get_node_info_panel_components(node_name):
@@ -329,7 +330,7 @@ def get_apply_tag_components(ujt_id):
                             options=converters.tag_dropdown_options_from_tags(tag_list),
                             value=tag,
                         ),
-                        width=10,
+                        width=11,
                         className="m-1",
                     ),
                     dbc.Col(
@@ -337,30 +338,28 @@ def get_apply_tag_components(ujt_id):
                             children="x",
                             id={"remove-applied-tag-button": "remove-applied-tag-button", "index": idx},
                         ),
-                        width=1,
-                        className="m-1",
+                        width="auto",
+                        className=constants.BOOTSTRAP_BUTTON_COLUMN_CLASSES,
                     ),
                 ],
                 no_gutters=True,
+                justify="end",
             ),
         ]
 
     add_button_row = dbc.Row(
         children=[
             dbc.Col(
-                width=10,
-                className="m-1",
-            ),
-            dbc.Col(
                 children=dbc.Button(
                     children="+",
                     id={"add-applied-tag-button": "add-applied-tag-button"},
                 ),
-                width=1,
-                className="m-1",
+                width="auto",
+                className=constants.BOOTSTRAP_BUTTON_COLUMN_CLASSES,
             ),
         ],
         no_gutters=True,
+        justify="end"
     )
 
     # This is a pretty bad hack.
@@ -393,61 +392,50 @@ def get_tag_panel():
         tag_rows += [
             dbc.Row(
                 children=[
-                    
                     dbc.Col(
                         children=dbc.Input(
                             id={"tag-input": "tag-input", "index": idx},
                             placeholder="Tag name",
                             value=tag,
                         ),
-                        width=9,
+                        width=10,
                         className="m-1", # margin around all sides https://getbootstrap.com/docs/4.0/utilities/spacing/
                     ),
-                    
                     dbc.Col(
                         children=dbc.Button(
                             children="x",
                             id={"delete-tag-button": "delete-tag-button", "index": idx},
                         ),
-                        width=1,
-                        className="m-1",
+                        width="auto",
+                        className=constants.BOOTSTRAP_BUTTON_COLUMN_CLASSES,
                     ),
                     dbc.Col(
                         children=dbc.Button(
                             children="\N{CHECK MARK}",
                             id={"save-tag-button": "save-tag-button", "index": idx},
                         ),
-                        width=1,
-                        className="m-1",
+                        width="auto",
+                        className=constants.BOOTSTRAP_BUTTON_COLUMN_CLASSES,
                     ),
                 ],
                 no_gutters=True,
+                justify="end",  # right justify to make it easier to line up the add button row
             ),
         ]
 
-    # This is a bit of a hack to line up the button with the right column of buttons.
-    # There's probably a better way to do this, but I'm not too experienced with fancy css and bootstrap.
-    # Leave it for now.
     add_button_row = dbc.Row(
         children=[
-            dbc.Col(
-                width=9,
-                className="m-1",
-            ),
-            dbc.Col(
-                width=1,
-                className="m-1",
-            ),
             dbc.Col(
                 children=dbc.Button(
                     children="+",
                     id={"create-tag-button": "create-tag-button"},
                 ),
-                width=1,
-                className="m-1",
+                width="auto",
+                className=constants.BOOTSTRAP_BUTTON_COLUMN_CLASSES,
             ),
         ],
         no_gutters=True,
+        justify="end",
     )
 
     save_tag_toast = dbc.Toast(

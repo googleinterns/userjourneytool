@@ -30,6 +30,8 @@ SLI_DATATABLE_ID = "datatable-slis"
 CHILD_DATATABLE_ID = "datatable-child-nodes"
 DEPENDENCY_DATATABLE_ID = "datatable-dependency-nodes"
 
+BOOTSTRAP_BUTTON_COLUMN_CLASSES = "m-1 d-flex justify-content-center"
+
 CYTO_STYLESHEET = [
     {
         "selector": "node",
