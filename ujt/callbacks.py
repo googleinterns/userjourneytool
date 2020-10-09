@@ -810,3 +810,14 @@ def update_applied_tag(dropdown_values, tap_node, tap_edge):
     ujt_id = latest_tapped_element["data"]["ujt_id"]
 
     state.update_applied_tag(ujt_id, tag_idx, tag_value)
+
+
+@app.callback(
+    Output("cytoscape-graph", "stylesheet"),
+    Input("style-map-update-signal", "children")
+)
+def update_cytoscape_stylesheet(style_map_update_signal):
+    style_map = state.get_style_map()
+    return [*constants.BASE_CYTO_STYLESHEET, *converters.cytoscape_stylesheet_from_style_map(style_map)]
+
+    

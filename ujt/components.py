@@ -1,8 +1,10 @@
 """ Generates components for use in the frontend. 
 
-In general, these functions usually produce a list of components. 
+In general, these functions usually produce a list of components (e.g. selected panel),
+ or a single toplevel component (e.g. the cytoscape graph). 
 
-This is in contrast to converters, which generally produce a single component
+This is in contrast to converters, which generally produce 
+a single component to be nested within an wrapping component,
 or an intermediate data structure (e.g. a list of dropdown options).
 
 Admittedly, this line is blurry, but it's nice to have a separate module to contain some higher
@@ -51,24 +53,26 @@ def get_layout():
                 ],
                 id="collapse-error-modal",
             ),
-            html.Div(
-                id="applied-tag-update-signal",
-                style={"display": "none"},
-            ),
-            html.Div(
-                id="update-applied-tag-dummy-signal",
-                style={"display": "none"},
-            ),
-            html.Div(
-                id="tag-update-signal",
-                style={"display": "none"},
-            ),
-            html.Div(
-                id="virtual-node-update-signal",
-                style={"display": "none"},
-            ),
+            get_signals(),
         ],
     )
+
+
+def get_signals():
+    signal_ids = [
+        "applied-tag-update-signal",
+        "update-applied-tag-dummy-signal",
+        "tag-update-signal",
+        "virtual-node-update-signal",
+        "style-map-update-signal",
+    ]
+
+    signals = [html.Div(
+        id=signal_id,
+        style={"display": "none"},
+    ) for signal_id in signal_ids]
+
+    return html.Div(id="signal-wrapper-div", children=signals)
 
 
 def get_top_row_components():
@@ -133,7 +137,6 @@ def get_cytoscape_graph():
             "height": constants.GRAPH_HEIGHT,
             "backgroundColor": constants.GRAPH_BACKGROUND_COLOR,
         },
-        stylesheet=constants.CYTO_STYLESHEET,
     )
 
 
@@ -321,7 +324,7 @@ def get_apply_tag_components(ujt_id):
     tag_map = state.get_tag_map()
     tag_list = state.get_tag_list()
 
-    out = [html.H3("Tagging")]
+    out = [html.H2("Tagging")]
     for idx, tag in enumerate(tag_map[ujt_id]):
         out += [
             dbc.Row(
@@ -332,13 +335,11 @@ def get_apply_tag_components(ujt_id):
                                 "apply-tag-dropdown": "apply-tag-dropdown",
                                 "index": idx
                             },
-                            clearable=False,
-                            searchable=False,
                             options=converters.tag_dropdown_options_from_tags(
                                 tag_list),
                             value=tag,
                         ),
-                        width=11,
+                        width=10,
                         className="m-1",
                     ),
                     dbc.Col(
@@ -398,6 +399,13 @@ def get_apply_tag_components(ujt_id):
 
 
 def get_tag_panel():
+    create_tag_components = get_create_tag_components()
+    apply_view_components = get_apply_view_components()
+    create_style_components = get_create_style_components()
+    return create_tag_components + apply_view_components + create_style_components
+
+
+def get_create_tag_components():
     tag_list = state.get_tag_list()
 
     tag_rows = []
@@ -411,7 +419,7 @@ def get_tag_panel():
                             placeholder="Tag name",
                             value=tag,
                         ),
-                        width=10,
+                        width=9,
                         className="m-1", # margin around all sides https://getbootstrap.com/docs/4.0/utilities/spacing/
                     ),
                     dbc.Col(
@@ -461,4 +469,112 @@ def get_tag_panel():
         is_open=False,
     )
 
-    return tag_rows + [add_button_row, save_tag_toast]
+    header = html.H2("Tags")
+
+    return [header] + tag_rows + [add_button_row, save_tag_toast]
+
+
+def get_apply_view_components():
+    tag_list = state.get_tag_list()
+    style_map = state.get_style_map()
+    view_list = state.get_view_list()
+
+    view_rows = []
+    for idx, view_tuple in enumerate(view_list):
+        view_rows += [
+            dbc.Row(
+                children=[
+                    dbc.Col(
+                        children=dcc.Dropdown(
+                            id={
+                                "apply-view-tag-dropdown": "apply-view-tag-dropdown",
+                                "index": idx
+                            },
+                            options=converters.tag_dropdown_options_from_tags(
+                                tag_list),
+                            value=view_tuple[0],
+                        ),
+                        width=5,
+                        className="m-1",
+                    ),
+                    dbc.Col(
+                        children=dcc.Dropdown(
+                            id={
+                                "apply-view-style-dropdown": "apply-view-style-dropdown",
+                                "index": idx
+                            },
+                            options=converters.style_dropdown_options_from_styles(
+                                style_map),
+                            value=view_tuple[1],
+                        ),
+                        width=5,
+                        className="m-1",
+                    ),
+                    dbc.Col(
+                        children=dbc.Button(
+                            children="x",
+                            id={"remove-applied-view-button": "remove-applied-view-button", "index": idx},
+                        ),
+                        width="auto",
+                        className=constants.BOOTSTRAP_BUTTON_COLUMN_CLASSES,
+                    ),
+                ],
+                no_gutters=True,
+                justify="end",  # right justify to make it easier to line up the add button row
+            ),
+        ]
+
+    add_button_row = dbc.Row(
+        children=[
+            dbc.Col(
+                children=dbc.Button(
+                    children="+",
+                    id={"create-view-button": "create-view-button"},
+                ),
+                width="auto",
+                className=constants.BOOTSTRAP_BUTTON_COLUMN_CLASSES,
+            ),
+        ],
+        no_gutters=True,
+        justify="end",
+    )
+
+    header = html.H3("Views")
+
+    return [header] + view_rows + [add_button_row]
+
+
+def get_create_style_components(initial_value=""):
+    style_components = [
+        html.H3("Comments"),
+        dbc.Input(
+            id={"style-name-input": "style-name-input"},
+            type="text",
+            placeholder="Style Name",
+        ),
+        dbc.Textarea(
+            id={"style-textarea": "style-textarea"},
+            value=initial_value,
+        ),
+        dbc.Button(
+            id={"save-style-textarea-button": "save-style-textarea-button"},
+            children="Save Style",
+        ),
+        dbc.Button(
+            id={
+                "discard-style-textarea-button":
+                    "discard-style-textarea-button"
+            },
+            children="Discard Style Changes",
+        ),
+        dbc.Toast(
+            id={"save-style-toast": "save-style-toast"},
+            header="Successfully saved style!",
+            icon="success",
+            duration=3000,
+            dismissable=True,
+            body_style={"display": "none"},
+            is_open=False,
+        ),
+    ]
+    return style_components

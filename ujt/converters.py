@@ -302,3 +302,19 @@ def tag_dropdown_options_from_tags(tags):
         "label": tag,
         "value": tag,
     } for tag in tags]
+
+
+def style_dropdown_options_from_styles(styles):
+    return [{
+        "label": style,
+        "value": style,
+    } for style in style_map]
+
+def cytoscape_stylesheet_from_style_map(style_map):
+    return [
+        {
+            "selector": f".{style_name}",
+            "style": style_value,
+        }
+        for style_name, style_value in style_map.items()
+    ]

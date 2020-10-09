@@ -9,28 +9,21 @@ from .dash_app import app, cache
 def initialize_ujt():
     if constants.CLEAR_CACHE_ON_STARTUP:
         cache.clear()
+    
     # If first time running server, set these persisted properties as dicts
-    map_names = [
-        "virtual_node_map",  # Dict[str, VirtualNode]
-        "parent_virtual_node_map",  # Dict[str, str]
-        "comment_map",  # Dict[str, str]
-        "override_status_map",  # Dict[str, Status]
+    cache_key_default_values = [
+        ("virtual_node_map", {}),               # Dict[str, VirtualNode]
+        ("parent_virtual_node_map", {}),        # Dict[str, str]
+        ("comment_map", {}),                    # Dict[str, str]
+        ("override_status_map", {}),            # Dict[str, Status]
+        ("tag_list", ["a", "b", "c", "d"]),     # List[str] # set to a, b, c, d for testing only
+        ("tag_map", defaultdict(list)),         # DefaultDict[str, List[str]]
+        ("style_map", constants.DEFAULT_STYLE_MAP),
+        ("view_list", []),                      # List[Tuple[str, str]]
     ]
-    for map_name in map_names:
-        if cache.get(map_name) is None:
-            cache.set(map_name, {})
-
-    list_names = ["tag_list"]
-    for list_name in list_names:
-        if cache.get(list_name) is None:
-            cache.set(list_name, ["a", "b", "c", "d"])
-
-    defaultdict_names = [
-        "tag_map",
-    ]
-    for defaultdict_name in defaultdict_names:
-        if cache.get(defaultdict_name) is None:
-            cache.set(defaultdict_name, defaultdict(list))
+    for cache_key, default_value in cache_key_default_values:
+        if cache.get(cache_key) is None:
+            cache.set(cache_key, default_value)
 
     # Request and cache the dependency topology from the reporting server
     state.get_message_maps()

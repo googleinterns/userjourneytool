@@ -114,7 +114,7 @@ def get_cytoscape_elements():
     return elements
 
 
-# region virtual node functions
+# region virtual node
 def get_virtual_node_map() -> Dict[str, VirtualNode]:
     """ Gets a dictionary mapping virtual node names to virtual node messages.
 
@@ -361,7 +361,7 @@ def set_node_override_status(
     cache.set("override_status_map", override_status_map)
 
 
-#@cache.memoize()
+#@cache.memoize()  # this is commented out for consistent testing
 def get_node_to_user_journey_map() -> Dict[str, List[UserJourney]]:
     # map the node name to user journey names that pass through the node
     # should this be in state? it's memoized but doesn't really affect state
@@ -401,12 +401,18 @@ def get_node_to_user_journey_map() -> Dict[str, List[UserJourney]]:
 
     return output_map
 
+# Maybe we can think about making the following functions the result of 
+# a higher order function or decorator.
+# See https://stackoverflow.com/questions/13184281/python-dynamic-function-creation-with-custom-names
 
+#region tag list
 def get_tag_list() -> List[str]:
     """ Return the list of tags.
 
     We use a list since the order matters when using pattern matching callbacks to remove tags.
 
+    Returns:
+        A list containing the created tags.
     """
     return cache.get("tag_list")
 
@@ -433,16 +439,20 @@ def update_tag(tag_index, new_tag):
     tag_list = get_tag_list()
     tag_list[tag_index] = new_tag
     set_tag_list(tag_list)
+#endregion
 
-
+#region tag map
 def get_tag_map() -> Dict[str, List[str]]:
-    """ Returns the map of tags.
+    """ Returns the map associating ujt_ids and applied tags.
     
     The tag map associates names of nodes/virtual nodes/clients with a list of the tags that they contain.
     Maybe we should break this map up into separate maps for nodes, virtual nodes, and clients, but their names should be unique,
     so I leave it as one map for now.
     We use lists as the value type of the dictionary since we need an ordering to use the pattern matching callbacks to add/remove tags. 
-    
+    Moreover, this ensures a consistent ordering of applied tags in the UI.
+
+    Returns:
+        A dictionary associating ujt_ids and their applied tags.
     """
     return cache.get("tag_map")
 
@@ -452,6 +462,16 @@ def set_tag_map(tag_map):
 
 
 def add_tag_to_element(ujt_id, tag):
+    """ Adds a tag to an element.
+
+    We generally use "add" or "applies" to refer to this operation,
+    (as opposed to create).
+    This function is generally called with tag == "", when adding a new apply tag UI row. 
+
+    Args:
+        ujt_id: the UJT specific id of the element (see converters.py)
+        tag: the tag to apply
+    """
     tag_map = get_tag_map()
     tag_map[ujt_id].append(tag)
     set_tag_map(tag_map)
@@ -467,3 +487,60 @@ def update_applied_tag(ujt_id, tag_idx, tag):
     tag_map = get_tag_map()
     tag_map[ujt_id][tag_idx] = tag
     set_tag_map(tag_map)
+#endregion
+
+#region style map
+def get_style_map() -> Dict[str, Dict[str, str]]:
+    """ Return the map of styles.
+
+    The style map associates the name of a style with the value of the "style" field in the cytoscape stylesheet.
+    """
+
+    return cache.get("style_map")
+
+
+def set_style_map(style_map):
+    return cache.set("style_map", style_map)
+
+
+def create_style(style_name: str, style_dict: Dict[str, str]):
+    style_map = get_style_map()
+    style_map[style_name] = style_dict
+    set_style_map(style_map)
+
+
+def delete_style(style_name: str):
+    style_map = get_style_map()
+    del style_map[style_name]
+    set_style_map(style_map)
+#endregion
+
+#region view list
+def get_view_list():
+    """ Returns the list of created views, which associate a tag and a style..
+
+    This structure is a list since the ordering matters in the UI when displaying views.
+    
+    Returns:
+        A list of all created views.
+    """
+    return cache.get("view_list")
+
+def set_view_list(view_list):
+    return cache.set("view_list", view_list)
+
+def create_view(tag, style):
+    view_list = get_view_list()
+    view_list.append(tag, style)
+    set_view_list(view_list)
+
+def update_view(view_idx, tag, style):
+    view_list = get_view_list()
+    view_list[view_idx] = (tag, style)
+    set_view_list(view_list)
+
+def delete_view(view_idx):
+    view_list = get_view_list()
+    del view_list[view_idx]
+    set_view_list(view_list)
+#endregion
