@@ -13,6 +13,7 @@
 # limitations under the License.
 """ Callbacks for Dash app. """
 
+import json
 from typing import Any, Dict, List, Set, Tuple, Union
 
 import dash
@@ -117,7 +118,7 @@ def update_graph_elements(
     triggered_id, triggered_prop, triggered_value = utils.ctx_triggered_info(ctx)
     #print(ctx.triggered)
     #print(triggered_id, triggered_prop, triggered_value)  # for debugging...
-
+    print("updating elements")
     if (triggered_id == "virtual-node-update-signal" and
             triggered_value != constants.OK_SIGNAL) or (
                 triggered_id
@@ -210,6 +211,7 @@ def update_graph_elements(
         client_name_message_map,
         virtual_node_map,
     )
+    print(elements)
 
     # Determine if we need to generate a new UUID. This minimizes the choppyness of the animation.
     if triggered_id in [None, "virtual-node-update-signal"]:
@@ -669,12 +671,12 @@ def create_delete_tag(remove_timestamps, add_timestamps):
 
 
 @app.callback(
-    Output("tag-panel",
+    Output("create-tag-panel",
            "children"),
     Input("tag-update-signal",
           "children"),
 )
-def generate_tag_panel(tag_update_signal):
+def generate_create_tag_panel(tag_update_signal):
     """ Handles generating the tag creation and deletion panel.
 
     This function is called:
@@ -688,7 +690,7 @@ def generate_tag_panel(tag_update_signal):
     Returns:
         A list of components to be placed in the tag-panel.
     """
-    return components.get_tag_panel()
+    return components.get_create_tag_components()
 
 
 @app.callback(
@@ -812,12 +814,176 @@ def update_applied_tag(dropdown_values, tap_node, tap_edge):
     state.update_applied_tag(ujt_id, tag_idx, tag_value)
 
 
+"""
 @app.callback(
-    Output("cytoscape-graph", "stylesheet"),
-    Input("style-map-update-signal", "children")
+    Output("style-map-update-signal", "children"),
+    Input({"create-view-button": ALL}, "n_clicks_timestamp")
+)
+def create_view(n_clicks_timestamp):
+    # TODO: implement this
+    raise PreventUpdate
+"""
+
+
+@app.callback(
+    Output("cytoscape-graph",
+           "stylesheet"),
+    Input("style-map-update-signal",
+          "children"),
+    prevent_initial_call=True,          
 )
 def update_cytoscape_stylesheet(style_map_update_signal):
+    print("updating cytoscape stylesheet")
     style_map = state.get_style_map()
-    return [*constants.BASE_CYTO_STYLESHEET, *converters.cytoscape_stylesheet_from_style_map(style_map)]
+    stylesheet = [
+        *constants.BASE_CYTO_STYLESHEET,
+        *converters.cytoscape_stylesheet_from_style_map(style_map)
+    ]
+    print(stylesheet)
+    return stylesheet
 
+
+@app.callback(
+    [
+        Output("save-style-toast",
+               "is_open"),
+        Output("save-style-toast",
+               "header"),
+        Output("save-style-toast",
+               "icon"),
+        Output("save-style-signal", "children")
+    ],
+    Input("save-style-textarea-button",
+          "n_clicks_timestamp"),
+    [
+        State("style-name-input",
+              "value"),
+        State("style-textarea",
+              "value"),
+    ],
+    prevent_initial_call=True,
+)
+def save_style(save_n_clicks_timestamps, style_name, style_str):
+    """ Handles saving styles to the style map.
+
+    This function is called:
+        when the save style button is clicked
+
+    Args:
+        save_n_clicks_timestamps: List of the timestamps of when save-style-textarea-button buttons were called.
+            Should contain only one value.
+            Value unused, input only provided to register callback.
+        style_name_list: List of style names. Should contain only one value, from the style-name-input component.
+        style_str_list: List of strings encoding styles. Should contain only one value, from the style-textarea component.
+
+    Returns:
+        A 4 tuple, containing:
+            A boolean indicating whether the save tag successful toast should open.
+            A message to be placed in the header of the toast.
+            A string to determine the toast icon.
+    """
+    print(dash.callback_context.triggered)
+
+    try:
+        style_dict = utils.string_to_dict(style_str)
+    except json.decoder.JSONDecodeError:
+        return True, "Error decoding string into valid Cytoscape style format!", "danger", dash.no_update
+
+    state.update_style(style_name, style_dict)
+    return True, "Successfull saved style!", "success", constants.OK_SIGNAL
+
+
+@app.callback(
+    [
+        Output("style-name-input",
+               "value"),
+        Output("style-textarea",
+               "value"),
+        Output("delete-style-signal", "children"),
+    ],
+    [
+        Input("load-style-textarea-button",
+              "n_clicks_timestamp"),
+        Input("delete-style-button",
+              "n_clicks_timestamp"),
+    ],
+    State("style-name-input",
+          "value"),
+    prevent_initial_call=True,
+)
+def update_style_input_fields(
+        load_n_clicks_timestamp,
+        delete_n_clicks_timestamp,
+        style_name):
+    """ Handles loading and deleting styles from the style map.
+
+    This function is called:
+        when the load style button is clicked
+        when the delete style button is clicked
+
+    Args:
+        load_n_clicks_timestamps: List of the timestamps of when load-style-textarea-button buttons were called.
+            Should contain only one value.
+            Value unused, input only provided to register callback.
+        delete_n_clicks_timestamp: List of the timestamps of when delete-style-textarea-button buttons were called.
+            Should contain only one value.
+            Value unused, input only provided to register callback.
+        style_names: List of style names. Should contain only one value, from the style-name-input component.
+        
+    Returns:
+        A 3 tuple, containing:
+            The updated string to be placed in the style-name-input component.
+            The updated string to be placed in the style-textarea component.
+            The updated signal to be placed in the delete-style-signal
+    """
+    ctx = dash.callback_context
+    triggered_id, triggered_prop, triggered_value = utils.ctx_triggered_info(ctx)
+
+    if triggered_id == "load-style-textarea-button":
+        style_map = state.get_style_map()
+        textarea_value = utils.dict_to_str(
+            style_map[style_name]) if style_name in style_map else ""
+        return style_name, textarea_value, dash.no_update
+
+    if triggered_id == "delete-style-button":
+        state.delete_style(style_name)
+        return "", "", constants.OK_SIGNAL
+
+    raise ValueError
+
+
+@app.callback(
+    Output("style-map-update-signal", "children"),
+    [
+        Input("save-style-signal", "children"),
+        Input("delete-style-signal", "children"),
+    ]
+)
+def update_style_map_update_signal(save_style_signal, delete_style_signal):
+    """ Combines the save and delete style signal into an overall style map update signal. 
+
+    This is a workaround to simplify the logic of saving, loading, and deleting styles.
+    The save style button callback needs to update the properties of the save toast, 
+    and saves the style as a side effect.
+    The load and delete callback needs to update the properties of the text fields, 
+    and deletes the style as a side effect.  
     
+    The style-map-update-signal is used to trigger the update_cytoscape_stylesheet callback.
+    If we want to update the style-map-update-signal directly from the save and delete buttons, 
+    we have to combine the two callbacks to saving and deleting (since Dash only supports assigning
+    to an output with a single callback). 
+    In order to avoid combining the callbacks, we let them each produce their own update signals
+    and combine them with this callback is a workaround
+
+    This function is called:
+        when the save-style-signal is updated (when the save style button is called)
+        when the delete-style-signal is updated (when the delete style button is called)
+
+    Args:
+        save_style_signal: The value of the save style signal
+        delete_style_signal: The value of the delete style signal.
+
+    Returns:
+        The updated value of the style-map-update-signal
+    """
+    return constants.OK_SIGNAL

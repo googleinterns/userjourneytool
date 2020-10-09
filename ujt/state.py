@@ -401,9 +401,11 @@ def get_node_to_user_journey_map() -> Dict[str, List[UserJourney]]:
 
     return output_map
 
-# Maybe we can think about making the following functions the result of 
+
+# Maybe we can think about making the following functions the result of
 # a higher order function or decorator.
 # See https://stackoverflow.com/questions/13184281/python-dynamic-function-creation-with-custom-names
+
 
 #region tag list
 def get_tag_list() -> List[str]:
@@ -439,7 +441,10 @@ def update_tag(tag_index, new_tag):
     tag_list = get_tag_list()
     tag_list[tag_index] = new_tag
     set_tag_list(tag_list)
+
+
 #endregion
+
 
 #region tag map
 def get_tag_map() -> Dict[str, List[str]]:
@@ -487,7 +492,10 @@ def update_applied_tag(ujt_id, tag_idx, tag):
     tag_map = get_tag_map()
     tag_map[ujt_id][tag_idx] = tag
     set_tag_map(tag_map)
+
+
 #endregion
+
 
 #region style map
 def get_style_map() -> Dict[str, Dict[str, str]]:
@@ -503,7 +511,7 @@ def set_style_map(style_map):
     return cache.set("style_map", style_map)
 
 
-def create_style(style_name: str, style_dict: Dict[str, str]):
+def update_style(style_name: str, style_dict: Dict[str, str]):
     style_map = get_style_map()
     style_map[style_name] = style_dict
     set_style_map(style_map)
@@ -513,7 +521,10 @@ def delete_style(style_name: str):
     style_map = get_style_map()
     del style_map[style_name]
     set_style_map(style_map)
+
+
 #endregion
+
 
 #region view list
 def get_view_list():
@@ -526,21 +537,27 @@ def get_view_list():
     """
     return cache.get("view_list")
 
+
 def set_view_list(view_list):
     return cache.set("view_list", view_list)
+
 
 def create_view(tag, style):
     view_list = get_view_list()
     view_list.append(tag, style)
     set_view_list(view_list)
 
+
 def update_view(view_idx, tag, style):
     view_list = get_view_list()
     view_list[view_idx] = (tag, style)
     set_view_list(view_list)
 
+
 def delete_view(view_idx):
     view_list = get_view_list()
     del view_list[view_idx]
     set_view_list(view_list)
+
+
 #endregion

@@ -65,12 +65,16 @@ def get_signals():
         "tag-update-signal",
         "virtual-node-update-signal",
         "style-map-update-signal",
+        "save-style-signal",
+        "delete-style-signal",
     ]
 
-    signals = [html.Div(
-        id=signal_id,
-        style={"display": "none"},
-    ) for signal_id in signal_ids]
+    signals = [
+        html.Div(
+            id=signal_id,
+            style={"display": "none"},
+        ) for signal_id in signal_ids
+    ]
 
     return html.Div(id="signal-wrapper-div", children=signals)
 
@@ -137,6 +141,7 @@ def get_cytoscape_graph():
             "height": constants.GRAPH_HEIGHT,
             "backgroundColor": constants.GRAPH_BACKGROUND_COLOR,
         },
+        #stylesheet=*constants.DEF
     )
 
 
@@ -150,8 +155,15 @@ def get_bottom_panel_components():
                             [
                                 html.H1("Tagging"),
                                 html.Div(
-                                    id="tag-panel",
+                                    id="create-tag-panel",
                                 ),
+                                html.Div(
+                                    id="view-panel",
+                                ),
+                                html.Div(
+                                    id="style-panel",
+                                    children=get_create_style_components(),
+                                )
                             ],
                         ),
                         dbc.Col(
@@ -398,13 +410,6 @@ def get_apply_tag_components(ujt_id):
     return out + [add_button_row, dummy_override_dropdown]
 
 
-def get_tag_panel():
-    create_tag_components = get_create_tag_components()
-    apply_view_components = get_apply_view_components()
-    create_style_components = get_create_style_components()
-    return create_tag_components + apply_view_components + create_style_components
-
-
 def get_create_tag_components():
     tag_list = state.get_tag_list()
 
@@ -544,33 +549,29 @@ def get_apply_view_components():
     return [header] + view_rows + [add_button_row]
 
 
-def get_create_style_components(initial_value=""):
+def get_create_style_components():
     style_components = [
-        html.H3("Comments"),
+        html.H3("Styles"),
         dbc.Input(
-            id={"style-name-input": "style-name-input"},
+            id="style-name-input",
             type="text",
             placeholder="Style Name",
         ),
-        dbc.Textarea(
-            id={"style-textarea": "style-textarea"},
-            value=initial_value,
+        dbc.Textarea(id="style-textarea"),
+        dbc.Button(
+            id="load-style-textarea-button",
+            children="Load Style",
         ),
         dbc.Button(
-            id={"save-style-textarea-button": "save-style-textarea-button"},
+            id="save-style-textarea-button",
             children="Save Style",
         ),
         dbc.Button(
-            id={
-                "discard-style-textarea-button":
-                    "discard-style-textarea-button"
-            },
-            children="Discard Style Changes",
+            id="delete-style-button",
+            children="Delete Style",
         ),
         dbc.Toast(
-            id={"save-style-toast": "save-style-toast"},
-            header="Successfully saved style!",
-            icon="success",
+            id="save-style-toast",
             duration=3000,
             dismissable=True,
             body_style={"display": "none"},

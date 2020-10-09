@@ -308,13 +308,14 @@ def style_dropdown_options_from_styles(styles):
     return [{
         "label": style,
         "value": style,
-    } for style in style_map]
+    } for style in styles]
+
 
 def cytoscape_stylesheet_from_style_map(style_map):
     return [
         {
             "selector": f".{style_name}",
             "style": style_value,
-        }
-        for style_name, style_value in style_map.items()
+        } for style_name,
+        style_value in style_map.items()
     ]

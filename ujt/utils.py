@@ -118,6 +118,10 @@ def string_to_dict(stringified_dict):
     return json.loads(stringified_dict)
 
 
+def dict_to_str(input_dict, indent=4):
+    return json.dumps(input_dict, indent=indent)
+
+
 def get_latest_tapped_element(tap_node, tap_edge):
     # is this a hack?
     try:

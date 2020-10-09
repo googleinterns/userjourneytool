@@ -9,7 +9,7 @@ from .dash_app import app, cache
 def initialize_ujt():
     if constants.CLEAR_CACHE_ON_STARTUP:
         cache.clear()
-    
+
     # If first time running server, set these persisted properties as dicts
     cache_key_default_values = [
         ("virtual_node_map", {}),               # Dict[str, VirtualNode]

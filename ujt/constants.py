@@ -33,15 +33,17 @@ DEPENDENCY_DATATABLE_ID = "datatable-dependency-nodes"
 BOOTSTRAP_BUTTON_COLUMN_CLASSES = "m-1 d-flex justify-content-center"
 
 DEFAULT_STYLE_MAP = {
-    NodeType.Name(NodeType.NODETYPE_SERVICE): {
-        "shape": "rectangle",
-        "background-blacken": COMPOUND_BACKGROUND_BLACKEN_FACTOR,
-    },
-    NodeType.Name(NodeType.NODETYPE_VIRTUAL): {
-        "border-style": "dashed",
-        "shape": "octagon",
-        "background-blacken": VIRTUAL_BACKGROUND_BLACKEN_FACTOR,
-    },
+    NodeType.Name(NodeType.NODETYPE_SERVICE):
+        {
+            "shape": "rectangle",
+            "background-blacken": COMPOUND_BACKGROUND_BLACKEN_FACTOR,
+        },
+    NodeType.Name(NodeType.NODETYPE_VIRTUAL):
+        {
+            "border-style": "dashed",
+            "shape": "octagon",
+            "background-blacken": VIRTUAL_BACKGROUND_BLACKEN_FACTOR,
+        },
     Status.Name(Status.STATUS_HEALTHY): {
         "background-color": HEALTHY_COLOR,
     },
