@@ -62,8 +62,6 @@ def get_signals():
     signal_ids = [
         "virtual-node-update-signal",
         # ---
-        "view-update-signal",
-        # ---
         "create-tag-signal",
         "delete-tag-signal",
         "save-tag-signal",
@@ -73,6 +71,11 @@ def get_signals():
         "remove-applied-tag-signal",
         "modify-applied-tag-signal",
         "applied-tag-update-signal",
+        # ---
+        "create-view-signal",
+        "delete-view-signal",
+        "modify-view-signal",
+        "view-update-signal",
         # ---
         "save-style-signal",
         "delete-style-signal",
@@ -489,7 +492,7 @@ def get_create_tag_components():
     return [header] + tag_rows + [add_button_row, save_tag_toast]
 
 
-def get_apply_view_components():
+def get_view_components():
     tag_list = state.get_tag_list()
     style_map = state.get_style_map()
     view_list = state.get_view_list()
@@ -502,7 +505,7 @@ def get_apply_view_components():
                     dbc.Col(
                         children=dcc.Dropdown(
                             id={
-                                "apply-view-tag-dropdown": "apply-view-tag-dropdown",
+                                "view-tag-dropdown": "view-tag-dropdown",
                                 "index": idx
                             },
                             options=converters.tag_dropdown_options_from_tags(
@@ -515,7 +518,7 @@ def get_apply_view_components():
                     dbc.Col(
                         children=dcc.Dropdown(
                             id={
-                                "apply-view-style-dropdown": "apply-view-style-dropdown",
+                                "view-style-dropdown": "view-style-dropdown",
                                 "index": idx
                             },
                             options=converters.style_dropdown_options_from_styles(
@@ -528,7 +531,7 @@ def get_apply_view_components():
                     dbc.Col(
                         children=dbc.Button(
                             children="x",
-                            id={"remove-applied-view-button": "remove-applied-view-button", "index": idx},
+                            id={"delete-view-button": "delete-view-button", "index": idx},
                         ),
                         width="auto",
                         className=constants.BOOTSTRAP_BUTTON_COLUMN_CLASSES,

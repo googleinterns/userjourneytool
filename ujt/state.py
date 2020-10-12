@@ -529,7 +529,7 @@ def delete_style(style_name: str):
 
 #region view list
 def get_view_list():
-    """ Returns the list of created views, which associate a tag and a style..
+    """ Returns the list of created views, which associate a tag and a style.
 
     This structure is a list since the ordering matters in the UI when displaying views.
     
@@ -545,13 +545,13 @@ def set_view_list(view_list):
 
 def create_view(tag, style):
     view_list = get_view_list()
-    view_list.append(tag, style)
+    view_list.append([tag, style])
     set_view_list(view_list)
 
 
 def update_view(view_idx, tag, style):
     view_list = get_view_list()
-    view_list[view_idx] = (tag, style)
+    view_list[view_idx] = [tag, style]
     set_view_list(view_list)
 
 

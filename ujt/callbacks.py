@@ -290,6 +290,7 @@ def generate_selected_info_panel(
     return out
 
 
+#region user journey panel
 @app.callback(
     Output("user-journey-info-panel",
            "children"),
@@ -345,6 +346,25 @@ def generate_user_journey_info_panel(dropdown_value: str) -> List[Any]:
             constants.USER_JOURNEY_DATATABLE_ID)
 
     raise ValueError
+
+
+@app.callback(
+    Output("user-journey-dropdown",
+           "options"),
+    [Input("virtual-node-update-signal",
+           "children")],
+)
+def update_user_journey_dropdown_options(virtual_node_update_signal):
+    node_name_message_map, client_name_message_map = state.get_message_maps()
+    virtual_node_map = state.get_virtual_node_map()
+
+    return converters.dropdown_options_from_maps(
+        node_name_message_map,
+        client_name_message_map,
+        virtual_node_map)
+
+
+#endregion
 
 
 #region virtual nodes
@@ -560,22 +580,6 @@ def save_comment(save_n_clicks_timestamp, tap_node, new_comment):
 #endregion
 
 
-@app.callback(
-    Output("user-journey-dropdown",
-           "options"),
-    [Input("virtual-node-update-signal",
-           "children")],
-)
-def update_user_journey_dropdown_options(virtual_node_update_signal):
-    node_name_message_map, client_name_message_map = state.get_message_maps()
-    virtual_node_map = state.get_virtual_node_map()
-
-    return converters.dropdown_options_from_maps(
-        node_name_message_map,
-        client_name_message_map,
-        virtual_node_map)
-
-
 #region tag creation panel
 @app.callback(
     Output("create-tag-signal",
@@ -622,7 +626,7 @@ def create_tag(create_timestamps):
     prevent_initial_call=True,
 )
 def delete_tag(delete_timestamps):
-    """ Handles creating and deleting tags from the tag list.
+    """ Handles deleting tags from the tag list.
 
     This function is called:
         when a delete tag button is clicked
@@ -903,7 +907,7 @@ def modify_applied_tag(dropdown_values, tap_node, tap_edge):
         tap_edge: Cytoscape element of the tapped/clicked edge.
 
     Returns:
-        A boolean indicating whether the save tag successful toast should open.
+        A signal to be placed in the modify-applied-tag-signal.
     """
     ctx = dash.callback_context
     triggered_id, triggered_prop, triggered_value = utils.ctx_triggered_info(ctx)
@@ -950,14 +954,195 @@ def generate_applied_tag_update_signal(
 #endregion
 
 
+#region view panel
 @app.callback(
-    Output("view-update-signal",
+    Output("create-view-signal",
            "children"),
     Input({"create-view-button": ALL},
           "n_clicks_timestamp"))
-def create_delete_view(n_clicks_timestamp):
-    # TODO: implement this
-    raise PreventUpdate
+def create_view(create_timestamps):
+    """ Handles creating views =.
+
+    This function is called:
+        when the create view button is clicked.
+        
+    Args:
+        create_timestamps: List of the timestamps of the create-view-button buttons were called.
+            Value unused, input only provided to register callback.
+            Should only contain one value.
+
+    Returns:
+        A signal to add to the create-view-signal hidden div.
+    """
+    ctx = dash.callback_context
+    triggered_id, triggered_prop, triggered_value = utils.ctx_triggered_info(ctx)
+
+    # When the button is initially added, it fires a callback.
+    # We want to prevent this callback from making changes to the update signal.
+    if triggered_value is None:
+        raise PreventUpdate
+
+    state.create_view("", "")
+    return constants.OK_SIGNAL
+
+
+@app.callback(
+    Output("delete-view-signal",
+           "children"),
+    Input(
+        {
+            "delete-view-button": "delete-view-button",
+            "index": ALL
+        },
+        "n_clicks_timestamp"),
+    prevent_initial_call=True,
+)
+def delete_view(delete_timestamps):
+    """ Handles deleting views from the view list.
+
+    This function is called:
+        when a delete view button is clicked
+
+    Args:
+        delete_timestamps: List of the timestamps of when delete-view-button buttons were called.
+            Value unused, input only provided to register callback.
+            Should contain only one value.
+
+    Returns:
+        A signal to add to the delete-view-signal hidden div.
+    """
+
+    ctx = dash.callback_context
+    triggered_id, triggered_prop, triggered_value = utils.ctx_triggered_info(ctx)
+
+    # When the button is initially added, it fires a callback.
+    # We want to prevent this callback from making changes to the update signal.
+    if triggered_value is None:
+        raise PreventUpdate
+
+    # Unfortunately, we have to convert the stringified dict back to a dict.
+    # Dash doesn't provide us any other method to see which element triggered the callback.
+    # This isn't very elegant, but I don't see any other way to proceed.
+    id_dict = utils.string_to_dict(triggered_id)
+    view_idx = id_dict["index"]
+    state.delete_view(view_idx)
+
+    return constants.OK_SIGNAL
+
+
+@app.callback(
+    Output("modify-view-signal",
+           "children"),
+    [
+        Input(
+            {
+                "view-tag-dropdown": "view-tag-dropdown",
+                "index": ALL,
+            },
+            "value",
+        ),
+        Input(
+            {
+                "view-style-dropdown": "view-style-dropdown",
+                "index": ALL,
+            },
+            "value",
+        ),
+    ],
+    prevent_initial_call=True,
+)
+def modify_view(tag_dropdown_values, style_dropdown_values):
+    """ Updates the corresponding applied tag in the tag map.
+
+    This function is called:
+        when an apply-tag-dropdown value is updated
+
+    Args:
+        tag_dropdown_values: the values of the view-tag-dropdown dropdown menus.
+        style_dropdown_values: the values of the view-style-dropdown dropdown menus.
+
+    Returns:
+        A signal to be placed in the modify-view-signal.
+    """
+    ctx = dash.callback_context
+    triggered_id, triggered_prop, triggered_value = utils.ctx_triggered_info(ctx)
+
+    if triggered_value is None:
+        raise PreventUpdate
+
+    # Unfortunately, we have to convert the stringified dict back to a dict.
+    # Dash doesn't provide us any other method to see which element triggered the callback.
+    # This isn't very elegant, but I don't see any other way to proceed.
+    id_dict = utils.string_to_dict(triggered_id)
+    view_idx = id_dict["index"]
+
+    tag_value = tag_dropdown_values[view_idx]
+    style_value = style_dropdown_values[view_idx]
+
+    state.update_view(view_idx, tag_value, style_value)
+
+    return constants.OK_SIGNAL
+
+
+@app.callback(
+    Output("view-update-signal",
+           "children"),
+    [
+        Input("create-view-signal",
+              "children"),
+        Input("delete-view-signal",
+              "children"),
+        Input("modify-view-signal",
+              "children"),
+    ],
+    prevent_initial_call=True,
+)
+def generate_view_update_signal(
+        create_view_signal,
+        delete_view_signal,
+        modify_view_signal):
+    return constants.OK_SIGNAL
+
+
+@app.callback(
+    Output("view-panel",
+           "children"),
+    [
+        Input("create-view-signal",
+              "children"),
+        Input("delete-view-signal",
+              "children"),
+        Input("tag-update-signal",
+              "children")
+    ],
+)
+def generate_view_panel(
+        create_view_signal,
+        delete_view_signal,
+        tag_update_signal):
+    """ Handles generating the view creation and deletion panel.
+
+    This function is called:
+        when a new view is created.
+        when a view is deleted.
+        when a tag is updated.
+
+    Args:
+        create_view_signal: Signal indicating that a view was created.
+            Value unused, input only provided to register callback.
+        delete_view_signal: Signal indicating that a view was deleted.
+            Value unused, input only provided to register callback.
+        tag_update_signal: Signal indicating that a tag was updated.
+            Value unused, input only provided to register callback.
+        
+
+    Returns:
+        A list of components to be placed in the view-panel.
+    """
+    return components.get_view_components()
+
+
+#endregion
 
 
 #region create style panel
