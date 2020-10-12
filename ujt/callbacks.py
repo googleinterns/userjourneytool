@@ -211,7 +211,7 @@ def update_graph_elements(
         client_name_message_map,
         virtual_node_map,
     )
-    print(elements)
+    #print(elements)
 
     # Determine if we need to generate a new UUID. This minimizes the choppyness of the animation.
     if triggered_id in [None, "virtual-node-update-signal"]:
@@ -233,14 +233,18 @@ def update_graph_elements(
               "tapNode"),
         Input("cytoscape-graph",
               "tapEdge"),
+        Input("tag-update-signal",
+              "children"),
         Input("applied-tag-update-signal",
               "children"),
     ],
     prevent_initial_call=True,
 )
-def generate_selected_info_panel(tap_node,
-                                 tap_edge,
-                                 applied_tag_update_signal) -> List[Any]:
+def generate_selected_info_panel(
+        tap_node,
+        tap_edge,
+        tag_update_signal,
+        applied_tag_update_signal) -> List[Any]:
     """ Generate the node info panel.
 
     This function is called:
@@ -250,11 +254,16 @@ def generate_selected_info_panel(tap_node,
     Args:
         tap_node: Cytoscape element of the tapped/clicked node.
         tap_edge: Cytoscape element of the tapped/clicked edge.
-        applied_tag_update_signal: The signal indicating that a tag was added or removed.
+        tag_update_signal: The signal indicating a tag was created or deleted. Used to update dropdown options.
+        applied_tag_update_signal: The signal indicating that a tag was added or removed to the selected element.
+
 
     Returns:
         a List of Dash components.
     """
+
+    if tap_node is None and tap_edge is None:
+        raise PreventUpdate
 
     ctx = dash.callback_context
     triggered_id, triggered_prop, triggered_value = utils.ctx_triggered_info(ctx)
@@ -338,6 +347,7 @@ def generate_user_journey_info_panel(dropdown_value: str) -> List[Any]:
     raise ValueError
 
 
+#region virtual nodes
 @app.callback(
     Output("virtual-node-update-signal",
            "children"),
@@ -467,6 +477,10 @@ def toggle_collapse_error_modal(n_clicks_timestamp,
     return False, ""
 
 
+#endregion
+
+
+#region comments
 @app.callback(
     # We can't use ALL in the output, so we use MATCH.
     # However, since there's only one component with this key, the functionality is identical.
@@ -543,6 +557,9 @@ def save_comment(save_n_clicks_timestamp, tap_node, new_comment):
     ]  # wrap in a list since we used pattern matching. should only ever be one toast.
 
 
+#endregion
+
+
 @app.callback(
     Output("user-journey-dropdown",
            "options"),
@@ -559,9 +576,91 @@ def update_user_journey_dropdown_options(virtual_node_update_signal):
         virtual_node_map)
 
 
+#region tag creation panel
 @app.callback(
-    Output({"save-tag-toast": ALL},
-           "is_open"),
+    Output("create-tag-signal",
+           "children"),
+    Input({"create-tag-button": ALL},
+          "n_clicks_timestamp"),
+    prevent_initial_call=True,
+)
+def create_tag(create_timestamps):
+    """ Handles creating tags from the tag list.
+
+    This function is called:
+        when the create tag button is clicked.
+        
+    Args:
+        create_timestamps: List of the timestamps of the create-tag-button buttons was called.
+            Value unused, input only provided to register callback.
+            Should only contain one value.
+
+    Returns:
+        A signal to add to the create-tag-signal hidden div.
+    """
+    ctx = dash.callback_context
+    triggered_id, triggered_prop, triggered_value = utils.ctx_triggered_info(ctx)
+
+    # When the button is initially added, it fires a callback.
+    # We want to prevent this callback from making changes to the update signal.
+    if triggered_value is None:
+        raise PreventUpdate
+
+    state.create_tag("")
+    return constants.OK_SIGNAL
+
+
+@app.callback(
+    Output("delete-tag-signal",
+           "children"),
+    Input(
+        {
+            "delete-tag-button": "delete-tag-button",
+            "index": ALL
+        },
+        "n_clicks_timestamp"),
+    prevent_initial_call=True,
+)
+def delete_tag(delete_timestamps):
+    """ Handles creating and deleting tags from the tag list.
+
+    This function is called:
+        when a delete tag button is clicked
+
+    Args:
+        delete_timestamps: List of the timestamps of when delete-tag-button buttons were called.
+            Value unused, input only provided to register callback.
+            Should contain only one value.
+
+    Returns:
+        A signal to add to the delete-tag-signal hidden div.
+    """
+
+    ctx = dash.callback_context
+    triggered_id, triggered_prop, triggered_value = utils.ctx_triggered_info(ctx)
+
+    # When the button is initially added, it fires a callback.
+    # We want to prevent this callback from making changes to the update signal.
+    if triggered_value is None:
+        raise PreventUpdate
+
+    # Unfortunately, we have to convert the stringified dict back to a dict.
+    # Dash doesn't provide us any other method to see which element triggered the callback.
+    # This isn't very elegant, but I don't see any other way to proceed.
+    id_dict = utils.string_to_dict(triggered_id)
+    tag_idx = id_dict["index"]
+    state.delete_tag(tag_idx)
+
+    return constants.OK_SIGNAL
+
+
+@app.callback(
+    [
+        Output({"save-tag-toast": ALL},
+               "is_open"),
+        Output("save-tag-signal",
+               "children"),
+    ],
     Input(
         {
             "save-tag-button": "save-tag-button",
@@ -593,10 +692,14 @@ def save_tag(n_clicks_timestamp, input_values):
 
     Returns:
         A boolean indicating whether the save tag successful toast should open.
+        A signal to save in the save-tag-signal component.
     """
 
     ctx = dash.callback_context
     triggered_id, triggered_prop, triggered_value = utils.ctx_triggered_info(ctx)
+
+    if triggered_value is None:
+        raise PreventUpdate
 
     # Unfortunately, we have to convert the stringified dict back to a dict.
     # Dash doesn't provide us any other method to see which element triggered the callback.
@@ -610,41 +713,91 @@ def save_tag(n_clicks_timestamp, input_values):
         raise PreventUpdate  # TODO: display an error UI element or something
 
     state.update_tag(tag_idx, tag_value)
-    return [
-        True
-    ]  # since we pattern matched the save-tag-toast, we need to provide output as a list
+    # since we pattern matched the save-tag-toast, we need to provide output as a list
+    return [True], constants.OK_SIGNAL
 
 
 @app.callback(
     Output("tag-update-signal",
            "children"),
     [
-        Input(
-            {
-                "delete-tag-button": "delete-tag-button",
-                "index": ALL
-            },
-            "n_clicks_timestamp"),
-        Input({"create-tag-button": ALL},
-              "n_clicks_timestamp"),
+        Input("create-tag-signal",
+              "children"),
+        Input("delete-tag-signal",
+              "children"),
+        Input("save-tag-signal",
+              "children"),
     ],
     prevent_initial_call=True,
 )
-def create_delete_tag(remove_timestamps, add_timestamps):
-    """ Handles creating and deleting tags from the tag list.
+def generate_tag_update_signal(
+        create_tag_signal,
+        delete_tag_signal,
+        save_tag_signal):
+    print(
+        "generating tag update signal with ctx",
+        dash.callback_context.triggered)
+    return constants.OK_SIGNAL
+
+
+@app.callback(
+    Output("create-tag-panel",
+           "children"),
+    Input("create-tag-signal",
+          "children"),
+    Input("delete-tag-signal",
+          "children"))
+def generate_create_tag_panel(create_tag_signal, delete_tag_signal):
+    """ Handles generating the tag creation and deletion panel.
 
     This function is called:
-        when the create tag button is clicked.
-        while a delete tag button is clicked
+        when a new tag is created.
+        when a tag is deleted.
 
     Args:
-        remove_timestamps: List of the timestamps of when delete-tag-button buttons were called.
+        create_tag_signal: Signal indicating that a tag was created.
             Value unused, input only provided to register callback.
-        add_timestamps: List of the timestamps of the create-tag-button buttons was called.
+        delete_tag_signal: Signal indicating that a tag was deleted.
             Value unused, input only provided to register callback.
+        
+    Returns:
+        A list of components to be placed in the tag-panel.
+    """
+    return components.get_create_tag_components()
+
+
+#endregion
+
+
+#region apply tag panel
+@app.callback(
+    Output("add-applied-tag-signal",
+           "children"),
+    Input({"add-applied-tag-button": ALL},
+          "n_clicks_timestamp"),
+    [
+        State("cytoscape-graph",
+              "tapNode"),
+        State("cytoscape-graph",
+              "tapEdge"),
+    ],
+    prevent_initial_call=True,
+)
+def apply_new_empty_tag(add_timestamps, tap_node, tap_edge):
+    """ Handles applying a new empty tag to the tag map.
+
+    This function is called:
+        when the add applied tag button is clicked.
+
+    Args:
+        add_timestamps: List of the timestamps of the add-applied-tag-button buttons was called.
+            Value unused, input only provided to register callback.
+            Should only contain one value.
+        tap_node: The cytoscape element of the latest tapped node.
+        tap_edge: The cytoscape element of the latest tapped edge.
 
     Returns:
-        A signal to add to the tag-update-signal hidden div.
+        A signal to add to the add-applied-tag-signal hidden div.
     """
 
     ctx = dash.callback_context
@@ -655,57 +808,22 @@ def create_delete_tag(remove_timestamps, add_timestamps):
     if triggered_value is None:
         raise PreventUpdate
 
-    # Unfortunately, we have to convert the stringified dict back to a dict.
-    # Dash doesn't provide us any other method to see which element triggered the callback.
-    # This isn't very elegant, but I don't see any other way to proceed.
-    id_dict = utils.string_to_dict(triggered_id)
-    if "create-tag-button" in id_dict:
-        state.create_tag("")
-    elif "delete-tag-button" in id_dict:
-        tag_idx = id_dict["index"]
-        state.delete_tag(tag_idx)
-    else:
-        raise ValueError
+    ujt_id = utils.get_latest_tapped_element(tap_node,
+                                             tap_edge)["data"]["ujt_id"]
 
+    state.add_tag_to_element(ujt_id, "")
     return constants.OK_SIGNAL
 
 
 @app.callback(
-    Output("create-tag-panel",
+    Output("remove-applied-tag-signal",
            "children"),
-    Input("tag-update-signal",
-          "children"),
-)
-def generate_create_tag_panel(tag_update_signal):
-    """ Handles generating the tag creation and deletion panel.
-
-    This function is called:
-        when a new tag is created.
-        when a tag is deleted.
-
-    Args:
-        tag-update-signal: Signal indicating that the list of tags was modified.
-            Value unused, input only provided to register callback.
-        
-    Returns:
-        A list of components to be placed in the tag-panel.
-    """
-    return components.get_create_tag_components()
-
-
-@app.callback(
-    Output("applied-tag-update-signal",
-           "children"),
-    [
-        Input(
-            {
-                "remove-applied-tag-button": "remove-applied-tag-button",
-                "index": ALL
-            },
-            "n_clicks_timestamp"),
-        Input({"add-applied-tag-button": ALL},
-              "n_clicks_timestamp"),
-    ],
+    Input(
+        {
+            "remove-applied-tag-button": "remove-applied-tag-button",
+            "index": ALL
+        },
+        "n_clicks_timestamp"),
     [
         State("cytoscape-graph",
               "tapNode"),
@@ -714,32 +832,30 @@ def generate_create_tag_panel(tag_update_signal):
     ],
     prevent_initial_call=True,
 )
-def apply_empty_tag_remove_tag(
-        remove_timestamps,
-        add_timestamps,
-        tap_node,
-        tap_edge):
-    """ Handles applying empty tags and removing tags from the tag map.
+def remove_applied_tag(
+    remove_timestamps,
+    tap_node,
+    tap_edge,
+):
+    """ Handles removing tags from the tag map.
 
     This function is called:
-        when the add tag button is clicked.
-        while a delete tag button is clicked
+        when a delete-applied-tag-button is clicked
 
     Args:
-        remove_timestamps: List of the timestamps of when delete-applied-tag-button buttons were called.
+        remove_timestamps: List of the timestamps of when remove-applied-tag-button buttons were called.
             Value unused, input only provided to register callback.
-        add_timestamps: List of the timestamps of the add-applied-tag-button buttons was called.
-            Value unused, input only provided to register callback.
-        tap_node: The last cytoscape node element that was tapped.
-        tap_edge: The last cytoscape edge element that was tapped.
-        
+            Should only contain one value.
+        tap_node: The cytoscape element of the latest tapped node.
+        tap_edge: The cytoscape element of the latest tapped edge.
+
     Returns:
-        A signal to add to the applied-tag-update-signal hidden div.
+        A signal to add to the remove-applied-tag-signal hidden div. 
     """
 
     ctx = dash.callback_context
     triggered_id, triggered_prop, triggered_value = utils.ctx_triggered_info(ctx)
-
+    print("adding applied tag with ctx", ctx.triggered)
     # When the button is initially added, it fires a callback.
     # We want to prevent this callback from making changes to the update signal.
     if triggered_value is None:
@@ -753,19 +869,14 @@ def apply_empty_tag_remove_tag(
     ujt_id = utils.get_latest_tapped_element(tap_node,
                                              tap_edge)["data"]["ujt_id"]
 
-    if "add-applied-tag-button" in id_dict:
-        state.add_tag_to_element(ujt_id, "")
-    elif "remove-applied-tag-button" in id_dict:
-        tag_idx = id_dict["index"]
-        state.remove_tag_from_element(ujt_id, tag_idx)
-    else:
-        raise ValueError
+    tag_idx = id_dict["index"]
+    state.remove_tag_from_element(ujt_id, tag_idx)
 
     return constants.OK_SIGNAL
 
 
 @app.callback(
-    Output("update-applied-tag-dummy-signal",
+    Output("modify-applied-tag-signal",
            "children"),
     Input({
         "apply-tag-dropdown": "apply-tag-dropdown",
@@ -780,7 +891,7 @@ def apply_empty_tag_remove_tag(
     ],
     prevent_initial_call=True,
 )
-def update_applied_tag(dropdown_values, tap_node, tap_edge):
+def modify_applied_tag(dropdown_values, tap_node, tap_edge):
     """ Updates the corresponding applied tag in the tag map.
 
     This function is called:
@@ -805,41 +916,67 @@ def update_applied_tag(dropdown_values, tap_node, tap_edge):
     # This isn't very elegant, but I don't see any other way to proceed.
     id_dict = utils.string_to_dict(triggered_id)
 
+    ujt_id = utils.get_latest_tapped_element(tap_node,
+                                             tap_edge)["data"]["ujt_id"]
+
     tag_idx = id_dict["index"]
     tag_value = dropdown_values[tag_idx]
 
-    latest_tapped_element = utils.get_latest_tapped_element(tap_node, tap_edge)
-    ujt_id = latest_tapped_element["data"]["ujt_id"]
-
     state.update_applied_tag(ujt_id, tag_idx, tag_value)
+    return constants.OK_SIGNAL
 
 
-"""
 @app.callback(
-    Output("style-map-update-signal", "children"),
-    Input({"create-view-button": ALL}, "n_clicks_timestamp")
+    Output("applied-tag-update-signal",
+           "children"),
+    [
+        Input("add-applied-tag-signal",
+              "children"),
+        Input("remove-applied-tag-signal",
+              "children"),
+        Input("modify-applied-tag-signal",
+              "children"),
+    ],
+    prevent_initial_call=True,
 )
-def create_view(n_clicks_timestamp):
+def generate_applied_tag_update_signal(
+        add_applied_tag_signal,
+        remove_applied_tag_signal,
+        modify_applied_tag_signal):
+    print("apply tag update signal fired")
+    return constants.OK_SIGNAL
+
+
+#endregion
+
+
+@app.callback(
+    Output("view-update-signal",
+           "children"),
+    Input({"create-view-button": ALL},
+          "n_clicks_timestamp"))
+def create_delete_view(n_clicks_timestamp):
     # TODO: implement this
     raise PreventUpdate
-"""
 
 
+#region create style panel
 @app.callback(
     Output("cytoscape-graph",
            "stylesheet"),
-    Input("style-map-update-signal",
+    Input("style-update-signal",
           "children"),
-    prevent_initial_call=True,          
 )
 def update_cytoscape_stylesheet(style_map_update_signal):
-    print("updating cytoscape stylesheet")
+    print(
+        "updating cytoscape stylesheet with ctx",
+        dash.callback_context.triggered)
     style_map = state.get_style_map()
     stylesheet = [
         *constants.BASE_CYTO_STYLESHEET,
         *converters.cytoscape_stylesheet_from_style_map(style_map)
     ]
-    print(stylesheet)
+    #print(stylesheet)
     return stylesheet
 
 
@@ -851,7 +988,8 @@ def update_cytoscape_stylesheet(style_map_update_signal):
                "header"),
         Output("save-style-toast",
                "icon"),
-        Output("save-style-signal", "children")
+        Output("save-style-signal",
+               "children")
     ],
     Input("save-style-textarea-button",
           "n_clicks_timestamp"),
@@ -899,7 +1037,8 @@ def save_style(save_n_clicks_timestamps, style_name, style_str):
                "value"),
         Output("style-textarea",
                "value"),
-        Output("delete-style-signal", "children"),
+        Output("delete-style-signal",
+               "children"),
     ],
     [
         Input("load-style-textarea-button",
@@ -916,6 +1055,16 @@ def update_style_input_fields(
         delete_n_clicks_timestamp,
         style_name):
     """ Handles loading and deleting styles from the style map.
+
+    Notice this function handles both loading and deleting, since these operations both affect
+    the state of the style name and style textarea.
+    We don't dynamically generate the style panel since there's always one input and one textarea.
+    This makes it more inconvenient to split these cases into two callbacks, each producing their own update signal,
+    because we don't use a callback to dynamically generate the style panel. 
+    
+    This is slightly inconsistent with the tag creation and application callback organization, where each callback
+    produces its own signal, and another callback rerenders the respective panel.
+    Despite the inconsistency, I feel this method for static components makes more sense and reduces complexity.
 
     This function is called:
         when the load style button is clicked
@@ -953,13 +1102,17 @@ def update_style_input_fields(
 
 
 @app.callback(
-    Output("style-map-update-signal", "children"),
+    Output("style-update-signal",
+           "children"),
     [
-        Input("save-style-signal", "children"),
-        Input("delete-style-signal", "children"),
-    ]
+        Input("save-style-signal",
+              "children"),
+        Input("delete-style-signal",
+              "children"),
+    ],
+    prevent_initial_call=True,
 )
-def update_style_map_update_signal(save_style_signal, delete_style_signal):
+def generate_style_update_signal(save_style_signal, delete_style_signal):
     """ Combines the save and delete style signal into an overall style map update signal. 
 
     This is a workaround to simplify the logic of saving, loading, and deleting styles.
@@ -968,12 +1121,12 @@ def update_style_map_update_signal(save_style_signal, delete_style_signal):
     The load and delete callback needs to update the properties of the text fields, 
     and deletes the style as a side effect.  
     
-    The style-map-update-signal is used to trigger the update_cytoscape_stylesheet callback.
-    If we want to update the style-map-update-signal directly from the save and delete buttons, 
+    The style-update-signal is used to trigger the update_cytoscape_stylesheet callback.
+    If we want to update the style-update-signal directly from the save and delete buttons, 
     we have to combine the two callbacks to saving and deleting (since Dash only supports assigning
     to an output with a single callback). 
     In order to avoid combining the callbacks, we let them each produce their own update signals
-    and combine them with this callback is a workaround
+    and combine them with this callback is a workaround.
 
     This function is called:
         when the save-style-signal is updated (when the save style button is called)
@@ -984,6 +1137,9 @@ def update_style_map_update_signal(save_style_signal, delete_style_signal):
         delete_style_signal: The value of the delete style signal.
 
     Returns:
-        The updated value of the style-map-update-signal
+        The updated value of the style-update-signal
     """
     return constants.OK_SIGNAL
+
+
+#endregion

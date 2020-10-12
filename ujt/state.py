@@ -434,6 +434,7 @@ def create_tag(new_tag):
 def delete_tag(tag_index):
     tag_list = get_tag_list()
     del tag_list[tag_index]
+    # TODO: delete this tag from the tag map
     set_tag_list(tag_list)
 
 

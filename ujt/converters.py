@@ -301,7 +301,7 @@ def tag_dropdown_options_from_tags(tags):
     return [{
         "label": tag,
         "value": tag,
-    } for tag in tags]
+    } for tag in tags if tag != ""]
 
 
 def style_dropdown_options_from_styles(styles):

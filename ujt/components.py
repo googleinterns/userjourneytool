@@ -60,13 +60,23 @@ def get_layout():
 
 def get_signals():
     signal_ids = [
-        "applied-tag-update-signal",
-        "update-applied-tag-dummy-signal",
-        "tag-update-signal",
         "virtual-node-update-signal",
-        "style-map-update-signal",
+        # ---
+        "view-update-signal",
+        # ---
+        "create-tag-signal",
+        "delete-tag-signal",
+        "save-tag-signal",
+        "tag-update-signal",
+        # ---
+        "add-applied-tag-signal",
+        "remove-applied-tag-signal",
+        "modify-applied-tag-signal",
+        "applied-tag-update-signal",
+        # ---
         "save-style-signal",
         "delete-style-signal",
+        "style-update-signal",
     ]
 
     signals = [
