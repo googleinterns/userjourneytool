@@ -119,9 +119,7 @@ def update_graph_elements(
 
     ctx = dash.callback_context
     triggered_id, triggered_prop, triggered_value = utils.ctx_triggered_info(ctx)
-    print("updating elements:", ctx.triggered)
-    #print(triggered_id, triggered_prop, triggered_value)  # for debugging...
-    #print("updating elements")
+    #print("updating elements:", ctx.triggered)  # for debugging
     if (triggered_id == "virtual-node-update-signal" and
             triggered_value != constants.OK_SIGNAL) or (
                 triggered_id
@@ -208,9 +206,6 @@ def update_graph_elements(
         elements,
         active_user_journey_name)
 
-    tag_map = state.get_tag_map()
-    view_list = state.get_view_list()
-
     transformers.apply_node_classes(
         elements,
         node_name_message_map,
@@ -218,12 +213,14 @@ def update_graph_elements(
         virtual_node_map,
     )
 
+    tag_map = state.get_tag_map()
+    view_list = state.get_view_list()
     transformers.apply_views(
         elements,
         tag_map,
         view_list,
     )
-    #print(elements)
+    #print(elements)  # for debugging
 
     # Determine if we need to generate a new UUID. This minimizes the choppyness of the animation.
     if triggered_id in [None, "virtual-node-update-signal"]:
@@ -367,6 +364,17 @@ def generate_user_journey_info_panel(dropdown_value: str) -> List[Any]:
            "children")],
 )
 def update_user_journey_dropdown_options(virtual_node_update_signal):
+    """ Updates the options in the user journey dropdown on virtual node changes.
+
+    This function is called:
+        when a virtual node is created or deleted.
+
+    Args:
+        virtual_node_update_signal: Signal indicating a virtual node was modified.
+
+    Returns:
+        A list of options for the user journey dropdown.
+    """
     node_name_message_map, client_name_message_map = state.get_message_maps()
     virtual_node_map = state.get_virtual_node_map()
 
@@ -752,9 +760,6 @@ def generate_tag_update_signal(
         create_tag_signal,
         delete_tag_signal,
         save_tag_signal):
-    print(
-        "generating tag update signal with ctx",
-        dash.callback_context.triggered)
     return constants.OK_SIGNAL
 
 
@@ -961,7 +966,6 @@ def generate_applied_tag_update_signal(
         add_applied_tag_signal,
         remove_applied_tag_signal,
         modify_applied_tag_signal):
-    print("apply tag update signal fired")
     return constants.OK_SIGNAL
 
 
@@ -1172,15 +1176,22 @@ def generate_view_panel(
           "children"),
 )
 def update_cytoscape_stylesheet(style_update_signal):
-    print(
-        "updating cytoscape stylesheet with ctx",
-        dash.callback_context.triggered)
+    """ Updates the cytoscape stylesheet.
+
+    This function is called:
+        when a style is updated.
+
+    Args:
+        style_update_signal: Signal indicating a style was updated.
+
+    Returns:
+        A dictionary encoding a cytoscape format stylesheet.
+    """
     style_map = state.get_style_map()
     stylesheet = [
         *constants.BASE_CYTO_STYLESHEET,
         *converters.cytoscape_stylesheet_from_style_map(style_map)
     ]
-    #print(stylesheet)
     return stylesheet
 
 
@@ -1224,8 +1235,6 @@ def save_style(save_n_clicks_timestamps, style_name, style_str):
             A message to be placed in the header of the toast.
             A string to determine the toast icon.
     """
-    print(dash.callback_context.triggered)
-
     try:
         style_dict = utils.string_to_dict(style_str)
     except json.decoder.JSONDecodeError:
