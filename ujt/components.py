@@ -80,6 +80,8 @@ def get_signals():
         "save-style-signal",
         "delete-style-signal",
         "style-update-signal",
+        # ---
+        "composite-tagging-update-signal",
     ]
 
     signals = [

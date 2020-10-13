@@ -433,8 +433,14 @@ def create_tag(new_tag):
 
 def delete_tag(tag_index):
     tag_list = get_tag_list()
+
+    tag_value = tag_list[tag_index]
+    tag_map = get_tag_map()
+    for ujt_id in tag_map:
+        tag_map[ujt_id] = [tag for tag in tag_map[ujt_id] if tag != tag_value]
+    set_tag_map(tag_map)
+
     del tag_list[tag_index]
-    # TODO: delete this tag from the tag map
     set_tag_list(tag_list)
 
 
@@ -520,6 +526,15 @@ def update_style(style_name: str, style_dict: Dict[str, str]):
 
 def delete_style(style_name: str):
     style_map = get_style_map()
+
+    view_list = get_view_list()
+    view_list = [
+        [view_tag,
+         view_style_name] for view_tag,
+        view_style_name in view_list if view_style_name != style_name
+    ]
+    set_view_list(view_list)
+
     del style_map[style_name]
     set_style_map(style_map)
 

@@ -57,6 +57,8 @@ from .dash_app import app
               "n_clicks_timestamp"),
         Input({"override-dropdown": ALL},
               "value"),
+        Input("composite-tagging-update-signal",
+              "children")
     ],
     [
         State("cytoscape-graph",
@@ -77,6 +79,7 @@ def update_graph_elements(
         collapse_n_clicks_timestamp: int,
         expand_n_clicks_timestamp: int,
         override_dropdown_value: int,
+        composite_tagging_update_signal: str,
         # State
         state_elements: List[Dict[str,
                                   Any]],
@@ -116,9 +119,9 @@ def update_graph_elements(
 
     ctx = dash.callback_context
     triggered_id, triggered_prop, triggered_value = utils.ctx_triggered_info(ctx)
-    #print(ctx.triggered)
+    print("updating elements:", ctx.triggered)
     #print(triggered_id, triggered_prop, triggered_value)  # for debugging...
-    print("updating elements")
+    #print("updating elements")
     if (triggered_id == "virtual-node-update-signal" and
             triggered_value != constants.OK_SIGNAL) or (
                 triggered_id
@@ -205,11 +208,20 @@ def update_graph_elements(
         elements,
         active_user_journey_name)
 
+    tag_map = state.get_tag_map()
+    view_list = state.get_view_list()
+
     transformers.apply_node_classes(
         elements,
         node_name_message_map,
         client_name_message_map,
         virtual_node_map,
+    )
+
+    transformers.apply_views(
+        elements,
+        tag_map,
+        view_list,
     )
     #print(elements)
 
@@ -579,6 +591,8 @@ def save_comment(save_n_clicks_timestamp, tap_node, new_comment):
 
 #endregion
 
+#region tagging feature
+
 
 #region tag creation panel
 @app.callback(
@@ -859,7 +873,7 @@ def remove_applied_tag(
 
     ctx = dash.callback_context
     triggered_id, triggered_prop, triggered_value = utils.ctx_triggered_info(ctx)
-    print("adding applied tag with ctx", ctx.triggered)
+
     # When the button is initially added, it fires a callback.
     # We want to prevent this callback from making changes to the update signal.
     if triggered_value is None:
@@ -1113,19 +1127,23 @@ def generate_view_update_signal(
         Input("delete-view-signal",
               "children"),
         Input("tag-update-signal",
-              "children")
+              "children"),
+        Input("style-update-signal",
+              "children"),
     ],
 )
 def generate_view_panel(
         create_view_signal,
         delete_view_signal,
-        tag_update_signal):
+        tag_update_signal,
+        style_update_signal):
     """ Handles generating the view creation and deletion panel.
 
     This function is called:
         when a new view is created.
         when a view is deleted.
         when a tag is updated.
+        when a style is updated
 
     Args:
         create_view_signal: Signal indicating that a view was created.
@@ -1134,7 +1152,8 @@ def generate_view_panel(
             Value unused, input only provided to register callback.
         tag_update_signal: Signal indicating that a tag was updated.
             Value unused, input only provided to register callback.
-        
+        style_update_signal: Signal indicating that a style was updated.
+            Value unused, input only provided to register callback.
 
     Returns:
         A list of components to be placed in the view-panel.
@@ -1152,7 +1171,7 @@ def generate_view_panel(
     Input("style-update-signal",
           "children"),
 )
-def update_cytoscape_stylesheet(style_map_update_signal):
+def update_cytoscape_stylesheet(style_update_signal):
     print(
         "updating cytoscape stylesheet with ctx",
         dash.callback_context.triggered)
@@ -1213,7 +1232,7 @@ def save_style(save_n_clicks_timestamps, style_name, style_str):
         return True, "Error decoding string into valid Cytoscape style format!", "danger", dash.no_update
 
     state.update_style(style_name, style_dict)
-    return True, "Successfull saved style!", "success", constants.OK_SIGNAL
+    return True, "Successfully saved style!", "success", constants.OK_SIGNAL
 
 
 @app.callback(
@@ -1324,6 +1343,32 @@ def generate_style_update_signal(save_style_signal, delete_style_signal):
     Returns:
         The updated value of the style-update-signal
     """
+    return constants.OK_SIGNAL
+
+
+#endregion
+
+
+@app.callback(
+    Output("composite-tagging-update-signal",
+           "children"),
+    [
+        Input("tag-update-signal",
+              "children"),
+        Input("applied-tag-update-signal",
+              "children"),
+        Input("view-update-signal",
+              "children"),
+        Input("style-update-signal",
+              "children"),
+    ],
+    prevent_initial_call=True,
+)
+def generate_composite_tagging_update_signal(
+        tag_update_signal,
+        applied_tag_update_signal,
+        view_update_signal,
+        style_update_signal):
     return constants.OK_SIGNAL
 
 
