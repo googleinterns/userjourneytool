@@ -1,3 +1,3 @@
 #!/bin/bash
-python -m grpc.tools.protoc --proto_path=protos --python_out=generated --mypy_out=generated protos/*
+python -m grpc.tools.protoc --proto_path=protos --python_out=generated --grpc_python_out generated --mypy_out=generated protos/*
 

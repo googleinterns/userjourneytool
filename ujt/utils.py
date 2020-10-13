@@ -16,58 +16,7 @@
 Can be refactored into multiple files if necessary.
 """
 
-import pathlib
-from typing import Type
-
-import google.protobuf.text_format as text_format
-from google.protobuf.message import Message
-
 from . import constants, state
-
-
-def named_proto_file_name(name: str, proto_type: Type[Message]):
-    """ Generates the default file name for messages with a name field.
-
-    Such messages include: Services, Endpoints, Clients, UserJourneys.
-
-    Args:
-        name: A protobuf message name.
-        proto_type: The type of the protobuf message
-
-    Returns:
-        A string of the default file name for the given message.
-    """
-    return f"{proto_type.__name__}_{name}"
-
-
-def write_proto_to_file(file_name: str, message: Message) -> None:
-    """Writes a protobuf to disk in a human-readable format.
-
-    Args:
-        file_name: The desired file name for the file to be written.
-        message: A protobuf message.
-    """
-
-    with open(pathlib.Path(__file__).parent.parent / "data" / file_name,
-              "w+") as f:
-        f.write(text_format.MessageToString(message))
-
-
-def read_proto_from_file(file_name: str, proto_type: Type[Message]) -> Message:
-    """Reads a protobuf message from a file.
-
-    Args:
-        file_name: The desired file name for the file to be read.
-        proto_type: The type of the protobuf message.
-
-    Raises:
-        FileNotFoundError: The path was invalid.
-    """
-
-    with open(pathlib.Path(__file__).parent.parent / "data" / file_name,
-              "r") as f:
-        proto_text: str = f.read()
-        return text_format.Parse(proto_text, proto_type())
 
 
 def is_client_cytoscape_node(tap_node):
@@ -98,7 +47,11 @@ def ctx_triggered_info(ctx):
     return triggered_id, triggered_prop, triggered_value
 
 
-def get_highest_collapsed_virtual_node_name(node_name):
+def get_highest_collapsed_virtual_node_name(
+    node_name,
+    virtual_node_map,
+    parent_virtual_node_map,
+):
     """ Gets the name of the highest collapsed virtual node, given a node name.
 
     Node name can be virtual or non virtual.
@@ -107,14 +60,13 @@ def get_highest_collapsed_virtual_node_name(node_name):
     Can refactor later.
 
     Args:
-        node_name: a name of a virtual or non-virtual node.
+        node_name: A name of a virtual or non-virtual node.
+        virtual_node_map: A dict mapping virtual node names to virtual node protos.
+        parent_virtual_node_map: A parent mapping node names (virtual or non-virtual) to the name of their virtual parent. 
 
     Returns:
         The name of the highest collapsed virtual node above the given node.
     """
-    virtual_node_map = state.get_virtual_node_map()
-    parent_virtual_node_map = state.get_parent_virtual_node_map()
-
     current_name = node_name
     highest_collapsed_name = None
 
@@ -131,3 +83,7 @@ def get_highest_collapsed_virtual_node_name(node_name):
         highest_collapsed_name = current_name
 
     return highest_collapsed_name
+
+
+def proto_list_to_name_map(proto_list):
+    return {proto.name: proto for proto in proto_list}

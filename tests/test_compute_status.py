@@ -1,3 +1,5 @@
+# pylint: disable=redefined-outer-name
+
 from unittest.mock import ANY, Mock, call, patch, sentinel
 
 import pytest
@@ -15,16 +17,6 @@ import ujt.compute_status
 @pytest.fixture
 def patch_path():
     return "ujt.compute_status"
-
-
-@pytest.fixture
-def slo_bounds():
-    return {
-        "slo_error_lower_bound": .1,
-        "slo_warn_lower_bound": .2,
-        "slo_warn_upper_bound": .8,
-        "slo_error_upper_bound": .9,
-    }
 
 
 @pytest.mark.parametrize(
@@ -62,6 +54,7 @@ def test_compute_statuses(patch_path, expected_status):
     def side_effect_update_node_name_message_map(_, node_name):
         node_name_message_map[node_name].status = expected_status
         return expected_status
+
     with patch(
             f"{patch_path}.compute_single_node_status",
             Mock(
@@ -253,3 +246,34 @@ def test_compute_sli_status(sli_value, expected_status, slo_bounds):
     sli = SLI(sli_value=sli_value, **slo_bounds)
     assert ujt.compute_status.compute_sli_status(sli) == expected_status
     assert sli.status == expected_status
+
+
+def test_reset_node_statuses():
+    node_name = "node"
+    node_name_message_map = {
+        node_name: Node(name=node_name,
+                        status=Status.STATUS_ERROR),
+    }
+    ujt.compute_status.reset_node_statuses(node_name_message_map)
+    assert node_name_message_map[node_name].status == Status.STATUS_UNSPECIFIED
+
+
+def test_reset_client_statuses():
+    client_name = "client"
+    user_journey_name = "uj"
+    client_name_message_map = {
+        client_name:
+            Client(
+                name=client_name,
+                user_journeys=[
+                    UserJourney(
+                        name=user_journey_name,
+                        client_name=client_name,
+                        status=Status.STATUS_ERROR,
+                    ),
+                ],
+            ),
+    }
+    ujt.compute_status.reset_client_statuses(client_name_message_map)
+    assert client_name_message_map[client_name].user_journeys[
+        0].status == Status.STATUS_UNSPECIFIED

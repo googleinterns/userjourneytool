@@ -17,8 +17,9 @@ def get_top_row_components():
                 dbc.Row(
                     children=[
                         dbc.Col(
-                            dbc.Button(id="refresh-button",
-                                       children="Refresh"),
+                            dbc.Button(
+                                id="refresh-sli-button",
+                                children="Refresh SLIs"),
                         ),
                         dbc.Col(
                             children=[
@@ -97,9 +98,10 @@ def get_bottom_info_panels():
                                     id="client-dropdown",
                                     clearable=False,
                                     searchable=False,
-                                    options=converters.
-                                    dropdown_options_from_client_map(
-                                        state.get_client_name_message_map())),
+                                    #options=converters.
+                                    #dropdown_options_from_client_map(
+                                    #    state.get_client_name_message_map())
+                                ),
                                 html.Div(
                                     id="client-info-panel",
                                     className="info-panel",
@@ -144,7 +146,8 @@ def get_layout():
                         dbc.Button(
                             "Close",
                             id="collapse-error-modal-close",
-                            className="ml-auto")),
+                            className="ml-auto"),
+                    ),
                 ],
                 id="collapse-error-modal",
             ),

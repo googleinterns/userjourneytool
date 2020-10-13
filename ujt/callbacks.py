@@ -29,7 +29,7 @@ from .dash_app import app
     Output("cytoscape-graph",
            "elements"),
     [
-        Input("refresh-button",
+        Input("refresh-sli-button",
               "n_clicks_timestamp"),
         Input({"datatable-id": ALL},
               "selected_row_ids"),
@@ -91,20 +91,25 @@ def update_graph_elements(
 
     ctx = dash.callback_context
     triggered_id, triggered_prop, triggered_value = utils.ctx_triggered_info(ctx)
-
+    print(triggered_id, triggered_prop, triggered_value)
     if triggered_id == "virtual-node-update-signal" and triggered_value != constants.OK_SIGNAL:
         # No-op if the validation signal isn't OK
         raise PreventUpdate
 
-    if triggered_id == "refresh-button":
-        state.get_slis()  # no-op for now.
-
-    # Perform status computation.
     node_name_message_map, client_name_message_map = state.get_message_maps()
     virtual_node_map = state.get_virtual_node_map()
 
+    if triggered_id == "refresh-sli-button":
+        state.clear_sli_cache(
+        )  # in future, conditionally clear this based on timestamp
+        sli_list = state.get_slis()
+        node_name_message_map = transformers.apply_slis_to_node_map(
+            sli_list,
+            node_name_message_map)
+
+    # Perform status computation.
     compute_status.reset_node_statuses(node_name_message_map)
-    compute_status.reset_client_statses(client_name_message_map)
+    compute_status.reset_client_statuses(client_name_message_map)
     compute_status.reset_node_statuses(virtual_node_map)
 
     # combine the two maps of nodes into one dictionary
@@ -161,7 +166,9 @@ def update_graph_elements(
 
     # Workaround for https://github.com/plotly/dash-cytoscape/issues/106
     # Give new ids to Cytoscape to avoid immutability of edges and parent relationships.
-    elements = transformers.apply_uuid(elements)
+    # TODO: fix this to call only when changing an immutable relationship
+    # i.e. don't call when selecting client node -> user_journey_table_selected_row_ids changes to [None]
+    elements = transformers.apply_uuid_to_elements(elements)
     return elements
 
 

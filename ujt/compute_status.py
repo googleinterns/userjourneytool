@@ -5,7 +5,7 @@ from graph_structures_pb2 import SLI, Client, Node, Status
 
 if TYPE_CHECKING:
     from graph_structures_pb2 import \
-        StatusValue  # pylint: disable=no-name-in-module
+        StatusValue  # pylint: disable=no-name-in-module  # pragma: no cover
 
 
 def reset_node_statuses(node_name_message_map):
@@ -13,7 +13,7 @@ def reset_node_statuses(node_name_message_map):
         node.status = Status.STATUS_UNSPECIFIED
 
 
-def reset_client_statses(client_name_message_map):
+def reset_client_statuses(client_name_message_map):
     for client in client_name_message_map.values():
         for user_journey in client.user_journeys:
             user_journey.status = Status.STATUS_UNSPECIFIED
