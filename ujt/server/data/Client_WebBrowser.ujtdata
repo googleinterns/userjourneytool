@@ -1,0 +1,28 @@
+name: "WebBrowser"
+user_journeys {
+  name: "WebBrowser.ViewLeaderboard"
+  client_name: "WebBrowser"
+  dependencies {
+    target_name: "WebServer.GetLeaderboardPage"
+    source_name: "WebBrowser.ViewLeaderboard"
+    toplevel: true
+  }
+}
+user_journeys {
+  name: "WebBrowser.ViewProfile"
+  client_name: "WebBrowser"
+  dependencies {
+    target_name: "WebServer.GetProfilePage"
+    source_name: "WebBrowser.ViewProfile"
+    toplevel: true
+  }
+}
+user_journeys {
+  name: "WebBrowser.ConductMicrotransaction"
+  client_name: "WebBrowser"
+  dependencies {
+    target_name: "WebServer.BuyCurrency"
+    source_name: "WebBrowser.ConductMicrotransaction"
+    toplevel: true
+  }
+}

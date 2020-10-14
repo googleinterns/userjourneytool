@@ -1,0 +1,13 @@
+node_type: NODETYPE_SERVICE
+name: "LeaderboardService"
+child_names: "LeaderboardService.GetLeaderboard"
+child_names: "LeaderboardService.SetUserHighScore"
+child_names: "LeaderboardService.GetUserHighScore"
+slis {
+  node_name: "LeaderboardService"
+  sli_value: 0.04846717730185046
+  slo_error_upper_bound: 0.9
+  slo_error_lower_bound: 0.1
+  slo_warn_upper_bound: 0.8
+  slo_warn_lower_bound: 0.2
+}

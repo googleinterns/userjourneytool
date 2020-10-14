@@ -1,0 +1,12 @@
+node_type: NODETYPE_SERVICE
+name: "ProfileDB"
+child_names: "ProfileDB.ReadFriendsList"
+child_names: "ProfileDB.WriteFriendsList"
+slis {
+  node_name: "ProfileDB"
+  sli_value: 0.5542672069773664
+  slo_error_upper_bound: 0.9
+  slo_error_lower_bound: 0.1
+  slo_warn_upper_bound: 0.8
+  slo_warn_lower_bound: 0.2
+}
