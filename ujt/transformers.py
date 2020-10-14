@@ -37,11 +37,16 @@ def apply_node_classes(
         else:  # element_ujt_id in virtual_node_map
             node = virtual_node_map[element_ujt_id]
 
-        element["classes"] = " ".join(
-            [
-                NodeType.Name(node.node_type),
-                Status.Name(node.status),
-            ])  # use this join instead of format string for future flexibility
+        class_list = [NodeType.Name(node.node_type)]
+        if node.override_status != Status.STATUS_UNSPECIFIED:
+            class_list += [
+                Status.Name(node.override_status),
+                constants.OVERRIDE_CLASS
+            ]
+        else:
+            class_list += [Status.Name(node.status)]
+
+        element["classes"] = " ".join(class_list)
 
     # no return since we directly mutated elements
 

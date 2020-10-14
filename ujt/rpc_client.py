@@ -6,9 +6,15 @@ These functions are 1:1 passthroughs right now, but we may need to do
 some additional data processing as the application grows.
 """
 
+from typing import TYPE_CHECKING, Type
+
 import grpc
 import server_pb2
 import server_pb2_grpc
+
+if TYPE_CHECKING:
+    from graph_structures_pb2 import \
+        StatusValue  # pylint: disable=no-name-in-module  # pragma: no cover
 
 # Let's hardcode this for now... later can move into cfg file. Doesn't really fit in constants file
 # Not sure how to provide it as a cmd line argument from ujt module.
@@ -18,14 +24,14 @@ reporting_service_stub = server_pb2_grpc.ReportingServiceStub(channel)
 
 def get_nodes():
     """ Reads a list of Nodes from the remote Reporting Service. """
-    return reporting_service_stub.GetNodes(server_pb2.NodeRequest())
+    return reporting_service_stub.GetNodes(server_pb2.GetNodesRequest())
 
 
 def get_clients():
     """ Reads a list of Clients from the remote Reporting Service. """
-    return reporting_service_stub.GetClients(server_pb2.ClientRequest())
+    return reporting_service_stub.GetClients(server_pb2.GetClientsRequest())
 
 
 def get_slis():
     """ Reads a list of SLIs from the remote Reporting Service. """
-    return reporting_service_stub.GetSLIs(server_pb2.SLIRequest())
+    return reporting_service_stub.GetSLIs(server_pb2.GetSLIsRequest())

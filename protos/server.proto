@@ -4,38 +4,37 @@ package ujt_protos;
 
 service ReportingService {
     // for generating graph
-    rpc GetNodes(NodeRequest) returns (NodeResponse) {}
+    rpc GetNodes(GetNodesRequest) returns (GetNodesResponse) {}
     // for updating statuses
-    rpc GetSLIs(SLIRequest) returns (SLIResponse) {}
+    rpc GetSLIs(GetSLIsRequest) returns (GetSLIsResponse) {}
     // for user journeys
-    rpc GetClients(ClientRequest) returns (ClientResponse) {}
+    rpc GetClients(GetClientsRequest) returns (GetClientsResponse) {}
 
-    //rpc SetComment(CommentRequest) returns (CommentResponse) {}
 }
 
-message NodeRequest {
-    // add filtering fields later...
-    // not sure if it's necessary/useful to request a subset of nodes
-    // I imagine nodes should be requested once at startup (and perhaps force-refreshed)
+message GetNodesRequest {
+    // We can add filtering fields later.
+    // Not sure if it's necessary/useful to request a subset of nodes.
+    // I imagine nodes should be requested once at startup (and perhaps force-refreshed), 
+    // which should both request all nodes.
 }
 
-message NodeResponse {
+message GetNodesResponse {
     repeated Node nodes = 1;
 }
 
-message SLIRequest {
-    // same situation as NodeResponse, not sure when we need to request individual SLIs.
-    // we can add fields later if it becomes necessary
-}
-
-message SLIResponse {
-    repeated SLI slis = 1;
-}
-
-message ClientRequest {
+message GetSLIsRequest {
     // ...
 }
 
-message ClientResponse {
+message GetSLIsResponse {
+    repeated SLI slis = 1;
+}
+
+message GetClientsRequest {
+    // ...
+}
+
+message GetClientsResponse {
     repeated Client clients = 1;
 }

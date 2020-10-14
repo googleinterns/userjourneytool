@@ -4,8 +4,11 @@ Generally contains constants for styling.
 """
 from graph_structures_pb2 import NodeType, Status
 
+CLEAR_CACHE_ON_STARTUP = False
+
 CLIENT_CLASS = "CLIENT"
 HIGHLIGHTED_UJ_EDGE_CLASS = "HIGHLIGHTED_UJ_EDGE"
+OVERRIDE_CLASS = "OVERRIDE"
 OK_SIGNAL = "OK"
 
 HEALTHY_COLOR = "green"
@@ -36,10 +39,12 @@ CYTO_STYLESHEET = [
     },
     {
         "selector": "edge",
-        "style": {
-            "curve-style": "straight",
-            "target-arrow-shape": "triangle",
-        }
+        "style":
+            {
+                "curve-style": "straight",
+                "target-arrow-shape": "triangle",
+                "arrow-scale": 2,
+            }
     },
     {
         "selector": f".{NodeType.Name(NodeType.NODETYPE_SERVICE)}",
@@ -89,6 +94,12 @@ CYTO_STYLESHEET = [
                 "shape": "octagon",
                 "background-blacken": VIRTUAL_BACKGROUND_BLACKEN_FACTOR,
             }
+    },
+    {
+        "selector": f".{OVERRIDE_CLASS}",
+        "style": {
+            "shape": "tag",
+        }
     }
 ]
 

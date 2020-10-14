@@ -16,6 +16,7 @@ message Node { // all names are fully qualified (grandparent.parent.this_node.ch
     repeated Dependency dependencies = 6;
     repeated SLI slis = 7;
     optional string comment = 8;
+    optional Status override_status = 9;
 }
 
 message Dependency {
@@ -56,6 +57,8 @@ message Client {
     optional string name = 1;
     repeated UserJourney user_journeys = 2;
     // ---
+
+    optional string comment = 3;
 }
 
 message VirtualNode {
@@ -66,6 +69,8 @@ message VirtualNode {
 
     // ---
     optional Status status = 5;
+    optional string comment = 6;
+    optional Status override_status = 7;
 }
 
 enum Status {

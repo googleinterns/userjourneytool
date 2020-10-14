@@ -1,10 +1,20 @@
 from collections import deque
-from typing import Any, Deque, Dict, List, Set, Tuple, cast
+from typing import TYPE_CHECKING, Any, Deque, Dict, List, Set, Tuple, cast
 
-from graph_structures_pb2 import SLI, Client, Node, NodeType, VirtualNode
+from graph_structures_pb2 import (
+    SLI,
+    Client,
+    Node,
+    NodeType,
+    Status,
+    VirtualNode)
 
 from . import converters, rpc_client, utils
 from .dash_app import cache
+
+if TYPE_CHECKING:
+    from graph_structures_pb2 import \
+        StatusValue  # pylint: disable=no-name-in-module  # pragma: no cover
 
 
 def clear_sli_cache():
@@ -228,3 +238,114 @@ def set_virtual_node_collapsed_state(virtual_node_name: str, collapsed: bool):
 
 
 # endregion
+
+
+def set_comment(
+    name: str,
+    comment: str,
+    node_name_message_map: Dict[str,
+                                Node] = None,
+    client_name_message_map: Dict[str,
+                                  Client] = None,
+    virtual_node_map: Dict[str,
+                           VirtualNode] = None,
+):
+    """ Sets the node comment in the appropriate node map.
+
+    Addiionally adds the override status to an internal map. 
+    This internal map is combined with the graph topology when the topology is read from the reporting server.
+
+    Args:
+        name: The name of the node or client to modify.
+        comment: The comment to write to the node or client
+        node_name_message_map: A dictionary mapping node names to Nodes. Used when we want to modify the state of an existing map without reading from cache.
+        client_name_message_map: A dictionary mapping client names to Clients. Used when we want to modify the state of an existing map without reading from cache.
+        virtual_node_map: A dictionary mapping virtual node names to VirtualNodes. Used when we want to modify the state of an existing map without reading from cache.
+    """
+
+    save_changes = False
+
+    maps = [node_name_message_map, client_name_message_map, virtual_node_map]
+    getters = [
+        get_node_name_message_map,
+        get_client_name_message_map,
+        get_virtual_node_map
+    ]
+    setters = [
+        set_node_name_message_map,
+        set_client_name_message_map,
+        set_virtual_node_map
+    ]
+
+    for idx, proto_map in enumerate(maps):
+        if proto_map is None:
+            proto_map = getters[idx]()  # type: ignore
+            save_changes = True
+        if name in proto_map:  # type: ignore
+            proto_map[name].comment = comment  # type: ignore
+            if save_changes:
+                setters[idx](proto_map)
+
+    comment_map = cache.get("comment_map")
+    if comment == "":
+        try:
+            del comment_map[name]
+        except KeyError:  # the node didn't have a comment before
+            pass
+    else:
+        comment_map[name] = comment
+    cache.set("comment_map", comment_map)
+
+
+def set_node_override_status(
+    node_name: str,
+    override_status: "StatusValue",
+    node_name_message_map: Dict[str,
+                                Node] = None,
+    virtual_node_map: Dict[str,
+                           VirtualNode] = None,
+):
+    """ Sets the node override status in the appropriate node map.
+
+    Addiionally adds the override status to an internal map. 
+    This internal map is combined with the graph topology when the topology is read from the reporting server.
+
+    Notice that this function doesn't read and write from the cache if maps were provided in the arguments.
+    The maps should be provided when the caller is in the middle of a modification (a "transaction") of the message maps.
+    For instance,
+        node_name_message_map = state.get_node_name_message_map()
+        modify_map(node_name_message_map)
+        set_node_override_status(node_name, override_status, node_name_message_map, virtual_node_map)
+        state.set_node_name_message_map(node_name_message_map)
+        
+    Args:
+        node_name: The name of the node to modify.
+        override_status: The override status to write to the node
+        node_name_message_map: A dictionary mapping node names to Nodes. Used when we want to modify the state of an existing map without reading from cache.
+        virtual_node_map: A dictionary mapping virtual node names to VirtualNodes. Used when we want to modify the state of an existing map without reading from cache.
+    """
+    save_changes = False
+
+    maps = [node_name_message_map, virtual_node_map]
+    getters = [get_node_name_message_map, get_virtual_node_map]
+    setters = [set_node_name_message_map, set_virtual_node_map]
+
+    for idx, proto_map in enumerate(maps):
+        if proto_map is None:
+            maps[idx] = getters[idx]()  # type: ignore
+            save_changes = True
+        if node_name in proto_map:  # type: ignore
+            proto_map[  # type: ignore
+                node_name].override_status = override_status  # type: ignore
+            if save_changes:
+                setters[idx](proto_map)
+
+    override_status_map = cache.get("override_status_map")
+    if override_status == Status.STATUS_UNSPECIFIED:
+        try:
+            del override_status_map[node_name]
+        except KeyError:  # the node didn't have a comment before
+            pass
+    else:
+        override_status_map[node_name] = override_status
+    cache.set("override_status_map", override_status_map)

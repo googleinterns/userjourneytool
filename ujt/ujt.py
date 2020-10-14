@@ -7,7 +7,7 @@ import dash_html_components as html
 import dash_table
 
 from . import callbacks, constants, converters, state
-from .dash_app import app
+from .dash_app import app, cache
 
 
 def get_top_row_components():
@@ -136,9 +136,6 @@ def get_layout():
             get_top_row_components(),
             get_cytoscape_graph(),
             get_bottom_info_panels(),
-            html.Div(
-                id="virtual-node-update-signal",
-                style={"display": "none"}),
             dbc.Modal(
                 children=[
                     dbc.ModalHeader("Error"),
@@ -152,10 +149,32 @@ def get_layout():
                 ],
                 id="collapse-error-modal",
             ),
+            html.Div(
+                id="virtual-node-update-signal",
+                style={"display": "none"}),
         ],
     )
 
 
+def initialize_ujt():
+    if constants.CLEAR_CACHE_ON_STARTUP:
+        cache.clear()
+    # If first time running server, set these persisted properties as dicts
+    map_names = [
+        "virtual_node_map",
+        "parent_virtual_node_map",
+        "comment_map",
+        "override_status_map"
+    ]
+    for map_name in map_names:
+        if cache.get(map_name) is None:
+            cache.set(map_name, {})
+
+    # Request and cache the dependency topology from the reporting server
+    state.get_message_maps()
+
+
 if __name__ == "__main__":
+    initialize_ujt()
     app.layout = get_layout()
     app.run_server(debug=True)
