@@ -361,7 +361,7 @@ def set_node_override_status(
     cache.set("override_status_map", override_status_map)
 
 
-#@cache.memoize()  # this is commented out for consistent testing
+#@cache.memoize()  # this is commented out for consistent testing # DEBUG_REMOVE
 def get_node_to_user_journey_map() -> Dict[str, List[UserJourney]]:
     # map the node name to user journey names that pass through the node
     # should this be in state? it's memoized but doesn't really affect state
@@ -425,8 +425,6 @@ def set_tag_list(tag_list):
 
 def create_tag(new_tag):
     tag_list = get_tag_list()
-    if " " in new_tag:  # where should validation be done? in the callback or here?
-        raise ValueError("Tags cannot contain spaces!")
     tag_list.append(new_tag)
     set_tag_list(tag_list)
 
@@ -520,6 +518,10 @@ def set_style_map(style_map):
 
 def update_style(style_name: str, style_dict: Dict[str, str]):
     style_map = get_style_map()
+
+    if " " in style_name:  # where should validation be done? in the callback or here?
+        raise ValueError("Styles cannot contain spaces!")
+
     style_map[style_name] = style_dict
     set_style_map(style_map)
 

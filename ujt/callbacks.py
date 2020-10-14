@@ -1235,6 +1235,10 @@ def save_style(save_n_clicks_timestamps, style_name, style_str):
             A message to be placed in the header of the toast.
             A string to determine the toast icon.
     """
+
+    if " " in style_name:
+        return True, "Style name cannot contain spaces!", "danger", dash.no_update
+
     try:
         style_dict = utils.string_to_dict(style_str)
     except json.decoder.JSONDecodeError:
