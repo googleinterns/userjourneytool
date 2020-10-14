@@ -1,7 +1,7 @@
 """ Module holding transformer functions.
 
-Transformer functions take a Dash-specific data structure or an intermediate data structure,
-make a change, and return the same type of data structure.
+Transformer functions take an input data structure, make a change, and return an output of the same type.
+They are commonly used to perform operations on cytoscape graph elements.
 """
 
 import uuid
@@ -11,6 +11,39 @@ from typing import Any, Dict, Set
 from graph_structures_pb2 import NodeType, Status
 
 from . import constants, converters, state, utils
+
+
+def apply_node_classes(
+        elements,
+        node_name_message_map,
+        client_name_message_map,
+        virtual_node_map):
+    for element in elements:
+        if not utils.is_node_element(element):
+            continue
+
+        element_ujt_id = element["data"]["ujt_id"]
+
+        # Should we refactor this into three separate functions -- one for each type of node?
+        # Seems like overkill, but would allow us to separate the logic, at the cost of
+        # performing iterations over the element list.
+
+        if element_ujt_id in client_name_message_map:
+            element["classes"] = constants.CLIENT_CLASS
+            continue
+
+        if element_ujt_id in node_name_message_map:
+            node = node_name_message_map[element_ujt_id]
+        else:  # element_ujt_id in virtual_node_map
+            node = virtual_node_map[element_ujt_id]
+
+        element["classes"] = " ".join(
+            [
+                NodeType.Name(node.node_type),
+                Status.Name(node.status),
+            ])  # use this join instead of format string for future flexibility
+
+    # no return since we directly mutated elements
 
 
 def apply_highlighted_edge_class_to_elements(elements, user_journey_name):
@@ -112,7 +145,7 @@ def apply_virtual_nodes_to_elements(elements):
                 element["data"]["target"] = new_target
 
             element["data"][
-                "ujt_id"] = f"{element['data']['source']}/{element['data']['target']}"
+                "id"] = f"{element['data']['source']}/{element['data']['target']}"
 
             if element["data"]["source"] != element["data"]["target"]:
                 new_elements.append(element)
@@ -149,7 +182,7 @@ def apply_virtual_nodes_to_elements(elements):
     return new_elements
 
 
-def apply_uuid_to_elements(elements):
+def apply_uuid_to_elements(elements, this_uuid=None):
     """ Append a new UUID to the id of each cytoscape element
 
     This is used as a workaround to update the source/target of edges, and the parent/child relatioship of nodes.
@@ -161,11 +194,14 @@ def apply_uuid_to_elements(elements):
 
     Args:
         elements: a list of Cytoscape elements
+        uuid: a UUID to append. Defaults to None. If None is provided, this function generates a new UUID.
 
     Returns:
         A list of Cytoscape elements with an UUID appended to their ID fields. 
     """
-    this_uuid = uuid.uuid4()
+    if this_uuid is None:
+        this_uuid = uuid.uuid4()
+
     for e in elements:
         e["data"]["id"] += f"#{this_uuid}"
         if "source" in e["data"].keys():

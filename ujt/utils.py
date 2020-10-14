@@ -87,3 +87,7 @@ def get_highest_collapsed_virtual_node_name(
 
 def proto_list_to_name_map(proto_list):
     return {proto.name: proto for proto in proto_list}
+
+
+def get_existing_uuid(elements):
+    return elements[0]["data"]["id"].rsplit("#", 1)[1]

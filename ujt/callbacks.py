@@ -91,7 +91,9 @@ def update_graph_elements(
 
     ctx = dash.callback_context
     triggered_id, triggered_prop, triggered_value = utils.ctx_triggered_info(ctx)
+
     print(triggered_id, triggered_prop, triggered_value)
+
     if triggered_id == "virtual-node-update-signal" and triggered_value != constants.OK_SIGNAL:
         # No-op if the validation signal isn't OK
         raise PreventUpdate
@@ -99,45 +101,56 @@ def update_graph_elements(
     node_name_message_map, client_name_message_map = state.get_message_maps()
     virtual_node_map = state.get_virtual_node_map()
 
-    if triggered_id == "refresh-sli-button":
-        state.clear_sli_cache(
-        )  # in future, conditionally clear this based on timestamp
-        sli_list = state.get_slis()
-        node_name_message_map = transformers.apply_slis_to_node_map(
-            sli_list,
-            node_name_message_map)
+    elements = state.get_cytoscape_elements()
 
-    # Perform status computation.
-    compute_status.reset_node_statuses(node_name_message_map)
-    compute_status.reset_client_statuses(client_name_message_map)
-    compute_status.reset_node_statuses(virtual_node_map)
+    # This condition determines if we need to recompute node statuses.
+    # We recompute node statuses on startup and when SLIs are refreshed
+    # The two following if statements can be combined later.
+    # Getting SLIs will return random values from the server,
+    # while the message maps are already populated on startup with fixed SLI values from disk.
+    # Not overwriting these values is more consistent behavior for manual testing for now.
+    if triggered_id in [None,
+                        "refresh-sli-button",
+                        "virtual-node-update-signal"]:
+        if triggered_id == "refresh-sli-button":
+            state.clear_sli_cache(
+            )  # in future, conditionally clear this based on timestamp
+            sli_list = state.get_slis()
+            node_name_message_map = transformers.apply_slis_to_node_map(
+                sli_list,
+                node_name_message_map)
 
-    # combine the two maps of nodes into one dictionary
-    # use duck typing -- is this pythonic or a hack?
-    all_nodes_map = {**node_name_message_map, **virtual_node_map}  #type: ignore
-    compute_status.compute_statuses(
-        all_nodes_map,
-        client_name_message_map,
-    )
+        # Perform status computation.
+        # We can refactor this block later as well, but no other function should call it...
+        compute_status.reset_node_statuses(node_name_message_map)
+        compute_status.reset_client_statuses(client_name_message_map)
+        compute_status.reset_node_statuses(virtual_node_map)
 
-    state.set_node_name_message_map(node_name_message_map)
-    state.set_client_name_message_map(client_name_message_map)
-    state.set_virtual_node_map(virtual_node_map)
+        # combine the two maps of nodes into one dictionary
+        # use duck typing -- is this pythonic or a hack?
+        all_nodes_map = {
+            **node_name_message_map,
+            **virtual_node_map  # type: ignore
+        }
+        compute_status.compute_statuses(
+            all_nodes_map,
+            client_name_message_map,
+        )
 
-    # TODO: memoize this call per Ken's suggestion. This will be refactored when implementing server.
-    # something like: elements = state.get_cytoscape_elements()
-    elements = converters.cytoscape_elements_from_maps(
-        node_name_message_map,
-        client_name_message_map,
-    )
+        state.set_node_name_message_map(node_name_message_map)
+        state.set_client_name_message_map(client_name_message_map)
+        state.set_virtual_node_map(virtual_node_map)
 
     # For simplicity, we always perform all graph (view) transformations.
     # This greatly simplifies the implementation each individual transformation, since each step doesn't
     # need to account for changes introduced each subsequent step.
     # However, this isn't the most efficient approach.
 
-    # TODO: apply the status styling here instead of in converters. Will be refactored when implementing server.
-    # elements = transformers.apply_status_classes(...)
+    transformers.apply_node_classes(
+        elements,
+        node_name_message_map,
+        client_name_message_map,
+        virtual_node_map)
 
     if triggered_id == "collapse-virtual-node-button":
         state.set_virtual_node_collapsed_state(
@@ -153,9 +166,7 @@ def update_graph_elements(
 
     # user_journey_table_selected_row_ids == [] when the user journey datatable isn't created yet
     # it equals [None] when the datatable is created but no row is selected
-    if user_journey_table_selected_row_ids == [] or user_journey_table_selected_row_ids == [
-            None
-    ]:
+    if user_journey_table_selected_row_ids in [[], [None]]:
         active_user_journey_name = None
     else:
         active_user_journey_name = user_journey_table_selected_row_ids[0][0]
@@ -164,11 +175,15 @@ def update_graph_elements(
         elements,
         active_user_journey_name)
 
+    # Determine if we need to generate a new UUID. This minimizes the choppyness of the animation.
+    if triggered_id in [None, "virtual-node-update-signal"]:
+        uuid = None
+    else:
+        uuid = utils.get_existing_uuid(state_elements)
+
     # Workaround for https://github.com/plotly/dash-cytoscape/issues/106
     # Give new ids to Cytoscape to avoid immutability of edges and parent relationships.
-    # TODO: fix this to call only when changing an immutable relationship
-    # i.e. don't call when selecting client node -> user_journey_table_selected_row_ids changes to [None]
-    elements = transformers.apply_uuid_to_elements(elements)
+    elements = transformers.apply_uuid_to_elements(elements, this_uuid=uuid)
     return elements
 
 

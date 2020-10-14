@@ -188,8 +188,6 @@ def example_node_elements_from_node_map(
                     "label": service_relative_names[0],
                     "ujt_id": service_relative_names[0],
                 },
-            "classes":
-                f"{NodeType.Name(NodeType.NODETYPE_SERVICE)} {Status.Name(Status.STATUS_UNSPECIFIED)}"
         },
         {
             "data":
@@ -198,8 +196,6 @@ def example_node_elements_from_node_map(
                     "label": service_relative_names[1],
                     "ujt_id": service_relative_names[1],
                 },
-            "classes":
-                f"{NodeType.Name(NodeType.NODETYPE_SERVICE)} {Status.Name(Status.STATUS_UNSPECIFIED)}"
         },
         {
             "data":
@@ -213,8 +209,6 @@ def example_node_elements_from_node_map(
                     "ujt_id":
                         f"{service_relative_names[0]}.{endpoint_relative_names[0]}",
                 },
-            "classes":
-                f"{NodeType.Name(NodeType.NODETYPE_ENDPOINT)} {Status.Name(Status.STATUS_UNSPECIFIED)}"
         },
         {
             "data":
@@ -228,8 +222,6 @@ def example_node_elements_from_node_map(
                     "ujt_id":
                         f"{service_relative_names[0]}.{endpoint_relative_names[1]}",
                 },
-            "classes":
-                f"{NodeType.Name(NodeType.NODETYPE_ENDPOINT)} {Status.Name(Status.STATUS_UNSPECIFIED)}"
         },
         {
             "data":
@@ -243,8 +235,6 @@ def example_node_elements_from_node_map(
                     "ujt_id":
                         f"{service_relative_names[1]}.{endpoint_relative_names[2]}",
                 },
-            "classes":
-                f"{NodeType.Name(NodeType.NODETYPE_ENDPOINT)} {Status.Name(Status.STATUS_UNSPECIFIED)}"
         },
     ]
     return expected_node_elements
@@ -410,7 +400,6 @@ def example_node_elements_from_client_map(
                     "label": client_relative_names[0],
                     "ujt_id": client_relative_names[0],
                 },
-            "classes": ujt.constants.CLIENT_CLASS,
         },
         {
             "data":
@@ -419,7 +408,6 @@ def example_node_elements_from_client_map(
                     "label": client_relative_names[1],
                     "ujt_id": client_relative_names[1],
                 },
-            "classes": ujt.constants.CLIENT_CLASS,
         },
     ]
     return expected_node_elements

@@ -51,12 +51,6 @@ def cytoscape_element_from_node(node):
                                    # ujt_id is left unmodified, used for internal indexing into maps
                                    "ujt_id": node.name,
                                },
-                           "classes":
-                               " ".join(
-                                   [
-                                       NodeType.Name(node.node_type),
-                                       Status.Name(node.status),
-                                   ])
                        }
     if node.parent_name:
         node_element["data"]["parent"] = node.parent_name
@@ -79,7 +73,6 @@ def cytoscape_element_from_client(client):
                 "label": client.name,
                 "ujt_id": client.name,
             },
-        "classes": constants.CLIENT_CLASS,
     }
     return client_element
 
