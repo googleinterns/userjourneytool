@@ -19,7 +19,7 @@ Can be refactored into multiple files if necessary.
 import json
 from collections import deque
 
-from . import constants, state
+from . import constants
 
 
 def is_client_cytoscape_node(tap_node):

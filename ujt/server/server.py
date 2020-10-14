@@ -1,12 +1,10 @@
 """Implementation of Reporting Server."""
 
-import glob
 import pathlib
 import random
 from concurrent import futures
 from typing import List
 
-import google.protobuf.text_format as text_format
 import grpc
 import server_pb2
 import server_pb2_grpc

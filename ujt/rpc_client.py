@@ -6,7 +6,7 @@ These functions are 1:1 passthroughs right now, but we may need to do
 some additional data processing as the application grows.
 """
 
-from typing import TYPE_CHECKING, Type
+from typing import TYPE_CHECKING
 
 import grpc
 import server_pb2

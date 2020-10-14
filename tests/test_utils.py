@@ -1,9 +1,7 @@
 """ Tests for the main module. """
 
-from unittest.mock import MagicMock, Mock, mock_open, patch, sentinel
 
-import pytest
-from graph_structures_pb2 import Node, NodeType, Status
+from graph_structures_pb2 import NodeType, Status
 
 import ujt.converters
 import ujt.utils

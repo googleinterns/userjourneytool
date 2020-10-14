@@ -35,6 +35,7 @@ jobs:
     - name: Lint
       run: |
         pylint -E ujt tests
+        autoflake -c -r --remove-all-unused-imports ujt tests 
         black --check ujt tests
     - name: Type checking
       run: |

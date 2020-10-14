@@ -1,7 +1,7 @@
 # pylint: disable=redefined-outer-name
 
 from collections import defaultdict
-from unittest.mock import Mock, call, patch, sentinel
+from unittest.mock import Mock, patch
 
 import pytest
 from graph_structures_pb2 import Client, Node, NodeType, Status, VirtualNode

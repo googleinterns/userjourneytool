@@ -8,7 +8,7 @@ In general, we consider converters to modify some UJT-specific data structure
 from typing import Any, Collection, Dict, List
 
 import dash_table
-from graph_structures_pb2 import Client, Node, NodeType, SLIType, Status, VirtualNode
+from graph_structures_pb2 import Client, Node, SLIType, Status, VirtualNode
 
 from . import constants, utils
 

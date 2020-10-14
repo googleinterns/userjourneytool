@@ -6,11 +6,10 @@ They are commonly used to perform operations on cytoscape graph elements.
 
 import uuid
 from collections import defaultdict, deque
-from typing import Any, Dict, Set
 
 from graph_structures_pb2 import NodeType, Status
 
-from . import constants, converters, state, utils
+from . import constants, state, utils
 
 
 def apply_node_classes(

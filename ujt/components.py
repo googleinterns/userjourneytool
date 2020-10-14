@@ -17,10 +17,9 @@ import dash_bootstrap_components as dbc
 import dash_core_components as dcc
 import dash_cytoscape as cyto
 import dash_html_components as html
-import dash_table
 from graph_structures_pb2 import Node, NodeType, VirtualNode
 
-from . import callbacks, constants, converters, state, utils
+from . import constants, converters, state, utils
 
 
 def get_layout():
