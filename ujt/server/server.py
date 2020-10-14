@@ -21,14 +21,8 @@ def read_local_data():
     client_paths = data_path.glob("Client_*.ujtdata")
     node_paths = data_path.glob("Node_*.ujtdata")
 
-    clients = [
-        server_utils.read_proto_from_file(path,
-                                          Client) for path in client_paths
-    ]
-    nodes = [
-        server_utils.read_proto_from_file(path,
-                                          Node) for path in node_paths
-    ]
+    clients = [server_utils.read_proto_from_file(path, Client) for path in client_paths]
+    nodes = [server_utils.read_proto_from_file(path, Node) for path in node_paths]
 
     return nodes, clients
 
@@ -60,9 +54,9 @@ class ReportingServiceServicer(server_pb2_grpc.ReportingServiceServicer):
         return server_pb2.GetClientsResponse(clients=self.clients)
 
     def GetSLIs(self, request, context):
-        """ Returns updated SLI values to clients.
+        """Returns updated SLI values to clients.
 
-        In this mock example, we generate new random values for SLIs dynamically. 
+        In this mock example, we generate new random values for SLIs dynamically.
         In a real server, this method should report real SLI values.
         """
 
@@ -86,8 +80,8 @@ def serve():
     reporting_service_servicer = ReportingServiceServicer(nodes, clients)
 
     server_pb2_grpc.add_ReportingServiceServicer_to_server(
-        reporting_service_servicer,
-        server)
+        reporting_service_servicer, server
+    )
     server.add_insecure_port("[::]:50051")
     server.start()
     server.wait_for_termination()

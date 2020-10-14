@@ -35,7 +35,7 @@ jobs:
     - name: Lint
       run: |
         pylint -E ujt tests
-        yapf --recursive -d ujt tests
+        black --check ujt tests
     - name: Type checking
       run: |
         mypy ujt tests

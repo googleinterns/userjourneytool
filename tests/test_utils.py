@@ -21,13 +21,15 @@ def test_is_client_cytoscape_node():
 
 def test_relative_name():
     system_name, service_name, endpoint_name = "System", "Service", "Endpoint"
-    assert ujt.utils.relative_name(
-        f"{system_name}.{service_name}.{endpoint_name}") == endpoint_name
+    assert (
+        ujt.utils.relative_name(f"{system_name}.{service_name}.{endpoint_name}")
+        == endpoint_name
+    )
 
     assert ujt.utils.relative_name(system_name) == system_name
 
 
 def test_human_readable_enum_name():
-    assert ujt.utils.human_readable_enum_name(
-        Status.STATUS_HEALTHY,
-        Status) == "HEALTHY"
+    assert (
+        ujt.utils.human_readable_enum_name(Status.STATUS_HEALTHY, Status) == "HEALTHY"
+    )

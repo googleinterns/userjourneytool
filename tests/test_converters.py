@@ -7,7 +7,8 @@ from graph_structures_pb2 import (
     NodeType,
     SLIType,
     Status,
-    UserJourney)
+    UserJourney,
+)
 
 import ujt.constants
 import ujt.converters
@@ -22,8 +23,12 @@ def test_cytoscape_elements_from_node_map(
     example_node_elements_from_node_map,
     example_edge_elements_from_node_map,
 ):
-    assert example_node_elements_from_node_map + example_edge_elements_from_node_map == ujt.converters.cytoscape_elements_from_node_map(
-        example_node_name_message_map)
+    assert (
+        example_node_elements_from_node_map + example_edge_elements_from_node_map
+        == ujt.converters.cytoscape_elements_from_node_map(
+            example_node_name_message_map
+        )
+    )
 
 
 def test_cytoscape_elements_from_client_map(
@@ -31,8 +36,12 @@ def test_cytoscape_elements_from_client_map(
     example_node_elements_from_client_map,
     example_edge_elements_from_client_map,
 ):
-    assert example_node_elements_from_client_map + example_edge_elements_from_client_map == ujt.converters.cytoscape_elements_from_client_map(
-        example_client_name_message_map)
+    assert (
+        example_node_elements_from_client_map + example_edge_elements_from_client_map
+        == ujt.converters.cytoscape_elements_from_client_map(
+            example_client_name_message_map
+        )
+    )
 
 
 def test_datatable_from_nodes():
@@ -40,19 +49,15 @@ def test_datatable_from_nodes():
     table_id = "test-table"
 
     expected_columns = [
-        {
-            "name": "Node",
-            "id": "Node"
-        },
-        {
-            "name": "Status",
-            "id": "Status"
-        },
+        {"name": "Node", "id": "Node"},
+        {"name": "Status", "id": "Status"},
     ]
-    expected_data = [{
-        "Node": node.name,
-        "Status": "HEALTHY",
-    }]
+    expected_data = [
+        {
+            "Node": node.name,
+            "Status": "HEALTHY",
+        }
+    ]
 
     table = ujt.converters.datatable_from_nodes(
         [node],
@@ -63,48 +68,36 @@ def test_datatable_from_nodes():
     assert table.id == table_id  # pylint: disable=no-member
     assert table.columns == expected_columns  # pylint: disable=no-member
     assert table.data == expected_data  # pylint: disable=no-member
-    assert table.style_data_conditional == ujt.constants.DATATABLE_CONDITIONAL_STYLE  # pylint: disable=no-member
+    assert (
+        table.style_data_conditional  # pylint: disable=no-member
+        == ujt.constants.DATATABLE_CONDITIONAL_STYLE
+    )
 
 
 def test_datatable_from_slis():
     sli = SLI(
         sli_type=SLIType.SLITYPE_UNSPECIFIED,
-        sli_value=.511,
-        slo_error_lower_bound=.1,
-        slo_warn_lower_bound=.2,
-        slo_warn_upper_bound=.8,
-        slo_error_upper_bound=.9,
+        sli_value=0.511,
+        slo_error_lower_bound=0.1,
+        slo_warn_lower_bound=0.2,
+        slo_warn_upper_bound=0.8,
+        slo_error_upper_bound=0.9,
         status=Status.STATUS_HEALTHY,
     )
     table_id = "test-table"
 
     expected_columns = [
-        {
-            "name": "Type",
-            "id": "Type"
-        },
-        {
-            "name": "Status",
-            "id": "Status"
-        },
-        {
-            "name": "Value",
-            "id": "Value"
-        },
-        {
-            "name": "Warn Range",
-            "id": "Warn Range"
-        },
-        {
-            "name": "Error Range",
-            "id": "Error Range"
-        },
+        {"name": "Type", "id": "Type"},
+        {"name": "Status", "id": "Status"},
+        {"name": "Value", "id": "Value"},
+        {"name": "Warn Range", "id": "Warn Range"},
+        {"name": "Error Range", "id": "Error Range"},
     ]
     expected_data = [
         {
             "Type": "UNSPECIFIED",
             "Status": "HEALTHY",
-            "Value": .51,
+            "Value": 0.51,
             "Warn Range": "(0.2, 0.8)",
             "Error Range": "(0.1, 0.9)",
         }
@@ -115,7 +108,10 @@ def test_datatable_from_slis():
     assert table.id == table_id  # pylint: disable=no-member
     assert table.columns == expected_columns  # pylint: disable=no-member
     assert table.data == expected_data  # pylint: disable=no-member
-    assert table.style_data_conditional == ujt.constants.DATATABLE_CONDITIONAL_STYLE  # pylint: disable=no-member
+    assert (
+        table.style_data_conditional  # pylint: disable=no-member
+        == ujt.constants.DATATABLE_CONDITIONAL_STYLE
+    )
 
 
 def test_datatable_from_client():
@@ -158,4 +154,7 @@ def test_datatable_from_client():
     assert table.id == {table_id: table_id}  # pylint: disable=no-member
     assert table.columns == expected_columns  # pylint: disable=no-member
     assert table.data == expected_data  # pylint: disable=no-member
-    assert table.style_data_conditional == ujt.constants.DATATABLE_CONDITIONAL_STYLE  # pylint: disable=no-member
+    assert (
+        table.style_data_conditional  # pylint: disable=no-member
+        == ujt.constants.DATATABLE_CONDITIONAL_STYLE
+    )

@@ -55,7 +55,7 @@ def get_highest_collapsed_virtual_node_name(
     virtual_node_map,
     parent_virtual_node_map,
 ):
-    """ Gets the name of the highest collapsed virtual node, given a node name.
+    """Gets the name of the highest collapsed virtual node, given a node name.
 
     Node name can be virtual or non virtual.
     Highest refers to furthest ancestor.
@@ -65,7 +65,7 @@ def get_highest_collapsed_virtual_node_name(
     Args:
         node_name: A name of a virtual or non-virtual node.
         virtual_node_map: A dict mapping virtual node names to virtual node protos.
-        parent_virtual_node_map: A parent mapping node names (virtual or non-virtual) to the name of their virtual parent. 
+        parent_virtual_node_map: A parent mapping node names (virtual or non-virtual) to the name of their virtual parent.
 
     Returns:
         The name of the highest collapsed virtual node above the given node.
@@ -74,15 +74,16 @@ def get_highest_collapsed_virtual_node_name(
     highest_collapsed_name = None
 
     while current_name in parent_virtual_node_map:
-        if current_name in virtual_node_map and virtual_node_map[
-                current_name].collapsed:
+        if (
+            current_name in virtual_node_map
+            and virtual_node_map[current_name].collapsed
+        ):
             highest_collapsed_name = current_name
         current_name = parent_virtual_node_map[current_name]
 
     # need this for the highest-level (last) virtual node, which isn't registered
     # in the parent_virtual_node_map.
-    if current_name in virtual_node_map and virtual_node_map[
-            current_name].collapsed:
+    if current_name in virtual_node_map and virtual_node_map[current_name].collapsed:
         highest_collapsed_name = current_name
 
     return highest_collapsed_name
@@ -97,9 +98,8 @@ def get_existing_uuid(elements):
 
 
 def get_all_node_names_within_virtual_node(
-        virtual_node_name,
-        node_name_message_map,
-        virtual_node_map):
+    virtual_node_name, node_name_message_map, virtual_node_map
+):
     node_names = set()
     node_frontier = deque(virtual_node_map[virtual_node_name].child_names)
 
@@ -125,8 +125,9 @@ def dict_to_str(input_dict, indent=4):
 def get_latest_tapped_element(tap_node, tap_edge):
     # is this a hack?
     try:
-        element = tap_node if tap_node["timeStamp"] > tap_edge[
-            "timeStamp"] else tap_edge
+        element = (
+            tap_node if tap_node["timeStamp"] > tap_edge["timeStamp"] else tap_edge
+        )
     except TypeError:  # either tap_node or tap_edge are None
         element = tap_node if tap_edge is None else tap_edge
 

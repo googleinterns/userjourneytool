@@ -11,6 +11,6 @@ with grpc.insecure_channel("localhost:50051") as channel:  # pragma: no cover
     print(node_response.nodes)
 
     sli_request = server_pb2.GetSLIsRequest()
-    #sli_response = stub.get_slis(sli_request)
+    # sli_response = stub.get_slis(sli_request)
     sli_response = stub.GetSLIs(sli_request)
     print(sli_response.slis)
