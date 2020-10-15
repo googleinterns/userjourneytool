@@ -25,12 +25,44 @@ GRAPH_BACKGROUND_COLOR = "azure"
 GRAPH_WIDTH = "100%"
 GRAPH_HEIGHT = "600px"
 
-USER_JOURNEY_DATATABLE_ID = "user-journey-datatable"
-SLI_DATATABLE_ID = "datatable-slis"
-CHILD_DATATABLE_ID = "datatable-child-nodes"
-DEPENDENCY_DATATABLE_ID = "datatable-dependency-nodes"
-
 BOOTSTRAP_BUTTON_COLUMN_CLASSES = "m-1 d-flex justify-content-center"
+
+CYTO_LAYOUT = {
+    "name": "dagre",
+    "nodeDimensionsIncludeLabels": "true",
+    "animate": "true",
+}
+
+CYTO_STYLE = {
+    "width": GRAPH_WIDTH,
+    "height": GRAPH_HEIGHT,
+    "backgroundColor": GRAPH_BACKGROUND_COLOR,
+}
+
+# These selectors are hardcoded -- cannot be changed by style map.
+BASE_CYTO_STYLESHEET = [
+    {
+        "selector": "node",
+        "style": {
+            "content": "data(label)",
+        },
+    },
+    {
+        "selector": "edge",
+        "style": {
+            "curve-style": "straight",
+            "target-arrow-shape": "triangle",
+            "arrow-scale": 2,
+        },
+    },
+    {
+        "selector": ":selected",
+        "style": {
+            "border-width": SELECTED_NODE_BORDER_WIDTH,
+            "border-color": SELECTED_NODE_BORDER_COLOR,
+        },
+    },
+]
 
 DEFAULT_STYLE_MAP = {
     NodeType.Name(NodeType.NODETYPE_SERVICE): {
@@ -58,31 +90,6 @@ DEFAULT_STYLE_MAP = {
         "shape": "tag",
     },
 }
-
-# These selectors are hardcoded -- cannot be changed by style map.
-BASE_CYTO_STYLESHEET = [
-    {
-        "selector": "node",
-        "style": {
-            "content": "data(label)",
-        },
-    },
-    {
-        "selector": "edge",
-        "style": {
-            "curve-style": "straight",
-            "target-arrow-shape": "triangle",
-            "arrow-scale": 2,
-        },
-    },
-    {
-        "selector": ":selected",
-        "style": {
-            "border-width": SELECTED_NODE_BORDER_WIDTH,
-            "border-color": SELECTED_NODE_BORDER_COLOR,
-        },
-    },
-]
 
 DATATABLE_CONDITIONAL_STYLE = [
     {
