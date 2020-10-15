@@ -2,9 +2,11 @@
 
 Generally contains constants for styling.
 """
+from collections import defaultdict
+
 from graph_structures_pb2 import NodeType, Status
 
-CLEAR_CACHE_ON_STARTUP = True
+from . import id_constants
 
 CLIENT_CLASS = "CLIENT"
 HIGHLIGHTED_UJ_EDGE_CLASS = "HIGHLIGHTED_UJ_EDGE"
@@ -105,3 +107,15 @@ DATATABLE_CONDITIONAL_STYLE = [
         "color": ERROR_COLOR,
     },
 ]
+
+CLEAR_CACHE_ON_STARTUP = True
+CACHE_DEFAULT_VALUES = {
+    id_constants.VIRTUAL_NODE_MAP: {},  # Dict[str, VirtualNode]
+    id_constants.PARENT_VIRTUAL_NODE_MAP: {},  # Dict[str, str]
+    id_constants.COMMENT_MAP: {},  # Dict[str, str]
+    id_constants.OVERRIDE_STATUS_MAP: {},  # Dict[str, Status]
+    id_constants.TAG_LIST: ["a", "b", "c"],  # List[str] # DEBUG_REMOVE
+    id_constants.TAG_MAP: defaultdict(list),  # DefaultDict[str, List[str]]
+    id_constants.STYLE_MAP: DEFAULT_STYLE_MAP,  # Dict[str, Dict[str, str]]
+    id_constants.VIEW_LIST: [],  # List[List[str]]
+}

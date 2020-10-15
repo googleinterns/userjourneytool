@@ -11,7 +11,7 @@ from graph_structures_pb2 import (
     VirtualNode,
 )
 
-from . import converters, rpc_client, utils
+from . import converters, id_constants, rpc_client, utils
 from .dash_app import cache
 
 if TYPE_CHECKING:
@@ -52,8 +52,8 @@ def get_message_maps() -> Tuple[Dict[str, Node], Dict[str, Client]]:
         The first dictionary contains a mapping from Node name to the actual Node protobuf message.
         The second dictionary contains a mapping from Client name to the actual Client protobuf message.
     """
-    node_name_message_map = cache.get("node_name_message_map")
-    client_name_message_map = cache.get("client_name_message_map")
+    node_name_message_map = cache.get(id_constants.NODE_NAME_MESSAGE_MAP)
+    client_name_message_map = cache.get(id_constants.CLIENT_NAME_MESSAGE_MAP)
 
     # If initial call (or cache was manually cleared) to get_message_maps, read from remote server.
     if node_name_message_map is None or client_name_message_map is None:
@@ -65,8 +65,8 @@ def get_message_maps() -> Tuple[Dict[str, Node], Dict[str, Client]]:
         node_name_message_map = utils.proto_list_to_name_map(node_response.nodes)
         client_name_message_map = utils.proto_list_to_name_map(client_response.clients)
 
-        cache.set("node_name_message_map", node_name_message_map)
-        cache.set("client_name_message_map", client_name_message_map)
+        cache.set(id_constants.NODE_NAME_MESSAGE_MAP, node_name_message_map)
+        cache.set(id_constants.CLIENT_NAME_MESSAGE_MAP, client_name_message_map)
 
     return node_name_message_map, client_name_message_map
 
@@ -82,7 +82,7 @@ def get_node_name_message_map() -> Dict[str, Node]:
 
 
 def set_node_name_message_map(node_name_message_map):
-    return cache.set("node_name_message_map", node_name_message_map)
+    return cache.set(id_constants.NODE_NAME_MESSAGE_MAP, node_name_message_map)
 
 
 def get_client_name_message_map() -> Dict[str, Client]:
@@ -95,7 +95,7 @@ def get_client_name_message_map() -> Dict[str, Client]:
 
 
 def set_client_name_message_map(client_name_message_map):
-    cache.set("client_name_message_map", client_name_message_map)
+    cache.set(id_constants.CLIENT_NAME_MESSAGE_MAP, client_name_message_map)
 
 
 @cache.memoize()
@@ -115,7 +115,7 @@ def get_virtual_node_map() -> Dict[str, VirtualNode]:
     Returns:
         A dictionary mapping virtual node names to virtual node objects.
     """
-    return cache.get("virtual_node_map")
+    return cache.get(id_constants.VIRTUAL_NODE_MAP)
 
 
 def set_virtual_node_map(virtual_node_map: Dict[str, VirtualNode]):
@@ -124,7 +124,7 @@ def set_virtual_node_map(virtual_node_map: Dict[str, VirtualNode]):
     Args:
         virutal_node_map: The new virtual node map to be saved in the cache.
     """
-    cache.set("virtual_node_map", virtual_node_map)
+    cache.set(id_constants.VIRTUAL_NODE_MAP, virtual_node_map)
 
 
 def get_parent_virtual_node_map() -> Dict[str, str]:
@@ -137,7 +137,7 @@ def get_parent_virtual_node_map() -> Dict[str, str]:
     Returns:
         A dictionary mapping node names to the name of their direct virtual node parent.
     """
-    return cache.get("parent_virtual_node_map")
+    return cache.get(id_constants.PARENT_VIRTUAL_NODE_MAP)
 
 
 def set_parent_virtual_node_map(parent_virtual_node_map: Dict[str, str]):
@@ -146,7 +146,7 @@ def set_parent_virtual_node_map(parent_virtual_node_map: Dict[str, str]):
     Args:
         parent_virutal_node_map: The new parent virtual node map to be saved in the cache.
     """
-    cache.set("parent_virtual_node_map", parent_virtual_node_map)
+    cache.set(id_constants.PARENT_VIRTUAL_NODE_MAP, parent_virtual_node_map)
 
 
 def add_virtual_node(
@@ -286,7 +286,7 @@ def set_comment(
             if save_changes:
                 setters[idx](proto_map)
 
-    comment_map = cache.get("comment_map")
+    comment_map = cache.get(id_constants.COMMENT_MAP)
     if comment == "":
         try:
             del comment_map[name]
@@ -294,7 +294,7 @@ def set_comment(
             pass
     else:
         comment_map[name] = comment
-    cache.set("comment_map", comment_map)
+    cache.set(id_constants.COMMENT_MAP, comment_map)
 
 
 def set_node_override_status(
@@ -339,7 +339,7 @@ def set_node_override_status(
             if save_changes:
                 setters[idx](proto_map)
 
-    override_status_map = cache.get("override_status_map")
+    override_status_map = cache.get(id_constants.OVERRIDE_STATUS_MAP)
     if override_status == Status.STATUS_UNSPECIFIED:
         try:
             del override_status_map[node_name]
@@ -347,7 +347,7 @@ def set_node_override_status(
             pass
     else:
         override_status_map[node_name] = override_status
-    cache.set("override_status_map", override_status_map)
+    cache.set(id_constants.OVERRIDE_STATUS_MAP, override_status_map)
 
 
 # @cache.memoize()  # this is commented out for consistent testing # DEBUG_REMOVE
@@ -400,11 +400,11 @@ def get_tag_list() -> List[str]:
     Returns:
         A list containing the created tags.
     """
-    return cache.get("tag_list")
+    return cache.get(id_constants.TAG_LIST)
 
 
 def set_tag_list(tag_list):
-    return cache.set("tag_list", tag_list)
+    return cache.set(id_constants.TAG_LIST, tag_list)
 
 
 def create_tag(new_tag):
@@ -448,11 +448,11 @@ def get_tag_map() -> Dict[str, List[str]]:
     Returns:
         A dictionary associating ujt_ids and their applied tags.
     """
-    return cache.get("tag_map")
+    return cache.get(id_constants.TAG_MAP)
 
 
 def set_tag_map(tag_map):
-    return cache.set("tag_map", tag_map)
+    return cache.set(id_constants.TAG_MAP, tag_map)
 
 
 def add_tag_to_element(ujt_id, tag):
@@ -493,11 +493,11 @@ def get_style_map() -> Dict[str, Dict[str, str]]:
     The style map associates the name of a style with the value of the "style" field in the cytoscape stylesheet.
     """
 
-    return cache.get("style_map")
+    return cache.get(id_constants.STYLE_MAP)
 
 
 def set_style_map(style_map):
-    return cache.set("style_map", style_map)
+    return cache.set(id_constants.STYLE_MAP, style_map)
 
 
 def update_style(style_name: str, style_dict: Dict[str, str]):
@@ -537,11 +537,11 @@ def get_view_list():
     Returns:
         A list of all created views.
     """
-    return cache.get("view_list")
+    return cache.get(id_constants.VIEW_LIST)
 
 
 def set_view_list(view_list):
-    return cache.set("view_list", view_list)
+    return cache.set(id_constants.VIEW_LIST, view_list)
 
 
 def create_view(tag, style):
