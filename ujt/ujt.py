@@ -1,11 +1,28 @@
 """ Main entry point for UJT. """
 
+from . import components, constants, state
 
-from . import callbacks, components, constants, state  # noqa
+# Ask python reviewer about this.
+# from .callbacks import * doesn't import all modules, but import * isn't recommended anyway
+# is there a way to programatically specify this?
+# Python importing is confusing...
+from .callbacks import (  # noqa
+    apply_tag_callbacks,
+    comment_callbacks,
+    create_tag_callbacks,
+    graph_callbacks,
+    panel_callbacks,
+    signal_callbacks,
+    style_callbacks,
+    view_callbacks,
+    virtual_node_callbacks,
+)
 from .dash_app import app, cache
 
 
 def initialize_ujt():
+    signal_callbacks.generate_composite_signals()
+
     if constants.CLEAR_CACHE_ON_STARTUP:
         cache.clear()
 
