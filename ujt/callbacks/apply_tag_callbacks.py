@@ -111,7 +111,7 @@ def remove_applied_tag(
     Output(id_constants.SIGNAL_APPLIED_TAG_MODIFY, "children"),
     Input(
         {
-            id_constants.APPLY_TAG_DROPDOWN: id_constants.APPLY_TAG_DROPDOWN,
+            id_constants.APPLIED_TAG_DROPDOWN: id_constants.APPLIED_TAG_DROPDOWN,
             "index": ALL,
         },
         "value",
@@ -126,10 +126,10 @@ def modify_applied_tag(dropdown_values, tap_node, tap_edge):
     """Updates the corresponding applied tag in the tag map.
 
     This function is called:
-        when an APPLY_TAG_DROPDOWN value is updated
+        when an APPLIED_TAG_DROPDOWN value is updated
 
     Args:
-        dropdown_values: the values of the APPLY_TAG_DROPDOWN dropdown menus.
+        dropdown_values: the values of the APPLIED_TAG_DROPDOWN dropdown menus.
         tap_node: Cytoscape element of the tapped/clicked node.
         tap_edge: Cytoscape element of the tapped/clicked edge.
 

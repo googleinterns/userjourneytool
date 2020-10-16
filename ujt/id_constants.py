@@ -30,6 +30,8 @@ SIGNAL_TAG_UPDATE = "tag-update-signal"
 SIGNAL_APPLIED_TAG_ADD = "add-applied-tag-signal"
 SIGNAL_APPLIED_TAG_REMOVE = "remove-applied-tag-signal"
 SIGNAL_APPLIED_TAG_MODIFY = "modify-applied-tag-signal"
+SIGNAL_APPLIED_TAG_BATCH_ADD = "batch-add-applied-tag-signal"
+SIGNAL_APPLIED_TAG_BATCH_REMOVE = "batch-remove-applied-tag-signal"
 SIGNAL_APPLIED_TAG_UPDATE = "applied-tag-update-signal"
 
 SIGNAL_VIEW_CREATE = "create-view-signal"
@@ -54,11 +56,16 @@ COLLAPSE_ERROR_MODAL_CLOSE = "collapse-error-modal-close"
 
 # region top bar
 REFRESH_SLI_BUTTON = "refresh-sli-button"
+
 VIRTUAL_NODE_INPUT = "virtual-node-input"
 ADD_VIRTUAL_NODE_BUTTON = "add-virtual-node-button"
 DELETE_VIRTUAL_NODE_BUTTON = "delete-virtual-node-button"
 COLLAPSE_VIRTUAL_NODE_BUTTON = "collapse-virtual-node-button"
 EXPAND_VIRTUAL_NODE_BUTTON = "expand-virtual-node-button"
+
+BATCH_APPLIED_TAG_DROPDOWN = "batch-applied-tag-dropdown"
+BATCH_ADD_APPLIED_TAG_BUTTON = "batch-add-applied-tag-button"
+BATCH_REMOVE_APPLIED_TAG_BUTTON = "batch-remove-applied-tag-button"
 # endregion
 
 CYTOSCAPE_GRAPH = "cytoscape-graph"
@@ -94,7 +101,7 @@ SAVE_COMMENT_TOAST = "save-comment-toast"
 # endregion
 
 # region apply tag
-APPLY_TAG_DROPDOWN = "apply-tag-dropdown"
+APPLIED_TAG_DROPDOWN = "applied-tag-dropdown"
 REMOVE_APPLIED_TAG_BUTTON = "remove-applied-tag-button"
 ADD_APPLIED_TAG_BUTTON = "add-applied-tag-button"
 # endregion

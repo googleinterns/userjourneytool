@@ -6,7 +6,7 @@ import dash
 from dash.dependencies import ALL, Input, Output, State
 from dash.exceptions import PreventUpdate
 
-from .. import constants, id_constants, state, utils
+from .. import constants, converters, id_constants, state, utils
 from ..dash_app import app
 
 
@@ -135,3 +135,27 @@ def save_tag(n_clicks_timestamp, input_values):
     state.update_tag(tag_idx, tag_value)
     # since we pattern matched the SAVE_TAG_TOAST, we need to provide output as a list
     return [True], constants.OK_SIGNAL
+
+
+@app.callback(
+    Output(id_constants.BATCH_APPLIED_TAG_DROPDOWN, "options"),
+    Input(id_constants.SIGNAL_TAG_UPDATE, "children"),
+)
+def update_batch_applied_tag_dropdown_options(tag_update_signal):
+    """Updates the options in the batch applied tag dropdown on tag changes.
+
+    Notice that we don't need to have a similar callback to update the options of the
+    non-batch applied tag dropdowns.
+    This is because the whole selected info panel is dynamically generated.
+
+    This function is called:
+        when a tag node is updated.
+
+    Args:
+        tag_update_signal: Signal indicating a virtual node was modified.
+
+    Returns:
+        A list of options for the batch applied tag dropdown journey dropdown.
+    """
+    tag_list = state.get_tag_list()
+    return converters.tag_dropdown_options_from_tags(tag_list)
