@@ -1,11 +1,11 @@
 """ Callbacks that generate the panels below the cytoscape graph.
 """
 
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Tuple
 
 import dash_core_components as dcc
 import dash_html_components as html
-from dash.dependencies import Input, Output
+from dash.dependencies import Input, Output, State
 from dash.exceptions import PreventUpdate
 from graph_structures_pb2 import UserJourney
 
@@ -174,34 +174,35 @@ def generate_create_tag_panel(create_tag_signal, delete_tag_signal):
 @app.callback(
     Output(id_constants.VIEW_PANEL, "children"),
     [
-        Input(id_constants.SIGNAL_VIEW_CREATE, "children"),
-        Input(id_constants.SIGNAL_VIEW_DELETE, "children"),
+        Input(id_constants.SIGNAL_VIEW_UPDATE, "children"),
         Input(id_constants.SIGNAL_TAG_UPDATE, "children"),
         Input(id_constants.SIGNAL_STYLE_UPDATE, "children"),
     ],
+    State(id_constants.VIEW_STORE, "data"),
 )
 def generate_view_panel(
-    create_view_signal, delete_view_signal, tag_update_signal, style_update_signal
+    view_update_signal,
+    tag_update_signal,
+    style_update_signal,
+    view_list: List[Tuple[str, str]],
 ):
     """Handles generating the view creation and deletion panel.
 
     This function is called:
-        when a new view is created.
-        when a view is deleted.
+        when a view is updated.
         when a tag is updated.
         when a style is updated
 
     Args:
-        create_view_signal: Signal indicating that a view was created.
-            Value unused, input only provided to register callback.
-        delete_view_signal: Signal indicating that a view was deleted.
+        view_update_signal: Signal indicating that a view was updated.
             Value unused, input only provided to register callback.
         tag_update_signal: Signal indicating that a tag was updated.
             Value unused, input only provided to register callback.
         style_update_signal: Signal indicating that a style was updated.
             Value unused, input only provided to register callback.
+        view_list: The current list of views.
 
     Returns:
         A list of components to be placed in the VIEW_PANEL.
     """
-    return components.get_view_components()
+    return components.get_view_components(view_list)

@@ -518,54 +518,8 @@ def update_style(style_name: str, style_dict: Dict[str, str]):
 
 def delete_style(style_name: str):
     style_map = get_style_map()
-
-    view_list = get_view_list()
-    view_list = [
-        [view_tag, view_style_name]
-        for view_tag, view_style_name in view_list
-        if view_style_name != style_name
-    ]
-    set_view_list(view_list)
-
     del style_map[style_name]
     set_style_map(style_map)
-
-
-# endregion
-
-
-# region view list
-def get_view_list():
-    """Returns the list of created views, which associate a tag and a style.
-
-    This structure is a list since the ordering matters in the UI when displaying views.
-
-    Returns:
-        A list of all created views.
-    """
-    return cache.get(id_constants.VIEW_LIST)
-
-
-def set_view_list(view_list):
-    return cache.set(id_constants.VIEW_LIST, view_list)
-
-
-def create_view(tag, style):
-    view_list = get_view_list()
-    view_list.append([tag, style])
-    set_view_list(view_list)
-
-
-def update_view(view_idx, tag, style):
-    view_list = get_view_list()
-    view_list[view_idx] = [tag, style]
-    set_view_list(view_list)
-
-
-def delete_view(view_idx):
-    view_list = get_view_list()
-    del view_list[view_idx]
-    set_view_list(view_list)
 
 
 # endregion

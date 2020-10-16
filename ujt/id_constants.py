@@ -34,9 +34,6 @@ SIGNAL_APPLIED_TAG_BATCH_ADD = "batch-add-applied-tag-signal"
 SIGNAL_APPLIED_TAG_BATCH_REMOVE = "batch-remove-applied-tag-signal"
 SIGNAL_APPLIED_TAG_UPDATE = "applied-tag-update-signal"
 
-SIGNAL_VIEW_CREATE = "create-view-signal"
-SIGNAL_VIEW_DELETE = "delete-view-signal"
-SIGNAL_VIEW_MODIFY = "modify-view-signal"
 SIGNAL_VIEW_UPDATE = "view-update-signal"
 
 SIGNAL_STYLE_SAVE = "save-style-signal"
@@ -119,6 +116,7 @@ VIEW_TAG_DROPDOWN = "view-tag-dropdown"
 VIEW_STYLE_DROPDOWN = "view-style-dropdown"
 DELETE_VIEW_BUTTON = "delete-view-button"
 CREATE_VIEW_BUTTON = "create-view-button"
+VIEW_STORE = "view-store"
 # endregion
 
 # region style
