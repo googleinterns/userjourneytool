@@ -3,7 +3,7 @@
 Generally contains constants for styling.
 """
 from collections import defaultdict
-from typing import Dict
+from typing import Any, Dict
 
 from graph_structures_pb2 import NodeType, Status
 
@@ -18,6 +18,7 @@ HEALTHY_COLOR = "green"
 WARN_COLOR = "orange"
 ERROR_COLOR = "red"
 HIGHLIGHTED_UJ_EDGE_COLOR = "purple"
+
 
 COMPOUND_BACKGROUND_BLACKEN_FACTOR = -0.5
 VIRTUAL_BACKGROUND_BLACKEN_FACTOR = -0.8
@@ -112,7 +113,17 @@ BASE_CYTO_STYLESHEET = [
     },
 ]
 
-DEFAULT_STYLE_MAP: Dict[str, Dict[str, str]] = {"HIDDEN": {}}
+DEFAULT_STYLE_MAP: Dict[str, Dict[str, Any]] = {
+    "HIDDEN": {
+        "display": "none",
+    },
+    "HIGHLIGHTED": {
+        "border-color": "deeppink",
+        "border-width": 5,
+        "line-color": "deeppink",
+        "width": 5,
+    },
+}
 
 DATATABLE_CONDITIONAL_STYLE = [
     {
