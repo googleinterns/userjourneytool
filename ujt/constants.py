@@ -3,6 +3,7 @@
 Generally contains constants for styling.
 """
 from collections import defaultdict
+from typing import Dict
 
 from graph_structures_pb2 import NodeType, Status
 
@@ -47,77 +48,71 @@ BASE_CYTO_STYLESHEET = [
         "selector": "node",
         "style": {
             "content": "data(label)",
-        }
+        },
     },
     {
         "selector": "edge",
-        "style":
-            {
-                "curve-style": "straight",
-                "target-arrow-shape": "triangle",
-                "arrow-scale": 2,
-            }
+        "style": {
+            "curve-style": "straight",
+            "target-arrow-shape": "triangle",
+            "arrow-scale": 2,
+        },
     },
     {
         "selector": ":selected",
-        "style":
-            {
-                "border-width": SELECTED_NODE_BORDER_WIDTH,
-                "border-color": SELECTED_NODE_BORDER_COLOR,
-            }
+        "style": {
+            "border-width": SELECTED_NODE_BORDER_WIDTH,
+            "border-color": SELECTED_NODE_BORDER_COLOR,
+        },
     },
     {
         "selector": f".{NodeType.Name(NodeType.NODETYPE_SERVICE)}",
-        "style":
-            {
-                "shape": "rectangle",
-                "background-blacken": COMPOUND_BACKGROUND_BLACKEN_FACTOR,
-            }
+        "style": {
+            "shape": "rectangle",
+            "background-blacken": COMPOUND_BACKGROUND_BLACKEN_FACTOR,
+        },
     },
     {
         "selector": f".{NodeType.Name(NodeType.NODETYPE_VIRTUAL)}",
-        "style":
-            {
-                "border-style": "dashed",
-                "shape": "octagon",
-                "background-blacken": VIRTUAL_BACKGROUND_BLACKEN_FACTOR,
-            }
+        "style": {
+            "border-style": "dashed",
+            "shape": "octagon",
+            "background-blacken": VIRTUAL_BACKGROUND_BLACKEN_FACTOR,
+        },
     },
     {
         "selector": f".{Status.Name(Status.STATUS_HEALTHY)}",
         "style": {
             "background-color": HEALTHY_COLOR,
-        }
+        },
     },
     {
         "selector": f".{Status.Name(Status.STATUS_WARN)}",
         "style": {
             "background-color": WARN_COLOR,
-        }
+        },
     },
     {
         "selector": f".{Status.Name(Status.STATUS_ERROR)}",
         "style": {
             "background-color": ERROR_COLOR,
-        }
+        },
     },
     {
         "selector": f".{HIGHLIGHTED_UJ_EDGE_CLASS}",
         "style": {
             "line-color": HIGHLIGHTED_UJ_EDGE_COLOR,
-        }
+        },
     },
     {
         "selector": f".{OVERRIDE_CLASS}",
         "style": {
             "shape": "tag",
-        }
-    }
+        },
+    },
 ]
 
-DEFAULT_STYLE_MAP = {
-    "HIDDEN": {}
-}
+DEFAULT_STYLE_MAP: Dict[str, Dict[str, str]] = {"HIDDEN": {}}
 
 DATATABLE_CONDITIONAL_STYLE = [
     {

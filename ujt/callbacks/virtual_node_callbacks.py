@@ -135,6 +135,7 @@ def toggle_collapse_error_modal(n_clicks_timestamp, signal_message) -> Tuple[boo
 
     return False, ""
 
+
 @app.callback(
     Output(id_constants.USER_JOURNEY_DROPDOWN, "options"),
     Input(id_constants.SIGNAL_VIRTUAL_NODE_UPDATE, "children"),

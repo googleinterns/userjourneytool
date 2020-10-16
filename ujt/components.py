@@ -70,6 +70,8 @@ def get_signals():
         # ---
         id_constants.SIGNAL_APPLIED_TAG_ADD,
         id_constants.SIGNAL_APPLIED_TAG_REMOVE,
+        id_constants.SIGNAL_APPLIED_TAG_BATCH_ADD,
+        id_constants.SIGNAL_APPLIED_TAG_BATCH_REMOVE,
         id_constants.SIGNAL_APPLIED_TAG_MODIFY,
         id_constants.SIGNAL_APPLIED_TAG_UPDATE,
         # ---
@@ -108,17 +110,14 @@ def get_top_row_components():
                                 children="Refresh SLIs",
                             ),
                         ),
-                        dbc.Col(
-                            children=get_virtual_node_control_components()
-                        ),
-                        dbc.Col(
-                            children=get_batch_apply_tag_components()
-                        )
+                        dbc.Col(children=get_virtual_node_control_components()),
+                        dbc.Col(children=get_batch_apply_tag_components()),
                     ],
                 ),
             ),
         ],
     )
+
 
 def get_virtual_node_control_components():
     components = [
@@ -146,6 +145,7 @@ def get_virtual_node_control_components():
     ]
     return components
 
+
 def get_batch_apply_tag_components():
     components = [
         dcc.Dropdown(
@@ -153,14 +153,15 @@ def get_batch_apply_tag_components():
         ),
         dbc.Button(
             id=id_constants.BATCH_ADD_APPLIED_TAG_BUTTON,
-            children="Add Tags to Selected"
+            children="Add Tags to Selected",
         ),
         dbc.Button(
             id=id_constants.BATCH_REMOVE_APPLIED_TAG_BUTTON,
-            children="Remove Tags from Selected"
+            children="Remove Tags from Selected",
         ),
     ]
     return components
+
 
 def get_cytoscape_graph():
     return cyto.Cytoscape(
