@@ -135,11 +135,8 @@ def generate_user_journey_info_panel(dropdown_value: str) -> List[Any]:
             dropdown_value, node_name_message_map, virtual_node_map
         )
         user_journeys = []
-        for (
-            node_name
-        ) in (
-            node_names_in_virtual_node
-        ):  # maybe we can try to improve this if the input size is large
+        # maybe we can try to improve this if the input size is large
+        for node_name in node_names_in_virtual_node:
             for user_journey in node_user_journey_map[node_name]:
                 if user_journey not in user_journeys:
                     user_journeys.append(user_journey)

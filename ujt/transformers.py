@@ -66,7 +66,7 @@ def apply_views(elements, tag_map, view_list):
 
 
 def apply_highlighted_edge_class_to_elements(elements, user_journey_name):
-    # we may want to refactor the edge map creation for testability.
+    # We may want to refactor the edge map creation for testability.
     # No other function currently requires us to map edge source to edge element.
     edges_map = defaultdict(list)
     nodes_list = []

@@ -3,8 +3,11 @@
 from . import components, constants, state
 
 # Ask python reviewer about this.
-# from .callbacks import * doesn't import all modules, but import * isn't recommended anyway
-# is there a way to programatically specify this?
+# from .callbacks import * doesn't import all modules
+# We would need to specify __all__ in callbacks/__init__.py either manually or searching the file system
+# https://docs.python.org/3/tutorial/modules.html#importing-from-a-package
+# is there a way to programatically specify "import all submodules from this package"? (preferably while avoiding from ... import *)
+# or is this even desirable?
 # Python importing is confusing...
 from .callbacks import (  # noqa
     apply_tag_callbacks,

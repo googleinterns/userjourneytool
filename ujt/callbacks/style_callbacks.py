@@ -84,7 +84,7 @@ def update_style_input_fields(
     the state of the style name and style textarea.
     We don't dynamically generate the style panel since there's always one input and one textarea.
     This makes it more inconvenient to split these cases into two callbacks, each producing their own update signal,
-    because we don't use a callback to dynamically generate the style panel.
+    because we don't use a callback (that reads from the composite update signal) to dynamically generate the style panel.
 
     This is slightly inconsistent with the tag creation and application callback organization, where each callback
     produces its own signal, and another callback rerenders the respective panel.
