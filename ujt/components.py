@@ -530,8 +530,8 @@ def get_view_components():
                                 id_constants.VIEW_STYLE_DROPDOWN: id_constants.VIEW_STYLE_DROPDOWN,
                                 "index": idx,
                             },
-                            options=converters.style_dropdown_options_from_styles(
-                                style_map
+                            options=converters.style_dropdown_options_from_style_names(
+                                style_map.keys()
                             ),
                             value=view_tuple[1],
                         ),
