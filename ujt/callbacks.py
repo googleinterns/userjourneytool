@@ -13,7 +13,7 @@
 # limitations under the License.
 """ Callbacks for Dash app. """
 
-from typing import Any, Dict, List, Tuple, Union
+from typing import Any, Dict, List, Set, Tuple, Union
 
 import dash
 import dash_bootstrap_components as dbc
@@ -21,9 +21,15 @@ import dash_core_components as dcc
 import dash_html_components as html
 from dash.dependencies import ALL, MATCH, Input, Output, State
 from dash.exceptions import PreventUpdate
-from graph_structures_pb2 import Node, NodeType, Status, VirtualNode
+from graph_structures_pb2 import (
+    Node,
+    NodeType,
+    Status,
+    UserJourney,
+    VirtualNode)
 
 from . import (
+    components,
     compute_status,
     constants,
     converters,
@@ -40,7 +46,7 @@ from .dash_app import app
     [
         Input("refresh-sli-button",
               "n_clicks_timestamp"),
-        Input({constants.CLIENT_DATATABLE_ID: ALL},
+        Input({constants.USER_JOURNEY_DATATABLE_ID: ALL},
               "selected_row_ids"),
         Input("virtual-node-update-signal",
               "children"),
@@ -109,11 +115,16 @@ def update_graph_elements(
 
     ctx = dash.callback_context
     triggered_id, triggered_prop, triggered_value = utils.ctx_triggered_info(ctx)
+    #print(ctx.triggered)
+    #print(triggered_id, triggered_prop, triggered_value)  # for debugging...
 
-    # print(triggered_id, triggered_prop, triggered_value)  # for debugging...
-
-    if triggered_id == "virtual-node-update-signal" and triggered_value != constants.OK_SIGNAL:
-        # No-op if the validation signal isn't OK
+    if (triggered_id == "virtual-node-update-signal" and
+            triggered_value != constants.OK_SIGNAL) or (
+                triggered_id
+                == r"""{"override-dropdown":"override-dropdown-hidden"}"""):
+        # No-op if :
+        #   the validation signal isn't OK
+        #   callback fired from dummy override dropdown
         raise PreventUpdate
 
     node_name_message_map, client_name_message_map = state.get_message_maps()
@@ -213,169 +224,31 @@ def update_graph_elements(
 
 
 @app.callback(
-    Output("node-info-panel",
+    Output("selected-info-panel",
            "children"),
-    [Input("cytoscape-graph",
-           "tapNode")],
+    [
+        Input("cytoscape-graph",
+              "tapNode"),
+        Input("cytoscape-graph",
+              "tapEdge"),
+        Input("applied-tag-update-signal",
+              "children"),
+    ],
+    prevent_initial_call=True,
 )
-def generate_node_info_panel(tap_node) -> List[Any]:
+def generate_selected_info_panel(tap_node,
+                                 tap_edge,
+                                 applied_tag_update_signal) -> List[Any]:
     """ Generate the node info panel.
 
     This function is called:
         when a node is clicked
+        when an edge is clicked
 
     Args:
         tap_node: Cytoscape element of the tapped/clicked node.
-
-    Returns:
-        a List of Dash components.
-    """
-
-    if tap_node is None or utils.is_client_cytoscape_node(tap_node):
-        raise PreventUpdate
-
-    node_name = tap_node["data"]["ujt_id"]
-    node_name_message_map = state.get_node_name_message_map()
-    virutal_node_map = state.get_virtual_node_map()
-
-    # See https://github.com/python/typing/issues/81
-    node = None  # type: Union[Node, VirtualNode]  # type: ignore
-    if node_name in node_name_message_map:
-        node = node_name_message_map[node_name]
-        is_virtual_node = False
-    else:
-        node = virutal_node_map[node_name]
-        is_virtual_node = True
-
-    header = html.H2(
-        f"{utils.relative_name(node_name)} ({utils.human_readable_enum_name(node.node_type, NodeType)})"
-    )
-
-    status_override_components = [
-        html.H3("Status"),
-        dcc.Dropdown(
-            id={"override-dropdown": "override-dropdown"},
-            clearable=False,
-            searchable=False,
-            options=converters.override_dropdown_options_from_node(node),
-            value=node.override_status)
-    ]
-
-    sli_info, child_info, dependency_info = [], [], []
-
-    # Use duck typing for virtual nodes
-    if node.child_names:
-        child_nodes: List[Union[Node, VirtualNode]] = []
-        for child_name in node.child_names:
-            if child_name in node_name_message_map:
-                child_nodes.append(node_name_message_map[child_name])
-            else:
-                child_nodes.append(virutal_node_map[child_name])
-
-        child_info = [
-            html.H3("Child Node Info"),
-            converters.datatable_from_nodes(
-                child_nodes,
-                use_relative_names=True,
-                table_id=constants.CHILD_DATATABLE_ID)
-        ]
-
-    # Although we generally prefer "asking forgiveness rather than permission" (try/except) rather than
-    # "look before you leap", we avoid having an empty except block by checking the is_virtual_node_property.
-    if not is_virtual_node and node.slis:  # type: ignore
-        sli_info = [
-            html.H3("SLI Info"),
-            converters.datatable_from_slis(
-                node.slis,  # type: ignore
-                table_id=constants.SLI_DATATABLE_ID)
-        ]
-
-    if not is_virtual_node and node.dependencies:  # type: ignore
-        dependency_nodes = [
-            node_name_message_map[dependency.target_name]
-            for dependency in node.dependencies  # type: ignore
-        ]
-        dependency_info = [
-            html.H3("Dependency Node Info"),
-            converters.datatable_from_nodes(
-                dependency_nodes,
-                use_relative_names=False,
-                table_id=constants.DEPENDENCY_DATATABLE_ID)
-        ]
-
-    # We let the id fields be dictionaries here, to prevent Dash errors
-    # when registering callbacks to dynamically created components.
-    # Although we can directly assign an id and register a callback,
-    # an error appears in the Dash app saying that no such ID exists.
-    # The callback still works despite the error.
-    # It can be supressed, but only at a global granularity (for all callbacks),
-    # which seems too heavy handed.
-
-    # Instead, we use the pattern matching callback feature to
-    # match the dictionary fields in the id.
-    # This is the same approach taken in update_graph_elements to
-    # register the callback from the client datatable.
-
-    # Notice that the value of the dictionary doesn't matter,
-    # since we keep the key unique and match the value with ALL.
-    # Unfortunately, we can't do something like id={"id": "component-unique-id"},
-    # and match with Output/Input/State({"id": "component-unique-id"})
-    # since the callback requires a wildcard (ALL/MATCH) to match.
-    # We have to add an unused field, such as
-    # id={"id": "component-unique-id", "index": 0} and match with
-    # Output/Input/State({"id": "component-unique-id", "index": ALL/MATCH})
-    # Neither solution is ideal, but have to work with it.
-
-    comment_components = [
-        dbc.Textarea(
-            id={"node-comment-textarea": "node-comment-textarea"},
-            value=node.comment,
-        ),
-        dbc.Button(
-            id={"save-comment-textarea-button": "save-comment-textarea-button"},
-            children="Save Comment",
-        ),
-        dbc.Button(
-            id={
-                "discard-comment-textarea-button":
-                    "discard-comment-textarea-button"
-            },
-            children="Discard Comment Changes",
-        ),
-        dbc.Toast(
-            id={"save-comment-toast": "save-comment-toast"},
-            header="Successfully saved comment!",
-            icon="success",
-            duration=3000,
-            dismissable=True,
-            body_style={"display": "none"},
-            is_open=False)
-    ]
-
-    return (
-        [header] + status_override_components + sli_info + child_info +
-        dependency_info + comment_components)
-
-
-@app.callback(
-    Output("client-info-panel",
-           "children"),
-    [Input("cytoscape-graph",
-           "tapNode"),
-     Input("client-dropdown",
-           "value")],
-    prevent_initial_call=True,
-)
-def generate_client_info_panel(tap_node, dropdown_value: str) -> List[Any]:
-    """ Generate the client info panel.
-
-    This function is called:
-        when a client is clicked
-        when the client dropdown value is modified (i.e. a user selects a dropdown option)
-
-    Args:
-        tap_node: Cytoscape element of the tapped/clicked node.
-        dropdown_value: The value of the client dropdown
+        tap_edge: Cytoscape element of the tapped/clicked edge.
+        applied_tag_update_signal: The signal indicating that a tag was added or removed.
 
     Returns:
         a List of Dash components.
@@ -384,42 +257,83 @@ def generate_client_info_panel(tap_node, dropdown_value: str) -> List[Any]:
     ctx = dash.callback_context
     triggered_id, triggered_prop, triggered_value = utils.ctx_triggered_info(ctx)
 
-    # ctx.triggered[0] is either "cytoscape-graph.tapNode" or "client-dropdown.value"
-    if triggered_id == "cytoscape-graph":
-        tap_node = triggered_value
+    latest_tapped_element = utils.get_latest_tapped_element(tap_node, tap_edge)
+    ujt_id = latest_tapped_element["data"]["ujt_id"]
+
+    out = []
+    if latest_tapped_element == tap_node:
+        node_name = tap_node["data"]["ujt_id"]
         if not utils.is_client_cytoscape_node(tap_node):
-            raise PreventUpdate
-
-        client_name = tap_node["data"]["ujt_id"]
+            out += components.get_node_info_panel_components(node_name)
     else:
-        client_name = triggered_value
+        # just generate this header here for now,
+        # probably don't need to make a new component function for it.
+        source, target = ujt_id.split("/")
+        header = html.P(
+            f"Edge from {utils.relative_name(source)} to {utils.relative_name(target)}"
+        )
+        out.append(header)
 
-    client_name_message_map = state.get_client_name_message_map()
-    client = client_name_message_map[client_name]
-    return converters.datatable_from_client(client, "datatable-client")
+    out += components.get_apply_tag_components(ujt_id)
+
+    return out
 
 
 @app.callback(
-    Output("client-dropdown",
-           "value"),
-    [Input("cytoscape-graph",
-           "tapNode")],
+    Output("user-journey-info-panel",
+           "children"),
+    Input("user-journey-dropdown",
+          "value"),
+    prevent_initial_call=True,
 )
-def update_client_dropdown_value(tap_node) -> str:
-    """ Updates the client dropdown value.
+def generate_user_journey_info_panel(dropdown_value: str) -> List[Any]:
+    """ Generate the client info panel.
 
     This function is called:
-        when a user selects a client in the graph, to ensure the dropdown value matches the selection
+        when the user journey dropdown value is modified (i.e. a user selects a dropdown option)
 
     Args:
-        tap_node: Cytoscape element of the tapped/clicked node.
+        dropdown_value: The value of the client dropdown
 
     Returns:
-        the new value of the client dropdown.
+        a List of Dash components.
     """
-    if tap_node is None or not utils.is_client_cytoscape_node(tap_node):
-        raise PreventUpdate
-    return tap_node["data"]["ujt_id"]
+
+    node_name_message_map, client_name_message_map = state.get_message_maps()
+    virtual_node_map = state.get_virtual_node_map()
+
+    if dropdown_value in client_name_message_map:
+        client = client_name_message_map[dropdown_value]
+        return converters.user_journey_datatable_from_user_journeys(
+            client.user_journeys,
+            constants.USER_JOURNEY_DATATABLE_ID)
+
+    # associate the name of the user journey with the nodes that it passes through
+    node_user_journey_map: Dict[
+        str,
+        List[UserJourney]] = state.get_node_to_user_journey_map()
+
+    if dropdown_value in node_name_message_map:
+        return converters.user_journey_datatable_from_user_journeys(
+            node_user_journey_map[dropdown_value],
+            constants.USER_JOURNEY_DATATABLE_ID)
+
+    if dropdown_value in virtual_node_map:
+        node_names_in_virtual_node = utils.get_all_node_names_within_virtual_node(
+            dropdown_value,
+            node_name_message_map,
+            virtual_node_map)
+        user_journeys = []
+        for node_name in node_names_in_virtual_node:
+            for user_journey in node_user_journey_map[node_name]:
+                if user_journey not in user_journeys:  # this is sphagetti
+                    user_journeys.append(user_journey)
+
+        return converters.user_journey_datatable_from_user_journeys(
+            user_journeys,
+            constants.USER_JOURNEY_DATATABLE_ID)
+
+    raise ValueError
 
 
 @app.callback(
@@ -589,7 +503,7 @@ def discard_comment(discard_n_clicks_timestamp, tap_node):
 
 
 @app.callback(
-    Output({"save-comment-toast": MATCH},
+    Output({"save-comment-toast": ALL},
            "is_open"),
     Input({"save-comment-textarea-button": ALL},
           "n_clicks_timestamp"),
@@ -622,4 +536,277 @@ def save_comment(save_n_clicks_timestamp, tap_node, new_comment):
     new_comment = new_comment[0]
     node_name = tap_node["data"]["ujt_id"]
     state.set_comment(node_name, new_comment)
-    return True
+    return [
+        True
+    ]  # wrap in a list since we used pattern matching. should only ever be one toast.
+
+
+@app.callback(
+    Output("user-journey-dropdown",
+           "options"),
+    [Input("virtual-node-update-signal",
+           "children")],
+)
+def update_user_journey_dropdown_options(virtual_node_update_signal):
+    node_name_message_map, client_name_message_map = state.get_message_maps()
+    virtual_node_map = state.get_virtual_node_map()
+
+    return converters.dropdown_options_from_maps(
+        node_name_message_map,
+        client_name_message_map,
+        virtual_node_map)
+
+
+@app.callback(
+    Output({"save-tag-toast": ALL},
+           "is_open"),
+    Input(
+        {
+            "save-tag-button": "save-tag-button",
+            "index": ALL
+        },
+        "n_clicks_timestamp"),
+    State({
+        "tag-input": "tag-input",
+        "index": ALL
+    },
+          "value"),
+    prevent_initial_call=True,
+)
+def save_tag(n_clicks_timestamp, input_values):
+    """ Saves the corresponding tag from the input field to the tag list.
+    
+    Ideally, we would like to use the MATCH function to determine which button was clicked.
+    However, since we only have one save tag toast for all the tags, we can't use MATCH in the Output field.
+    To use MATCH, Dash requires the Output field to match the same properties as the input field.
+    Refer to: https://dash.plotly.com/pattern-matching-callbacks
+
+    This function is called:
+        when the save tag button is clicked.
+
+    Args:
+        n_clicks_timestamp: List of the timestamps of when save-tag-button buttons were called.
+            Value unused, input only provided to register callback.
+        input_values: List of the input values in tag-input inputs.
+
+    Returns:
+        A boolean indicating whether the save tag successful toast should open.
+    """
+
+    ctx = dash.callback_context
+    triggered_id, triggered_prop, triggered_value = utils.ctx_triggered_info(ctx)
+
+    # Unfortunately, we have to convert the stringified dict back to a dict.
+    # Dash doesn't provide us any other method to see which element triggered the callback.
+    # This isn't very elegant, but I don't see any other way to proceed.
+    id_dict = utils.string_to_dict(triggered_id)
+
+    tag_idx = id_dict["index"]
+    tag_value = input_values[tag_idx]
+
+    if " " in tag_value:
+        raise PreventUpdate  # TODO: display an error UI element or something
+
+    state.update_tag(tag_idx, tag_value)
+    return [
+        True
+    ]  # since we pattern matched the save-tag-toast, we need to provide output as a list
+
+
+@app.callback(
+    Output("tag-update-signal",
+           "children"),
+    [
+        Input(
+            {
+                "delete-tag-button": "delete-tag-button",
+                "index": ALL
+            },
+            "n_clicks_timestamp"),
+        Input({"create-tag-button": ALL},
+              "n_clicks_timestamp"),
+    ],
+    prevent_initial_call=True,
+)
+def create_delete_tag(remove_timestamps, add_timestamps):
+    """ Handles creating and deleting tags from the tag list.
+
+    This function is called:
+        when the create tag button is clicked.
+        while a delete tag button is clicked
+
+    Args:
+        remove_timestamps: List of the timestamps of when delete-tag-button buttons were called.
+            Value unused, input only provided to register callback.
+        add_timestamps: List of the timestamps of the create-tag-button buttons was called.
+            Value unused, input only provided to register callback.
+
+    Returns:
+        A signal to add to the tag-update-signal hidden div.
+    """
+
+    ctx = dash.callback_context
+    triggered_id, triggered_prop, triggered_value = utils.ctx_triggered_info(ctx)
+
+    # When the button is initially added, it fires a callback.
+    # We want to prevent this callback from making changes to the update signal.
+    if triggered_value is None:
+        raise PreventUpdate
+
+    # Unfortunately, we have to convert the stringified dict back to a dict.
+    # Dash doesn't provide us any other method to see which element triggered the callback.
+    # This isn't very elegant, but I don't see any other way to proceed.
+    id_dict = utils.string_to_dict(triggered_id)
+    if "create-tag-button" in id_dict:
+        state.create_tag("")
+    elif "delete-tag-button" in id_dict:
+        tag_idx = id_dict["index"]
+        state.delete_tag(tag_idx)
+    else:
+        raise ValueError
+
+    return constants.OK_SIGNAL
+
+
+@app.callback(
+    Output("tag-panel",
+           "children"),
+    Input("tag-update-signal",
+          "children"),
+)
+def generate_tag_panel(tag_update_signal):
+    """ Handles generating the tag creation and deletion panel.
+
+    This function is called:
+        when a new tag is created.
+        when a tag is deleted.
+
+    Args:
+        tag-update-signal: Signal indicating that the list of tags was modified.
+            Value unused, input only provided to register callback.
+        
+    Returns:
+        A list of components to be placed in the tag-panel.
+    """
+    return components.get_tag_panel()
+
+
+@app.callback(
+    Output("applied-tag-update-signal",
+           "children"),
+    [
+        Input(
+            {
+                "remove-applied-tag-button": "remove-applied-tag-button",
+                "index": ALL
+            },
+            "n_clicks_timestamp"),
+        Input({"add-applied-tag-button": ALL},
+              "n_clicks_timestamp"),
+    ],
+    [
+        State("cytoscape-graph",
+              "tapNode"),
+        State("cytoscape-graph",
+              "tapEdge"),
+    ],
+    prevent_initial_call=True,
+)
+def apply_empty_tag_remove_tag(
+        remove_timestamps,
+        add_timestamps,
+        tap_node,
+        tap_edge):
+    """ Handles applying empty tags and removing tags from the tag map.
+
+    This function is called:
+        when the add tag button is clicked.
+        while a delete tag button is clicked
+
+    Args:
+        remove_timestamps: List of the timestamps of when delete-applied-tag-button buttons were called.
+            Value unused, input only provided to register callback.
+        add_timestamps: List of the timestamps of the add-applied-tag-button buttons was called.
+            Value unused, input only provided to register callback.
+        tap_node: The last cytoscape node element that was tapped.
+        tap_edge: The last cytoscape edge element that was tapped.
+        
+    Returns:
+        A signal to add to the applied-tag-update-signal hidden div.
+    """
+
+    ctx = dash.callback_context
+    triggered_id, triggered_prop, triggered_value = utils.ctx_triggered_info(ctx)
+
+    # When the button is initially added, it fires a callback.
+    # We want to prevent this callback from making changes to the update signal.
+    if triggered_value is None:
+        raise PreventUpdate
+
+    # Unfortunately, we have to convert the stringified dict back to a dict.
+    # Dash doesn't provide us any other method to see which element triggered the callback.
+    # This isn't very elegant, but I don't see any other way to proceed.
+    id_dict = utils.string_to_dict(triggered_id)
+
+    ujt_id = utils.get_latest_tapped_element(tap_node,
+                                             tap_edge)["data"]["ujt_id"]
+
+    if "add-applied-tag-button" in id_dict:
+        state.add_tag_to_element(ujt_id, "")
+    elif "remove-applied-tag-button" in id_dict:
+        tag_idx = id_dict["index"]
+        state.remove_tag_from_element(ujt_id, tag_idx)
+    else:
+        raise ValueError
+
+    return constants.OK_SIGNAL
+
+
+@app.callback(
+    Output("update-applied-tag-dummy-signal",
+           "children"),
+    Input({
+        "apply-tag-dropdown": "apply-tag-dropdown",
+        "index": ALL
+    },
+          "value"),
+    [
+        State("cytoscape-graph",
+              "tapNode"),
+        State("cytoscape-graph",
+              "tapEdge"),
+    ],
+    prevent_initial_call=True,
+)
+def update_applied_tag(dropdown_values, tap_node, tap_edge):
+    """ Updates the corresponding applied tag in the tag map.
+
+    This function is called:
+        when an apply-tag-dropdown value is updated
+
+    Args:
+        dropdown_values: the values of the apply-tag-dropdown dropdown menus.
+        tap_node: Cytoscape element of the tapped/clicked node.
+        tap_edge: Cytoscape element of the tapped/clicked edge.
+
+    Returns:
+        A boolean indicating whether the save tag successful toast should open.
+    """
+    ctx = dash.callback_context
+    triggered_id, triggered_prop, triggered_value = utils.ctx_triggered_info(ctx)
+
+    if triggered_value is None:
+        raise PreventUpdate
+
+    # Unfortunately, we have to convert the stringified dict back to a dict.
+    # Dash doesn't provide us any other method to see which element triggered the callback.
+    # This isn't very elegant, but I don't see any other way to proceed.
+    id_dict = utils.string_to_dict(triggered_id)
+
+    tag_idx = id_dict["index"]
+    tag_value = dropdown_values[tag_idx]
+
+    latest_tapped_element = utils.get_latest_tapped_element(tap_node, tap_edge)
+    ujt_id = latest_tapped_element["data"]["ujt_id"]
+
+    state.update_applied_tag(ujt_id, tag_idx, tag_value)
