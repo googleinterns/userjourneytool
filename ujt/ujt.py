@@ -13,6 +13,7 @@ from .callbacks import (  # noqa
     apply_tag_callbacks,
     comment_callbacks,
     create_tag_callbacks,
+    change_over_time_callbacks,
     graph_callbacks,
     panel_callbacks,
     signal_callbacks,

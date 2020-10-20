@@ -451,7 +451,7 @@ def get_create_tag_components():
                                 id_constants.TAG_INPUT: id_constants.TAG_INPUT,
                                 "index": idx,
                             },
-                            placeholder="tag@timestamp",
+                            placeholder=f"tag@{constants.DATE_FORMAT} (timestamp optional)",
                             value=tag,
                         ),
                         width=9,

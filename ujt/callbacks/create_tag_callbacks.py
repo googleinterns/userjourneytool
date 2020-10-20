@@ -163,7 +163,7 @@ def update_batch_applied_tag_dropdown_options(tag_update_signal):
 
 @app.callback(
     Output(id_constants.CHANGE_OVER_TIME_TAG_DROPDOWN, "options"),
-    Input(id_constants.SIGNAL_TAG_UPDATE, "children")
+    Input(id_constants.SIGNAL_TAG_UPDATE, "children"),
 )
 def update_change_over_time_tag_dropdown_options(tag_update_signal):
     """Updates the options in the change over time tag dropdown on tag changes.
@@ -178,4 +178,9 @@ def update_change_over_time_tag_dropdown_options(tag_update_signal):
         A list of options for the change over time tag dropdown journey dropdown.
     """
     tag_list = state.get_tag_list()
-    return converters.timestamped_tag_dropdown_options_from_tags(tag_list)
+    tag_options = converters.timestamped_tag_dropdown_options_from_tags(tag_list)
+    custom_time_range_option = {
+        "label": constants.CUSTOM_TIME_RANGE_DROPDOWN_VALUE,
+        "value": constants.CUSTOM_TIME_RANGE_DROPDOWN_VALUE,
+    }
+    return tag_options + [custom_time_range_option]
