@@ -1,11 +1,31 @@
 """ Main entry point for UJT. """
 
+from . import components, constants, state
 
-from . import callbacks, components, constants, state  # noqa
+# Ask python reviewer about this.
+# from .callbacks import * doesn't import all modules
+# We would need to specify __all__ in callbacks/__init__.py either manually or searching the file system
+# https://docs.python.org/3/tutorial/modules.html#importing-from-a-package
+# is there a way to programatically specify "import all submodules from this package"? (preferably while avoiding from ... import *)
+# or is this even desirable?
+# Python importing is confusing...
+from .callbacks import (  # noqa
+    apply_tag_callbacks,
+    comment_callbacks,
+    create_tag_callbacks,
+    graph_callbacks,
+    panel_callbacks,
+    signal_callbacks,
+    style_callbacks,
+    view_callbacks,
+    virtual_node_callbacks,
+)
 from .dash_app import app, cache
 
 
 def initialize_ujt():
+    signal_callbacks.generate_composite_signals()
+
     if constants.CLEAR_CACHE_ON_STARTUP:
         cache.clear()
 

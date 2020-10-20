@@ -64,6 +64,7 @@ class ReportingServiceServicer(server_pb2_grpc.ReportingServiceServicer):
         for node in self.nodes:
             # not sure why node.slis[:] = [sli_name_map[node.name]] doesn't work
             # it seems to be supported in the official documentation.
+            # https://developers.google.com/protocol-buffers/docs/reference/python-generated#embedded_message
             # TODO: investigate proto repeated field assignmnt
 
             del node.slis[:]
