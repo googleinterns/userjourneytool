@@ -1,5 +1,14 @@
-from collections import deque
-from typing import TYPE_CHECKING, Any, Deque, Dict, List, Set, Tuple, cast
+from collections import defaultdict, deque
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    DefaultDict,
+    Deque,
+    Dict,
+    List,
+    Set,
+    Tuple,
+    cast)
 
 from graph_structures_pb2 import (
     SLI,
@@ -7,6 +16,7 @@ from graph_structures_pb2 import (
     Node,
     NodeType,
     Status,
+    UserJourney,
     VirtualNode)
 
 from . import converters, rpc_client, utils
@@ -104,7 +114,7 @@ def get_cytoscape_elements():
     return elements
 
 
-# region virtual node functions
+# region virtual node
 def get_virtual_node_map() -> Dict[str, VirtualNode]:
     """ Gets a dictionary mapping virtual node names to virtual node messages.
 
@@ -349,3 +359,206 @@ def set_node_override_status(
     else:
         override_status_map[node_name] = override_status
     cache.set("override_status_map", override_status_map)
+
+
+#@cache.memoize()  # this is commented out for consistent testing
+def get_node_to_user_journey_map() -> Dict[str, List[UserJourney]]:
+    # map the node name to user journey names that pass through the node
+    # should this be in state? it's memoized but doesn't really affect state
+    # however, it's kind of similar to the other maps we expose in state.py,
+    # only this one is dynamically generated once...
+    node_name_message_map, client_name_message_map = get_message_maps()
+    output_map: DefaultDict[
+        str,
+        List[UserJourney]] = defaultdict(
+            list
+        )  # we would prefer to use a set here, but protobufs are not hashable
+    for client in client_name_message_map.values():
+        for user_journey in client.user_journeys:
+            node_frontier = deque(
+                [
+                    dependency.target_name
+                    for dependency in user_journey.dependencies
+                ])
+
+            while node_frontier:
+                current_node_name = node_frontier.popleft()
+                if user_journey not in output_map[
+                        current_node_name]:  # since we don't use a set, we check if it exists in the list already
+                    output_map[current_node_name].append(user_journey)
+
+                # add all the node's parents
+                parent_name = node_name_message_map[
+                    current_node_name].parent_name
+                while parent_name != "":
+                    if user_journey not in output_map[parent_name]:
+                        output_map[parent_name].append(user_journey)
+                    parent_name = node_name_message_map[parent_name].parent_name
+
+                for dependency in node_name_message_map[
+                        current_node_name].dependencies:
+                    node_frontier.append(dependency.target_name)
+
+    return output_map
+
+
+# Maybe we can think about making the following functions the result of
+# a higher order function or decorator.
+# See https://stackoverflow.com/questions/13184281/python-dynamic-function-creation-with-custom-names
+
+
+#region tag list
+def get_tag_list() -> List[str]:
+    """ Return the list of tags.
+
+    We use a list since the order matters when using pattern matching callbacks to remove tags.
+
+    Returns:
+        A list containing the created tags.
+    """
+    return cache.get("tag_list")
+
+
+def set_tag_list(tag_list):
+    return cache.set("tag_list", tag_list)
+
+
+def create_tag(new_tag):
+    tag_list = get_tag_list()
+    if " " in new_tag:  # where should validation be done? in the callback or here?
+        raise ValueError("Tags cannot contain spaces!")
+    tag_list.append(new_tag)
+    set_tag_list(tag_list)
+
+
+def delete_tag(tag_index):
+    tag_list = get_tag_list()
+    del tag_list[tag_index]
+    # TODO: delete this tag from the tag map
+    set_tag_list(tag_list)
+
+
+def update_tag(tag_index, new_tag):
+    tag_list = get_tag_list()
+    tag_list[tag_index] = new_tag
+    set_tag_list(tag_list)
+
+
+#endregion
+
+
+#region tag map
+def get_tag_map() -> Dict[str, List[str]]:
+    """ Returns the map associating ujt_ids and applied tags.
+    
+    The tag map associates names of nodes/virtual nodes/clients with a list of the tags that they contain.
+    Maybe we should break this map up into separate maps for nodes, virtual nodes, and clients, but their names should be unique,
+    so I leave it as one map for now.
+    We use lists as the value type of the dictionary since we need an ordering to use the pattern matching callbacks to add/remove tags. 
+    Moreover, this ensures a consistent ordering of applied tags in the UI.
+
+    Returns:
+        A dictionary associating ujt_ids and their applied tags.
+    """
+    return cache.get("tag_map")
+
+
+def set_tag_map(tag_map):
+    return cache.set("tag_map", tag_map)
+
+
+def add_tag_to_element(ujt_id, tag):
+    """ Adds a tag to an element.
+
+    We generally use "add" or "applies" to refer to this operation,
+    (as opposed to create).
+    This function is generally called with tag == "", when adding a new apply tag UI row. 
+
+    Args:
+        ujt_id: the UJT specific id of the element (see converters.py)
+        tag: the tag to apply
+    """
+    tag_map = get_tag_map()
+    tag_map[ujt_id].append(tag)
+    set_tag_map(tag_map)
+
+
+def remove_tag_from_element(ujt_id, tag_idx):
+    tag_map = get_tag_map()
+    del tag_map[ujt_id][tag_idx]
+    set_tag_map(tag_map)
+
+
+def update_applied_tag(ujt_id, tag_idx, tag):
+    tag_map = get_tag_map()
+    tag_map[ujt_id][tag_idx] = tag
+    set_tag_map(tag_map)
+
+
+#endregion
+
+
+#region style map
+def get_style_map() -> Dict[str, Dict[str, str]]:
+    """ Return the map of styles.
+
+    The style map associates the name of a style with the value of the "style" field in the cytoscape stylesheet.
+    """
+
+    return cache.get("style_map")
+
+
+def set_style_map(style_map):
+    return cache.set("style_map", style_map)
+
+
+def update_style(style_name: str, style_dict: Dict[str, str]):
+    style_map = get_style_map()
+    style_map[style_name] = style_dict
+    set_style_map(style_map)
+
+
+def delete_style(style_name: str):
+    style_map = get_style_map()
+    del style_map[style_name]
+    set_style_map(style_map)
+
+
+#endregion
+
+
+#region view list
+def get_view_list():
+    """ Returns the list of created views, which associate a tag and a style.
+
+    This structure is a list since the ordering matters in the UI when displaying views.
+    
+    Returns:
+        A list of all created views.
+    """
+    return cache.get("view_list")
+
+
+def set_view_list(view_list):
+    return cache.set("view_list", view_list)
+
+
+def create_view(tag, style):
+    view_list = get_view_list()
+    view_list.append([tag, style])
+    set_view_list(view_list)
+
+
+def update_view(view_idx, tag, style):
+    view_list = get_view_list()
+    view_list[view_idx] = [tag, style]
+    set_view_list(view_list)
+
+
+def delete_view(view_idx):
+    view_list = get_view_list()
+    del view_list[view_idx]
+    set_view_list(view_list)
+
+
+#endregion

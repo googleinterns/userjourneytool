@@ -4,7 +4,7 @@ Generally contains constants for styling.
 """
 from graph_structures_pb2 import NodeType, Status
 
-CLEAR_CACHE_ON_STARTUP = False
+CLEAR_CACHE_ON_STARTUP = True
 
 CLIENT_CLASS = "CLIENT"
 HIGHLIGHTED_UJ_EDGE_CLASS = "HIGHLIGHTED_UJ_EDGE"
@@ -25,12 +25,44 @@ GRAPH_BACKGROUND_COLOR = "azure"
 GRAPH_WIDTH = "100%"
 GRAPH_HEIGHT = "600px"
 
-CLIENT_DATATABLE_ID = "datatable-client"
+USER_JOURNEY_DATATABLE_ID = "user-journey-datatable"
 SLI_DATATABLE_ID = "datatable-slis"
 CHILD_DATATABLE_ID = "datatable-child-nodes"
 DEPENDENCY_DATATABLE_ID = "datatable-dependency-nodes"
 
-CYTO_STYLESHEET = [
+BOOTSTRAP_BUTTON_COLUMN_CLASSES = "m-1 d-flex justify-content-center"
+
+DEFAULT_STYLE_MAP = {
+    NodeType.Name(NodeType.NODETYPE_SERVICE):
+        {
+            "shape": "rectangle",
+            "background-blacken": COMPOUND_BACKGROUND_BLACKEN_FACTOR,
+        },
+    NodeType.Name(NodeType.NODETYPE_VIRTUAL):
+        {
+            "border-style": "dashed",
+            "shape": "octagon",
+            "background-blacken": VIRTUAL_BACKGROUND_BLACKEN_FACTOR,
+        },
+    Status.Name(Status.STATUS_HEALTHY): {
+        "background-color": HEALTHY_COLOR,
+    },
+    Status.Name(Status.STATUS_WARN): {
+        "background-color": WARN_COLOR,
+    },
+    Status.Name(Status.STATUS_ERROR): {
+        "background-color": ERROR_COLOR,
+    },
+    HIGHLIGHTED_UJ_EDGE_CLASS: {
+        "line-color": HIGHLIGHTED_UJ_EDGE_COLOR,
+    },
+    OVERRIDE_CLASS: {
+        "shape": "tag",
+    },
+}
+
+# These selectors are hardcoded -- cannot be changed by style map.
+BASE_CYTO_STYLESHEET = [
     {
         "selector": "node",
         "style": {
@@ -47,32 +79,6 @@ CYTO_STYLESHEET = [
             }
     },
     {
-        "selector": f".{NodeType.Name(NodeType.NODETYPE_SERVICE)}",
-        "style":
-            {
-                "shape": "rectangle",
-                "background-blacken": COMPOUND_BACKGROUND_BLACKEN_FACTOR,
-            }
-    },
-    {
-        "selector": f".{Status.Name(Status.STATUS_HEALTHY)}",
-        "style": {
-            "background-color": HEALTHY_COLOR,
-        }
-    },
-    {
-        "selector": f".{Status.Name(Status.STATUS_WARN)}",
-        "style": {
-            "background-color": WARN_COLOR,
-        }
-    },
-    {
-        "selector": f".{Status.Name(Status.STATUS_ERROR)}",
-        "style": {
-            "background-color": ERROR_COLOR,
-        }
-    },
-    {
         "selector": ":selected",
         "style":
             {
@@ -80,27 +86,6 @@ CYTO_STYLESHEET = [
                 "border-color": SELECTED_NODE_BORDER_COLOR,
             }
     },
-    {
-        "selector": f".{HIGHLIGHTED_UJ_EDGE_CLASS}",
-        "style": {
-            "line-color": HIGHLIGHTED_UJ_EDGE_COLOR,
-        }
-    },
-    {
-        "selector": f".{NodeType.Name(NodeType.NODETYPE_VIRTUAL)}",
-        "style":
-            {
-                "border-style": "dashed",
-                "shape": "octagon",
-                "background-blacken": VIRTUAL_BACKGROUND_BLACKEN_FACTOR,
-            }
-    },
-    {
-        "selector": f".{OVERRIDE_CLASS}",
-        "style": {
-            "shape": "tag",
-        }
-    }
 ]
 
 DATATABLE_CONDITIONAL_STYLE = [
