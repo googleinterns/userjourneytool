@@ -1,4 +1,5 @@
 syntax = "proto2";
+import "google/protobuf/timestamp.proto";
 package ujt_protos;
 
 // functionally required fields declared at the top of each message
@@ -41,6 +42,8 @@ message SLI {
 
     optional Status status = 8;
     optional string comment = 9;
+
+    optional google.protobuf.Timestamp timestamp = 10;
 }
 
 message UserJourney {

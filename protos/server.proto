@@ -1,5 +1,6 @@
 syntax = "proto2";
 import "graph_structures.proto";
+import "google/protobuf/timestamp.proto";
 package ujt_protos;
 
 service ReportingService {
@@ -24,7 +25,10 @@ message GetNodesResponse {
 }
 
 message GetSLIsRequest {
-    // ...
+    repeated string node_names = 1;
+    repeated SLIType sli_types = 2;
+    optional google.protobuf.Timestamp start_time = 3;
+    optional google.protobuf.Timestamp end_time = 4;
 }
 
 message GetSLIsResponse {

@@ -1,5 +1,6 @@
 """Implementation of Reporting Server."""
 
+import datetime
 import pathlib
 import random
 from concurrent import futures
@@ -8,6 +9,7 @@ from typing import List
 import grpc
 import server_pb2
 import server_pb2_grpc
+from google.protobuf.timestamp_pb2 import Timestamp
 from graph_structures_pb2 import SLI, Client, Node
 
 from . import generate_data, server_utils
@@ -25,12 +27,15 @@ def read_local_data():
     return nodes, clients
 
 
-def generate_new_random_slis(nodes):
+def generate_new_random_slis(nodes, timestamp: datetime.datetime):
     slis = []
     for node in nodes:
+        proto_timestamp = Timestamp()
+        proto_timestamp.FromDatetime(timestamp)
         sli = SLI(
             node_name=node.name,
             sli_value=random.random(),
+            timestamp=proto_timestamp,
             **generate_data.SLO_BOUNDS,
         )
         slis.append(sli)
@@ -44,6 +49,8 @@ class ReportingServiceServicer(server_pb2_grpc.ReportingServiceServicer):
     def __init__(self, nodes, clients):
         self.nodes: List[Node] = nodes
         self.clients: List[Client] = clients
+        self.last_reported_timestamp: datetime.datetime = datetime.datetime.now()
+        self.reporting_interval: int = 5
 
     def GetNodes(self, request, context):
         return server_pb2.GetNodesResponse(nodes=self.nodes)
@@ -57,14 +64,33 @@ class ReportingServiceServicer(server_pb2_grpc.ReportingServiceServicer):
         In this mock example, we generate new random values for SLIs dynamically.
         In a real server, this method should report real SLI values.
         """
+        current_timestamp = Timestamp()
+        current_timestamp.GetCurrentTime()
+        # Set the start and end time to the current time if they are unset in the request
+        start_dt = request.start_time.ToDatetime() if request.start_time.IsInitialized() else current_timestamp.ToDatetime()
+        end_dt = request.end_time.ToDatetime() if request.end_time.IsInitialized() else current_timestamp.ToDatetime()
+        
+        slis_output = []
+        slis_at_timestamp = []
+        # In this implementation, the timestamps are inclusive since we generate new SLIs
+        # However, this is not inherent to the proto semantics
+        while start_dt <= end_dt:
+            slis_at_timestamp = generate_new_random_slis(self.nodes, start_dt)
+            slis_output += slis_at_timestamp
+            start_dt += datetime.timedelta(seconds=self.reporting_interval)
 
-        slis = generate_new_random_slis(self.nodes)
-        # Update the server's internal Node state
-        sli_name_map = {sli.node_name: sli for sli in slis}
-        for node in self.nodes:
-            del node.slis[:]
-            node.slis.extend([sli_name_map[node.name]])
-        return server_pb2.GetSLIsResponse(slis=slis)
+        # Can we improve this logic? Doesn't seem very elegant.
+        if slis_at_timestamp != []:
+            this_last_reported_timestamp = slis_at_timestamp[0].timestamp.ToDatetime()
+            if this_last_reported_timestamp > self.last_reported_timestamp:
+                self.last_reported_timestamp = this_last_reported_timestamp
+                # Update the server's internal Node state
+                sli_name_map = {sli.node_name: sli for sli in slis_at_timestamp}
+                for node in self.nodes:
+                    del node.slis[:]
+                    node.slis.extend([sli_name_map[node.name]])
+
+        return server_pb2.GetSLIsResponse(slis=slis_output)
 
 
 def serve():
