@@ -27,16 +27,16 @@ def read_local_data():
     return nodes, clients
 
 
-def generate_new_random_slis(nodes, timestamp: datetime.datetime):
+def generate_new_random_slis(node_names: List[str], timestamp: datetime.datetime):
     slis = []
-    for node in nodes:
+    for node_name in node_names:
         proto_timestamp = Timestamp()
         proto_timestamp.FromDatetime(timestamp)
         sli = SLI(
-            node_name=node.name,
+            node_name=node_name,
             sli_value=random.random(),
             timestamp=proto_timestamp,
-            **generate_data.SLO_BOUNDS,
+            **generate_data.SLO_BOUNDS,  # type: ignore
         )
         slis.append(sli)
 
@@ -67,15 +67,28 @@ class ReportingServiceServicer(server_pb2_grpc.ReportingServiceServicer):
         current_timestamp = Timestamp()
         current_timestamp.GetCurrentTime()
         # Set the start and end time to the current time if they are unset in the request
-        start_dt = request.start_time.ToDatetime() if request.start_time.IsInitialized() else current_timestamp.ToDatetime()
-        end_dt = request.end_time.ToDatetime() if request.end_time.IsInitialized() else current_timestamp.ToDatetime()
-        
+        start_dt = (
+            request.start_time.ToDatetime()
+            if request.start_time.IsInitialized()
+            else current_timestamp.ToDatetime()
+        )
+        end_dt = (
+            request.end_time.ToDatetime()
+            if request.end_time.IsInitialized()
+            else current_timestamp.ToDatetime()
+        )
+
+        requested_node_names = (
+            request.node_names
+            if request.node_names != []
+            else [node.name for node in self.nodes]
+        )
         slis_output = []
         slis_at_timestamp = []
         # In this implementation, the timestamps are inclusive since we generate new SLIs
         # However, this is not inherent to the proto semantics
         while start_dt <= end_dt:
-            slis_at_timestamp = generate_new_random_slis(self.nodes, start_dt)
+            slis_at_timestamp = generate_new_random_slis(requested_node_names, start_dt)
             slis_output += slis_at_timestamp
             start_dt += datetime.timedelta(seconds=self.reporting_interval)
 
