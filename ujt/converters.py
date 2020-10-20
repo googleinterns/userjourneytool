@@ -271,13 +271,13 @@ def tag_dropdown_options_from_tags(tags):
     ]
 
 
-def style_dropdown_options_from_styles(styles):
+def style_dropdown_options_from_style_names(style_names):
     return [
         {
             "label": style,
             "value": style,
         }
-        for style in styles
+        for style in style_names
     ]
 
 

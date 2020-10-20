@@ -17,6 +17,8 @@ COMPOSITE_SIGNAL_MAP = {
         id_constants.SIGNAL_APPLIED_TAG_ADD,
         id_constants.SIGNAL_APPLIED_TAG_REMOVE,
         id_constants.SIGNAL_APPLIED_TAG_MODIFY,
+        id_constants.SIGNAL_APPLIED_TAG_BATCH_ADD,
+        id_constants.SIGNAL_APPLIED_TAG_BATCH_REMOVE,
     ),
     id_constants.SIGNAL_VIEW_UPDATE: (
         id_constants.SIGNAL_VIEW_CREATE,

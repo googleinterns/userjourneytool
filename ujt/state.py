@@ -477,6 +477,12 @@ def remove_tag_from_element(ujt_id, tag_idx):
     set_tag_map(tag_map)
 
 
+def remove_tag_from_element_by_value(ujt_id, tag_to_remove):
+    tag_map = get_tag_map()
+    tag_map[ujt_id] = [tag for tag in tag_map[ujt_id] if tag != tag_to_remove]
+    set_tag_map(tag_map)
+
+
 def update_applied_tag(ujt_id, tag_idx, tag):
     tag_map = get_tag_map()
     tag_map[ujt_id][tag_idx] = tag

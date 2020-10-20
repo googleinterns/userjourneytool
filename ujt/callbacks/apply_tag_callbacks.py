@@ -111,7 +111,7 @@ def remove_applied_tag(
     Output(id_constants.SIGNAL_APPLIED_TAG_MODIFY, "children"),
     Input(
         {
-            id_constants.APPLY_TAG_DROPDOWN: id_constants.APPLY_TAG_DROPDOWN,
+            id_constants.APPLIED_TAG_DROPDOWN: id_constants.APPLIED_TAG_DROPDOWN,
             "index": ALL,
         },
         "value",
@@ -126,10 +126,10 @@ def modify_applied_tag(dropdown_values, tap_node, tap_edge):
     """Updates the corresponding applied tag in the tag map.
 
     This function is called:
-        when an APPLY_TAG_DROPDOWN value is updated
+        when an APPLIED_TAG_DROPDOWN value is updated
 
     Args:
-        dropdown_values: the values of the APPLY_TAG_DROPDOWN dropdown menus.
+        dropdown_values: the values of the APPLIED_TAG_DROPDOWN dropdown menus.
         tap_node: Cytoscape element of the tapped/clicked node.
         tap_edge: Cytoscape element of the tapped/clicked edge.
 
@@ -153,4 +153,90 @@ def modify_applied_tag(dropdown_values, tap_node, tap_edge):
     tag_value = dropdown_values[tag_idx]
 
     state.update_applied_tag(ujt_id, tag_idx, tag_value)
+    return constants.OK_SIGNAL
+
+
+@app.callback(
+    Output(id_constants.SIGNAL_APPLIED_TAG_BATCH_ADD, "children"),
+    Input(id_constants.BATCH_ADD_APPLIED_TAG_BUTTON, "n_clicks_timestamp"),
+    [
+        State(id_constants.BATCH_APPLIED_TAG_DROPDOWN, "value"),
+        State(id_constants.CYTOSCAPE_GRAPH, "selectedNodeData"),
+        State(id_constants.CYTOSCAPE_GRAPH, "selectedEdgeData"),
+    ],
+    prevent_initial_call=True,
+)
+def batch_add_applied_tag(add_timestamp, tag, selected_node_data, selected_edge_data):
+    """Handles adding an applied tag to all selected elements.
+
+    This function is called:
+        when the BATCH_ADD_APPLIED_TAG_BUTTON is clicked
+
+    Args:
+        add_timestamp: The timestamp of when the BATCH_ADD_APPLIED_TAG_BUTTON was clicked
+        tag: The tag to apply
+        selected_node_data: The data dictionaries of the selected nodes.
+        selected_edge_data: The data dictionaries of the selected edges.
+
+    Returns:
+        a signal to place into the SIGNAL_APPLIED_TAG_BATCH_ADD signal
+    """
+
+    if tag is None:
+        raise PreventUpdate
+
+    selected_element_data = []
+    if selected_edge_data is not None:
+        selected_element_data += selected_edge_data
+    if selected_node_data is not None:
+        selected_element_data += selected_node_data
+
+    for data in selected_element_data:
+        ujt_id = data["ujt_id"]
+        state.add_tag_to_element(ujt_id, tag)
+
+    return constants.OK_SIGNAL
+
+
+@app.callback(
+    Output(id_constants.SIGNAL_APPLIED_TAG_BATCH_REMOVE, "children"),
+    Input(id_constants.BATCH_REMOVE_APPLIED_TAG_BUTTON, "n_clicks_timestamp"),
+    [
+        State(id_constants.BATCH_APPLIED_TAG_DROPDOWN, "value"),
+        State(id_constants.CYTOSCAPE_GRAPH, "selectedNodeData"),
+        State(id_constants.CYTOSCAPE_GRAPH, "selectedEdgeData"),
+    ],
+    prevent_initial_call=True,
+)
+def batch_remove_applied_tag(
+    remove_timestamp, tag, selected_node_data, selected_edge_data
+):
+    """Handles removing an applied tag to all selected elements.
+
+    This function is called:
+        when the BATCH_REMOVE_APPLIED_TAG_BUTTON is clicked
+
+    Args:
+        remove_timestamp: The timestamp of when the BATCH_REMOVE_APPLIED_TAG_BUTTON was clicked
+        tag: The tag to apply
+        selected_node_data: The data dictionaries of the selected nodes.
+        selected_edge_data: The data dictionaries of the selected edges.
+
+    Returns:
+        a signal to place into the SIGNAL_APPLIED_TAG_BATCH_REMOVE signal
+    """
+
+    if tag is None:
+        raise PreventUpdate
+
+    selected_element_data = []
+    if selected_edge_data is not None:
+        selected_element_data += selected_edge_data
+    if selected_node_data is not None:
+        selected_element_data += selected_node_data
+
+    for data in selected_element_data:
+        ujt_id = data["ujt_id"]
+        state.remove_tag_from_element_by_value(ujt_id, tag)
+
     return constants.OK_SIGNAL

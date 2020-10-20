@@ -92,7 +92,6 @@ def generate_selected_info_panel(
     return out
 
 
-# region user journey panel
 @app.callback(
     Output(id_constants.USER_JOURNEY_INFO_PANEL, "children"),
     Input(id_constants.USER_JOURNEY_DROPDOWN, "value"),
@@ -146,33 +145,6 @@ def generate_user_journey_info_panel(dropdown_value: str) -> List[Any]:
         )
 
     raise ValueError
-
-
-@app.callback(
-    Output(id_constants.USER_JOURNEY_DROPDOWN, "options"),
-    Input(id_constants.SIGNAL_VIRTUAL_NODE_UPDATE, "children"),
-)
-def update_user_journey_dropdown_options(virtual_node_update_signal):
-    """Updates the options in the user journey dropdown on virtual node changes.
-
-    This function is called:
-        when a virtual node is created or deleted.
-
-    Args:
-        virtual_node_update_signal: Signal indicating a virtual node was modified.
-
-    Returns:
-        A list of options for the user journey dropdown.
-    """
-    node_name_message_map, client_name_message_map = state.get_message_maps()
-    virtual_node_map = state.get_virtual_node_map()
-
-    return converters.dropdown_options_from_maps(
-        node_name_message_map, client_name_message_map, virtual_node_map
-    )
-
-
-# endregion
 
 
 @app.callback(

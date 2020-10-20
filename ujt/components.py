@@ -70,6 +70,8 @@ def get_signals():
         # ---
         id_constants.SIGNAL_APPLIED_TAG_ADD,
         id_constants.SIGNAL_APPLIED_TAG_REMOVE,
+        id_constants.SIGNAL_APPLIED_TAG_BATCH_ADD,
+        id_constants.SIGNAL_APPLIED_TAG_BATCH_REMOVE,
         id_constants.SIGNAL_APPLIED_TAG_MODIFY,
         id_constants.SIGNAL_APPLIED_TAG_UPDATE,
         # ---
@@ -108,46 +110,57 @@ def get_top_row_components():
                                 children="Refresh SLIs",
                             ),
                         ),
-                        dbc.Col(
-                            children=[
-                                dbc.Form(
-                                    children=[
-                                        dbc.FormGroup(
-                                            children=[
-                                                dbc.Input(
-                                                    id=id_constants.VIRTUAL_NODE_INPUT,
-                                                    type="text",
-                                                    placeholder="Virtual Node Name",
-                                                ),
-                                            ],
-                                            className="mr-3",
-                                        ),
-                                        dbc.Button(
-                                            id=id_constants.ADD_VIRTUAL_NODE_BUTTON,
-                                            children="Add",
-                                        ),
-                                        dbc.Button(
-                                            id=id_constants.DELETE_VIRTUAL_NODE_BUTTON,
-                                            children="Delete",
-                                        ),
-                                        dbc.Button(
-                                            id=id_constants.COLLAPSE_VIRTUAL_NODE_BUTTON,
-                                            children="Collapse",
-                                        ),
-                                        dbc.Button(
-                                            id=id_constants.EXPAND_VIRTUAL_NODE_BUTTON,
-                                            children="Expand",
-                                        ),
-                                    ],
-                                    inline=False,
-                                ),
-                            ],
-                        ),
+                        dbc.Col(children=get_virtual_node_control_components()),
+                        dbc.Col(children=get_batch_apply_tag_components()),
                     ],
                 ),
             ),
         ],
     )
+
+
+def get_virtual_node_control_components():
+    components = [
+        dbc.Input(
+            id=id_constants.VIRTUAL_NODE_INPUT,
+            type="text",
+            placeholder="Virtual Node Name",
+        ),
+        dbc.Button(
+            id=id_constants.ADD_VIRTUAL_NODE_BUTTON,
+            children="Add",
+        ),
+        dbc.Button(
+            id=id_constants.DELETE_VIRTUAL_NODE_BUTTON,
+            children="Delete",
+        ),
+        dbc.Button(
+            id=id_constants.COLLAPSE_VIRTUAL_NODE_BUTTON,
+            children="Collapse",
+        ),
+        dbc.Button(
+            id=id_constants.EXPAND_VIRTUAL_NODE_BUTTON,
+            children="Expand",
+        ),
+    ]
+    return components
+
+
+def get_batch_apply_tag_components():
+    components = [
+        dcc.Dropdown(
+            id=id_constants.BATCH_APPLIED_TAG_DROPDOWN,
+        ),
+        dbc.Button(
+            id=id_constants.BATCH_ADD_APPLIED_TAG_BUTTON,
+            children="Add Tags to Selected",
+        ),
+        dbc.Button(
+            id=id_constants.BATCH_REMOVE_APPLIED_TAG_BUTTON,
+            children="Remove Tags from Selected",
+        ),
+    ]
+    return components
 
 
 def get_cytoscape_graph():
@@ -366,7 +379,7 @@ def get_apply_tag_components(ujt_id):
                     dbc.Col(
                         children=dcc.Dropdown(
                             id={
-                                id_constants.APPLY_TAG_DROPDOWN: id_constants.APPLY_TAG_DROPDOWN,
+                                id_constants.APPLIED_TAG_DROPDOWN: id_constants.APPLIED_TAG_DROPDOWN,
                                 "index": idx,
                             },
                             options=converters.tag_dropdown_options_from_tags(tag_list),
@@ -518,8 +531,8 @@ def get_view_components():
                                 id_constants.VIEW_STYLE_DROPDOWN: id_constants.VIEW_STYLE_DROPDOWN,
                                 "index": idx,
                             },
-                            options=converters.style_dropdown_options_from_styles(
-                                style_map
+                            options=converters.style_dropdown_options_from_style_names(
+                                style_map.keys()
                             ),
                             value=view_tuple[1],
                         ),

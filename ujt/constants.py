@@ -3,6 +3,7 @@
 Generally contains constants for styling.
 """
 from collections import defaultdict
+from typing import Any, Dict
 
 from graph_structures_pb2 import NodeType, Status
 
@@ -17,6 +18,7 @@ HEALTHY_COLOR = "green"
 WARN_COLOR = "orange"
 ERROR_COLOR = "red"
 HIGHLIGHTED_UJ_EDGE_COLOR = "purple"
+
 
 COMPOUND_BACKGROUND_BLACKEN_FACTOR = -0.5
 VIRTUAL_BACKGROUND_BLACKEN_FACTOR = -0.8
@@ -41,7 +43,7 @@ CYTO_STYLE = {
     "backgroundColor": GRAPH_BACKGROUND_COLOR,
 }
 
-# These selectors are hardcoded -- cannot be changed by style map.
+# These styles are hardcoded -- cannot be changed by style map.
 BASE_CYTO_STYLESHEET = [
     {
         "selector": "node",
@@ -64,32 +66,62 @@ BASE_CYTO_STYLESHEET = [
             "border-color": SELECTED_NODE_BORDER_COLOR,
         },
     },
+    {
+        "selector": f".{NodeType.Name(NodeType.NODETYPE_SERVICE)}",
+        "style": {
+            "shape": "rectangle",
+            "background-blacken": COMPOUND_BACKGROUND_BLACKEN_FACTOR,
+        },
+    },
+    {
+        "selector": f".{NodeType.Name(NodeType.NODETYPE_VIRTUAL)}",
+        "style": {
+            "border-style": "dashed",
+            "shape": "octagon",
+            "background-blacken": VIRTUAL_BACKGROUND_BLACKEN_FACTOR,
+        },
+    },
+    {
+        "selector": f".{Status.Name(Status.STATUS_HEALTHY)}",
+        "style": {
+            "background-color": HEALTHY_COLOR,
+        },
+    },
+    {
+        "selector": f".{Status.Name(Status.STATUS_WARN)}",
+        "style": {
+            "background-color": WARN_COLOR,
+        },
+    },
+    {
+        "selector": f".{Status.Name(Status.STATUS_ERROR)}",
+        "style": {
+            "background-color": ERROR_COLOR,
+        },
+    },
+    {
+        "selector": f".{HIGHLIGHTED_UJ_EDGE_CLASS}",
+        "style": {
+            "line-color": HIGHLIGHTED_UJ_EDGE_COLOR,
+        },
+    },
+    {
+        "selector": f".{OVERRIDE_CLASS}",
+        "style": {
+            "shape": "tag",
+        },
+    },
 ]
 
-DEFAULT_STYLE_MAP = {
-    NodeType.Name(NodeType.NODETYPE_SERVICE): {
-        "shape": "rectangle",
-        "background-blacken": COMPOUND_BACKGROUND_BLACKEN_FACTOR,
+DEFAULT_STYLE_MAP: Dict[str, Dict[str, Any]] = {
+    "HIDDEN": {
+        "display": "none",
     },
-    NodeType.Name(NodeType.NODETYPE_VIRTUAL): {
-        "border-style": "dashed",
-        "shape": "octagon",
-        "background-blacken": VIRTUAL_BACKGROUND_BLACKEN_FACTOR,
-    },
-    Status.Name(Status.STATUS_HEALTHY): {
-        "background-color": HEALTHY_COLOR,
-    },
-    Status.Name(Status.STATUS_WARN): {
-        "background-color": WARN_COLOR,
-    },
-    Status.Name(Status.STATUS_ERROR): {
-        "background-color": ERROR_COLOR,
-    },
-    HIGHLIGHTED_UJ_EDGE_CLASS: {
-        "line-color": HIGHLIGHTED_UJ_EDGE_COLOR,
-    },
-    OVERRIDE_CLASS: {
-        "shape": "tag",
+    "HIGHLIGHTED": {
+        "border-color": "deeppink",
+        "border-width": 5,
+        "line-color": "deeppink",
+        "width": 5,
     },
 }
 
