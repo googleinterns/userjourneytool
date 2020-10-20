@@ -19,7 +19,7 @@ import dash_cytoscape as cyto
 import dash_html_components as html
 from graph_structures_pb2 import Node, NodeType, VirtualNode
 
-from . import constants, converters, state, utils
+from . import constants, converters, id_constants, state, utils
 
 
 def get_layout():
@@ -43,16 +43,16 @@ def get_layout():
             dbc.Modal(
                 children=[
                     dbc.ModalHeader("Error"),
-                    dbc.ModalBody(id="collapse-error-modal-body"),
+                    dbc.ModalBody(id=id_constants.COLLAPSE_ERROR_MODAL_BODY),
                     dbc.ModalFooter(
                         dbc.Button(
                             "Close",
-                            id="collapse-error-modal-close",
+                            id=id_constants.COLLAPSE_ERROR_MODAL_CLOSE,
                             className="ml-auto",
                         ),
                     ),
                 ],
-                id="collapse-error-modal",
+                id=id_constants.COLLAPSE_ERROR_MODAL,
             ),
             get_signals(),
         ],
@@ -61,28 +61,28 @@ def get_layout():
 
 def get_signals():
     signal_ids = [
-        "virtual-node-update-signal",
+        id_constants.SIGNAL_VIRTUAL_NODE_UPDATE,
         # ---
-        "create-tag-signal",
-        "delete-tag-signal",
-        "save-tag-signal",
-        "tag-update-signal",
+        id_constants.SIGNAL_TAG_CREATE,
+        id_constants.SIGNAL_TAG_DELETE,
+        id_constants.SIGNAL_TAG_SAVE,
+        id_constants.SIGNAL_TAG_UPDATE,
         # ---
-        "add-applied-tag-signal",
-        "remove-applied-tag-signal",
-        "modify-applied-tag-signal",
-        "applied-tag-update-signal",
+        id_constants.SIGNAL_APPLIED_TAG_ADD,
+        id_constants.SIGNAL_APPLIED_TAG_REMOVE,
+        id_constants.SIGNAL_APPLIED_TAG_MODIFY,
+        id_constants.SIGNAL_APPLIED_TAG_UPDATE,
         # ---
-        "create-view-signal",
-        "delete-view-signal",
-        "modify-view-signal",
-        "view-update-signal",
+        id_constants.SIGNAL_VIEW_CREATE,
+        id_constants.SIGNAL_VIEW_DELETE,
+        id_constants.SIGNAL_VIEW_MODIFY,
+        id_constants.SIGNAL_VIEW_UPDATE,
         # ---
-        "save-style-signal",
-        "delete-style-signal",
-        "style-update-signal",
+        id_constants.SIGNAL_STYLE_SAVE,
+        id_constants.SIGNAL_STYLE_DELETE,
+        id_constants.SIGNAL_STYLE_UPDATE,
         # ---
-        "composite-tagging-update-signal",
+        id_constants.SIGNAL_COMPOSITE_TAGGING_UPDATE,
     ]
 
     signals = [
@@ -93,7 +93,7 @@ def get_signals():
         for signal_id in signal_ids
     ]
 
-    return html.Div(id="signal-wrapper-div", children=signals)
+    return html.Div(id=id_constants.SIGNAL_WRAPPER_DIV, children=signals)
 
 
 def get_top_row_components():
@@ -104,7 +104,8 @@ def get_top_row_components():
                     children=[
                         dbc.Col(
                             dbc.Button(
-                                id="refresh-sli-button", children="Refresh SLIs"
+                                id=id_constants.REFRESH_SLI_BUTTON,
+                                children="Refresh SLIs",
                             ),
                         ),
                         dbc.Col(
@@ -114,7 +115,7 @@ def get_top_row_components():
                                         dbc.FormGroup(
                                             children=[
                                                 dbc.Input(
-                                                    id="virtual-node-input",
+                                                    id=id_constants.VIRTUAL_NODE_INPUT,
                                                     type="text",
                                                     placeholder="Virtual Node Name",
                                                 ),
@@ -122,18 +123,19 @@ def get_top_row_components():
                                             className="mr-3",
                                         ),
                                         dbc.Button(
-                                            id="add-virtual-node-button", children="Add"
+                                            id=id_constants.ADD_VIRTUAL_NODE_BUTTON,
+                                            children="Add",
                                         ),
                                         dbc.Button(
-                                            id="delete-virtual-node-button",
+                                            id=id_constants.DELETE_VIRTUAL_NODE_BUTTON,
                                             children="Delete",
                                         ),
                                         dbc.Button(
-                                            id="collapse-virtual-node-button",
+                                            id=id_constants.COLLAPSE_VIRTUAL_NODE_BUTTON,
                                             children="Collapse",
                                         ),
                                         dbc.Button(
-                                            id="expand-virtual-node-button",
+                                            id=id_constants.EXPAND_VIRTUAL_NODE_BUTTON,
                                             children="Expand",
                                         ),
                                     ],
@@ -150,18 +152,9 @@ def get_top_row_components():
 
 def get_cytoscape_graph():
     return cyto.Cytoscape(
-        id="cytoscape-graph",
-        layout={
-            "name": "dagre",
-            "nodeDimensionsIncludeLabels": "true",
-            "animate": "true",
-        },
-        style={
-            "width": constants.GRAPH_WIDTH,
-            "height": constants.GRAPH_HEIGHT,
-            "backgroundColor": constants.GRAPH_BACKGROUND_COLOR,
-        },
-        # stylesheet=*constants.DEF
+        id=id_constants.CYTOSCAPE_GRAPH,
+        layout=constants.CYTO_LAYOUT,
+        style=constants.CYTO_STYLE,
     )
 
 
@@ -175,13 +168,13 @@ def get_bottom_panel_components():
                             [
                                 html.H1("Tagging"),
                                 html.Div(
-                                    id="create-tag-panel",
+                                    id=id_constants.CREATE_TAG_PANEL,
                                 ),
                                 html.Div(
-                                    id="view-panel",
+                                    id=id_constants.VIEW_PANEL,
                                 ),
                                 html.Div(
-                                    id="style-panel",
+                                    id=id_constants.STYLE_PANEL,
                                     children=get_create_style_components(),
                                 ),
                             ],
@@ -190,7 +183,7 @@ def get_bottom_panel_components():
                             [
                                 html.H1("Selected Info"),
                                 html.Div(
-                                    id="selected-info-panel",
+                                    id=id_constants.SELECTED_INFO_PANEL,
                                 ),
                             ],
                         ),
@@ -198,12 +191,12 @@ def get_bottom_panel_components():
                             [
                                 html.H1("User Journey Info"),
                                 dcc.Dropdown(
-                                    id="user-journey-dropdown",
+                                    id=id_constants.USER_JOURNEY_DROPDOWN,
                                     clearable=False,
                                     searchable=False,
                                 ),
                                 html.Div(
-                                    id="user-journey-info-panel",
+                                    id=id_constants.USER_JOURNEY_INFO_PANEL,
                                 ),
                             ]
                         ),
@@ -236,7 +229,7 @@ def get_node_info_panel_components(node_name):
     status_override_components = [
         html.H3("Status"),
         dcc.Dropdown(
-            id={"override-dropdown": "override-dropdown"},
+            id={id_constants.OVERRIDE_DROPDOWN: id_constants.OVERRIDE_DROPDOWN},
             clearable=False,
             searchable=False,
             options=converters.override_dropdown_options_from_node(node),
@@ -260,7 +253,7 @@ def get_node_info_panel_components(node_name):
             converters.datatable_from_nodes(
                 child_nodes,
                 use_relative_names=True,
-                table_id=constants.CHILD_DATATABLE_ID,
+                table_id=id_constants.CHILD_DATATABLE,
             ),
         ]
 
@@ -270,7 +263,7 @@ def get_node_info_panel_components(node_name):
         sli_info = [
             html.H3("SLI Info"),
             converters.datatable_from_slis(
-                node.slis, table_id=constants.SLI_DATATABLE_ID  # type: ignore
+                node.slis, table_id=id_constants.SLI_DATATABLE  # type: ignore
             ),
         ]
 
@@ -284,7 +277,7 @@ def get_node_info_panel_components(node_name):
             converters.datatable_from_nodes(
                 dependency_nodes,
                 use_relative_names=False,
-                table_id=constants.DEPENDENCY_DATATABLE_ID,
+                table_id=id_constants.DEPENDENCY_DATATABLE,
             ),
         ]
 
@@ -333,19 +326,23 @@ def get_comment_components(initial_value=""):
     comment_components = [
         html.H3("Comments"),
         dbc.Textarea(
-            id={"node-comment-textarea": "node-comment-textarea"},
+            id={id_constants.NODE_COMMENT_TEXTAREA: id_constants.NODE_COMMENT_TEXTAREA},
             value=initial_value,
         ),
         dbc.Button(
-            id={"save-comment-textarea-button": "save-comment-textarea-button"},
+            id={
+                id_constants.SAVE_COMMENT_TEXTAREA_BUTTON: id_constants.SAVE_COMMENT_TEXTAREA_BUTTON
+            },
             children="Save Comment",
         ),
         dbc.Button(
-            id={"discard-comment-textarea-button": "discard-comment-textarea-button"},
+            id={
+                id_constants.DISCARD_COMMENT_TEXTAREA_BUTTON: id_constants.DISCARD_COMMENT_TEXTAREA_BUTTON
+            },
             children="Discard Comment Changes",
         ),
         dbc.Toast(
-            id={"save-comment-toast": "save-comment-toast"},
+            id={id_constants.SAVE_COMMENT_TOAST: id_constants.SAVE_COMMENT_TOAST},
             header="Successfully saved comment!",
             icon="success",
             duration=3000,
@@ -369,7 +366,7 @@ def get_apply_tag_components(ujt_id):
                     dbc.Col(
                         children=dcc.Dropdown(
                             id={
-                                "apply-tag-dropdown": "apply-tag-dropdown",
+                                id_constants.APPLY_TAG_DROPDOWN: id_constants.APPLY_TAG_DROPDOWN,
                                 "index": idx,
                             },
                             options=converters.tag_dropdown_options_from_tags(tag_list),
@@ -382,7 +379,7 @@ def get_apply_tag_components(ujt_id):
                         children=dbc.Button(
                             children="x",
                             id={
-                                "remove-applied-tag-button": "remove-applied-tag-button",
+                                id_constants.REMOVE_APPLIED_TAG_BUTTON: id_constants.REMOVE_APPLIED_TAG_BUTTON,
                                 "index": idx,
                             },
                         ),
@@ -400,7 +397,9 @@ def get_apply_tag_components(ujt_id):
             dbc.Col(
                 children=dbc.Button(
                     children="+",
-                    id={"add-applied-tag-button": "add-applied-tag-button"},
+                    id={
+                        id_constants.ADD_APPLIED_TAG_BUTTON: id_constants.ADD_APPLIED_TAG_BUTTON
+                    },
                 ),
                 width="auto",
                 className=constants.BOOTSTRAP_BUTTON_COLUMN_CLASSES,
@@ -410,27 +409,7 @@ def get_apply_tag_components(ujt_id):
         justify="end",
     )
 
-    # This is a pretty bad hack.
-    # The update_graph_elements callback is called (via pattern matching)
-    # when the override-dropdown component is removed (a node was previously selected, then a client/edge was selected).
-    # This causes us to update the UUID and re-render the graph, which is functionally OK but visually distracting.
-    # The callback is fired with triggered_id = triggered_prop = triggered_value = None, making it indistinguishible
-    # from the initial callback (at load time) from the arguments only (without perhaps creating an additional flag).
-
-    # By providing this hidden override dropdown with the same ID key, the callback fires but we can indicate that
-    # it was triggered by the removal of the override dropdown.
-    # The other workaround is to implement more complicated logic in determining when we need to append the UUID.
-    # There are a lot of different cases because the callback handles a wide variety of inputs.
-    # Although this is a hack, I feel it's preferable to complicating the logic in update_graph_elements further.
-    # I'd like to keep complexity out of update_graph_elements to ensure that it's flexible and maintainable, as
-    # that function is likely to be modified when adding additional features in the future.
-
-    dummy_override_dropdown = dcc.Dropdown(
-        id={"override-dropdown": "override-dropdown-hidden"},
-        style={"display": "none"},
-    )
-
-    return out + [add_button_row, dummy_override_dropdown]
+    return out + [add_button_row]
 
 
 def get_create_tag_components():
@@ -443,7 +422,10 @@ def get_create_tag_components():
                 children=[
                     dbc.Col(
                         children=dbc.Input(
-                            id={"tag-input": "tag-input", "index": idx},
+                            id={
+                                id_constants.TAG_INPUT: id_constants.TAG_INPUT,
+                                "index": idx,
+                            },
                             placeholder="Tag name",
                             value=tag,
                         ),
@@ -453,7 +435,10 @@ def get_create_tag_components():
                     dbc.Col(
                         children=dbc.Button(
                             children="x",
-                            id={"delete-tag-button": "delete-tag-button", "index": idx},
+                            id={
+                                id_constants.DELETE_TAG_BUTTON: id_constants.DELETE_TAG_BUTTON,
+                                "index": idx,
+                            },
                         ),
                         width="auto",
                         className=constants.BOOTSTRAP_BUTTON_COLUMN_CLASSES,
@@ -461,7 +446,10 @@ def get_create_tag_components():
                     dbc.Col(
                         children=dbc.Button(
                             children="\N{CHECK MARK}",
-                            id={"save-tag-button": "save-tag-button", "index": idx},
+                            id={
+                                id_constants.SAVE_TAG_BUTTON: id_constants.SAVE_TAG_BUTTON,
+                                "index": idx,
+                            },
                         ),
                         width="auto",
                         className=constants.BOOTSTRAP_BUTTON_COLUMN_CLASSES,
@@ -477,7 +465,7 @@ def get_create_tag_components():
             dbc.Col(
                 children=dbc.Button(
                     children="+",
-                    id={"create-tag-button": "create-tag-button"},
+                    id={id_constants.CREATE_TAG_BUTTON: id_constants.CREATE_TAG_BUTTON},
                 ),
                 width="auto",
                 className=constants.BOOTSTRAP_BUTTON_COLUMN_CLASSES,
@@ -488,7 +476,7 @@ def get_create_tag_components():
     )
 
     save_tag_toast = dbc.Toast(
-        id={"save-tag-toast": "save-tag-toast"},
+        id={id_constants.SAVE_TAG_TOAST: id_constants.SAVE_TAG_TOAST},
         header="Successfully saved tag!",
         icon="success",
         duration=3000,
@@ -514,7 +502,10 @@ def get_view_components():
                 children=[
                     dbc.Col(
                         children=dcc.Dropdown(
-                            id={"view-tag-dropdown": "view-tag-dropdown", "index": idx},
+                            id={
+                                id_constants.VIEW_TAG_DROPDOWN: id_constants.VIEW_TAG_DROPDOWN,
+                                "index": idx,
+                            },
                             options=converters.tag_dropdown_options_from_tags(tag_list),
                             value=view_tuple[0],
                         ),
@@ -524,7 +515,7 @@ def get_view_components():
                     dbc.Col(
                         children=dcc.Dropdown(
                             id={
-                                "view-style-dropdown": "view-style-dropdown",
+                                id_constants.VIEW_STYLE_DROPDOWN: id_constants.VIEW_STYLE_DROPDOWN,
                                 "index": idx,
                             },
                             options=converters.style_dropdown_options_from_styles(
@@ -539,7 +530,7 @@ def get_view_components():
                         children=dbc.Button(
                             children="x",
                             id={
-                                "delete-view-button": "delete-view-button",
+                                id_constants.DELETE_VIEW_BUTTON: id_constants.DELETE_VIEW_BUTTON,
                                 "index": idx,
                             },
                         ),
@@ -557,7 +548,9 @@ def get_view_components():
             dbc.Col(
                 children=dbc.Button(
                     children="+",
-                    id={"create-view-button": "create-view-button"},
+                    id={
+                        id_constants.CREATE_VIEW_BUTTON: id_constants.CREATE_VIEW_BUTTON
+                    },
                 ),
                 width="auto",
                 className=constants.BOOTSTRAP_BUTTON_COLUMN_CLASSES,
@@ -581,25 +574,25 @@ def get_create_style_components():
             target="_blank",
         ),
         dbc.Input(
-            id="style-name-input",
+            id=id_constants.STYLE_NAME_INPUT,
             type="text",
             placeholder="Style Name",
         ),
-        dbc.Textarea(id="style-textarea"),
+        dbc.Textarea(id=id_constants.STYLE_TEXTAREA),
         dbc.Button(
-            id="load-style-textarea-button",
+            id=id_constants.LOAD_STYLE_TEXTAREA_BUTTON,
             children="Load Style",
         ),
         dbc.Button(
-            id="save-style-textarea-button",
+            id=id_constants.SAVE_STYLE_TEXTAREA_BUTTON,
             children="Save Style",
         ),
         dbc.Button(
-            id="delete-style-button",
+            id=id_constants.DELETE_STYLE_BUTTON,
             children="Delete Style",
         ),
         dbc.Toast(
-            id="save-style-toast",
+            id=id_constants.SAVE_STYLE_TOAST,
             duration=3000,
             dismissable=True,
             body_style={"display": "none"},

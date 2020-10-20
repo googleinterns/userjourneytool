@@ -2,9 +2,11 @@
 
 Generally contains constants for styling.
 """
+from collections import defaultdict
+
 from graph_structures_pb2 import NodeType, Status
 
-CLEAR_CACHE_ON_STARTUP = True
+from . import id_constants
 
 CLIENT_CLASS = "CLIENT"
 HIGHLIGHTED_UJ_EDGE_CLASS = "HIGHLIGHTED_UJ_EDGE"
@@ -25,12 +27,44 @@ GRAPH_BACKGROUND_COLOR = "azure"
 GRAPH_WIDTH = "100%"
 GRAPH_HEIGHT = "600px"
 
-USER_JOURNEY_DATATABLE_ID = "user-journey-datatable"
-SLI_DATATABLE_ID = "datatable-slis"
-CHILD_DATATABLE_ID = "datatable-child-nodes"
-DEPENDENCY_DATATABLE_ID = "datatable-dependency-nodes"
-
 BOOTSTRAP_BUTTON_COLUMN_CLASSES = "m-1 d-flex justify-content-center"
+
+CYTO_LAYOUT = {
+    "name": "dagre",
+    "nodeDimensionsIncludeLabels": "true",
+    "animate": "true",
+}
+
+CYTO_STYLE = {
+    "width": GRAPH_WIDTH,
+    "height": GRAPH_HEIGHT,
+    "backgroundColor": GRAPH_BACKGROUND_COLOR,
+}
+
+# These selectors are hardcoded -- cannot be changed by style map.
+BASE_CYTO_STYLESHEET = [
+    {
+        "selector": "node",
+        "style": {
+            "content": "data(label)",
+        },
+    },
+    {
+        "selector": "edge",
+        "style": {
+            "curve-style": "straight",
+            "target-arrow-shape": "triangle",
+            "arrow-scale": 2,
+        },
+    },
+    {
+        "selector": ":selected",
+        "style": {
+            "border-width": SELECTED_NODE_BORDER_WIDTH,
+            "border-color": SELECTED_NODE_BORDER_COLOR,
+        },
+    },
+]
 
 DEFAULT_STYLE_MAP = {
     NodeType.Name(NodeType.NODETYPE_SERVICE): {
@@ -59,31 +93,6 @@ DEFAULT_STYLE_MAP = {
     },
 }
 
-# These selectors are hardcoded -- cannot be changed by style map.
-BASE_CYTO_STYLESHEET = [
-    {
-        "selector": "node",
-        "style": {
-            "content": "data(label)",
-        },
-    },
-    {
-        "selector": "edge",
-        "style": {
-            "curve-style": "straight",
-            "target-arrow-shape": "triangle",
-            "arrow-scale": 2,
-        },
-    },
-    {
-        "selector": ":selected",
-        "style": {
-            "border-width": SELECTED_NODE_BORDER_WIDTH,
-            "border-color": SELECTED_NODE_BORDER_COLOR,
-        },
-    },
-]
-
 DATATABLE_CONDITIONAL_STYLE = [
     {
         "if": {"column_id": "Status", "filter_query": "{Status} = HEALTHY"},
@@ -98,3 +107,15 @@ DATATABLE_CONDITIONAL_STYLE = [
         "color": ERROR_COLOR,
     },
 ]
+
+CLEAR_CACHE_ON_STARTUP = True
+CACHE_DEFAULT_VALUES = {
+    id_constants.VIRTUAL_NODE_MAP: {},  # Dict[str, VirtualNode]
+    id_constants.PARENT_VIRTUAL_NODE_MAP: {},  # Dict[str, str]
+    id_constants.COMMENT_MAP: {},  # Dict[str, str]
+    id_constants.OVERRIDE_STATUS_MAP: {},  # Dict[str, Status]
+    id_constants.TAG_LIST: ["a", "b", "c"],  # List[str] # DEBUG_REMOVE
+    id_constants.TAG_MAP: defaultdict(list),  # DefaultDict[str, List[str]]
+    id_constants.STYLE_MAP: DEFAULT_STYLE_MAP,  # Dict[str, Dict[str, str]]
+    id_constants.VIEW_LIST: [],  # List[List[str]]
+}

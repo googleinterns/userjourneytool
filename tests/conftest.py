@@ -1,14 +1,7 @@
 # pylint: disable=redefined-outer-name
 
 import pytest
-from graph_structures_pb2 import (
-    SLI,
-    Client,
-    Dependency,
-    Node,
-    NodeType,
-    UserJourney,
-)
+from graph_structures_pb2 import SLI, Client, Dependency, Node, NodeType, UserJourney
 
 
 @pytest.fixture

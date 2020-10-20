@@ -1,8 +1,7 @@
 """ Main entry point for UJT. """
 
-from collections import defaultdict
 
-from . import components, constants, state
+from . import callbacks, components, constants, state  # noqa
 from .dash_app import app, cache
 
 
@@ -11,20 +10,7 @@ def initialize_ujt():
         cache.clear()
 
     # If first time running server, set these persisted properties as dicts
-    cache_key_default_values = [
-        ("virtual_node_map", {}),  # Dict[str, VirtualNode]
-        ("parent_virtual_node_map", {}),  # Dict[str, str]
-        ("comment_map", {}),  # Dict[str, str]
-        ("override_status_map", {}),  # Dict[str, Status]
-        (
-            "tag_list",
-            ["a", "b", "c", "d"],
-        ),  # List[str] # set to a, b, c, d for testing only
-        ("tag_map", defaultdict(list)),  # DefaultDict[str, List[str]]
-        ("style_map", constants.DEFAULT_STYLE_MAP),
-        ("view_list", []),  # List[Tuple[str, str]]
-    ]
-    for cache_key, default_value in cache_key_default_values:
+    for cache_key, default_value in constants.CACHE_DEFAULT_VALUES.items():
         if cache.get(cache_key) is None:
             cache.set(cache_key, default_value)
 

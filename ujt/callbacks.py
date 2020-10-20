@@ -17,6 +17,7 @@ import json
 from typing import Any, Dict, List, Tuple
 
 import dash
+import dash_core_components as dcc
 import dash_html_components as html
 from dash.dependencies import ALL, MATCH, Input, Output, State
 from dash.exceptions import PreventUpdate
@@ -27,6 +28,7 @@ from . import (
     compute_status,
     constants,
     converters,
+    id_constants,
     state,
     transformers,
     utils,
@@ -35,21 +37,21 @@ from .dash_app import app
 
 
 @app.callback(
-    Output("cytoscape-graph", "elements"),
+    Output(id_constants.CYTOSCAPE_GRAPH, "elements"),
     [
-        Input("refresh-sli-button", "n_clicks_timestamp"),
-        Input({constants.USER_JOURNEY_DATATABLE_ID: ALL}, "selected_row_ids"),
-        Input("virtual-node-update-signal", "children"),
-        Input("collapse-virtual-node-button", "n_clicks_timestamp"),
-        Input("expand-virtual-node-button", "n_clicks_timestamp"),
-        Input({"override-dropdown": ALL}, "value"),
-        Input("composite-tagging-update-signal", "children"),
+        Input(id_constants.REFRESH_SLI_BUTTON, "n_clicks_timestamp"),
+        Input({id_constants.USER_JOURNEY_DATATABLE: ALL}, "selected_row_ids"),
+        Input(id_constants.SIGNAL_VIRTUAL_NODE_UPDATE, "children"),
+        Input(id_constants.COLLAPSE_VIRTUAL_NODE_BUTTON, "n_clicks_timestamp"),
+        Input(id_constants.EXPAND_VIRTUAL_NODE_BUTTON, "n_clicks_timestamp"),
+        Input({id_constants.OVERRIDE_DROPDOWN: ALL}, "value"),
+        Input(id_constants.SIGNAL_COMPOSITE_TAGGING_UPDATE, "children"),
     ],
     [
-        State("cytoscape-graph", "elements"),
-        State("cytoscape-graph", "selectedNodeData"),
-        State("virtual-node-input", "value"),
-        State("cytoscape-graph", "tapNode"),
+        State(id_constants.CYTOSCAPE_GRAPH, "elements"),
+        State(id_constants.CYTOSCAPE_GRAPH, "selectedNodeData"),
+        State(id_constants.VIRTUAL_NODE_INPUT, "value"),
+        State(id_constants.CYTOSCAPE_GRAPH, "tapNode"),
     ],
 )
 def update_graph_elements(
@@ -73,7 +75,7 @@ def update_graph_elements(
         on startup to generate the graph
         when the refresh button is clicked to regenerate the graph
         when row is selected in the User Journey Datatable to highlight the User Journey edges through the path
-        when a virtual node is added or deleted (via the virtual-node-update-signal)
+        when a virtual node is added or deleted (via the SIGNAL_VIRTUAL_NODE_UPDATE)
         when the collapse button is clicked virtual node
         when the expand button is clicked to expand virtual nodes
 
@@ -81,28 +83,38 @@ def update_graph_elements(
     a single callback to a given output element.
 
     Args:
-        refresh_n_clicks_timestamp: Timestamp of when the refresh button was clicked. Value unused, input only provided to register callback.
-        user_journey_table_selected_row_ids: List of selected row ids from the user journey datatable. Should contain only one element. Used for highlighting a path through the graph.
+        refresh_n_clicks_timestamp: Timestamp of when the refresh button was clicked.
+            Value unused, input only provided to register callback.
+        user_journey_table_selected_row_ids: List of selected row ids from the user journey datatable.
+            Should contain only one element. Used for highlighting a path through the graph.
         virtual_node_update_signal: String used as a signal to indicate that the virtual node addition/deletion was valid.
-        collapse_n_clicks_timestamp: Timestamp of when the collapse button was clicked. Value unused, input only provided to register callback.
-        expand_n_clicks_timestamp: Timestamp of when the expand button was clicked. Value unused, input only provided to register callback.
+        collapse_n_clicks_timestamp: Timestamp of when the collapse button was clicked.
+            Value unused, input only provided to register callback.
+        expand_n_clicks_timestamp: Timestamp of when the expand button was clicked.
+            Value unused, input only provided to register callback.
         override_dropdown_value: Status enum value of the status to override for the node.
 
-        state_elements: The list of current cytoscape graph elements. This is unused and can be removed in a later change.
-        selected_node_data: The list of data dictionaries for selected nodes. Used to create virtual nodes.
-        virtual_node_input_value: The value of the virtual node input box. Used to perform all virtual node operations.
-        tap_node: The cytoscape element of the latest tapped node. Used check which node to override the status of.
+        state_elements: The list of current cytoscape graph elements.
+        selected_node_data: The list of data dictionaries for selected nodes.
+            Used to create virtual nodes.
+        virtual_node_input_value: The value of the virtual node input box.
+            Used to perform all virtual node operations.
+        tap_node: The cytoscape element of the latest tapped node.
+            Used to check which node to override the status of.
     Returns:
         A dictionary of cytoscape elements describing the nodes and edges of the graph.
     """
 
     ctx = dash.callback_context
     triggered_id, triggered_prop, triggered_value = utils.ctx_triggered_info(ctx)
-    # print("updating elements:", ctx.triggered)  # for debugging
+    # print("updating elements:", ctx.triggered)  # DEBUG_REMOVE
     if (
-        triggered_id == "virtual-node-update-signal"
+        triggered_id == id_constants.SIGNAL_VIRTUAL_NODE_UPDATE
         and triggered_value != constants.OK_SIGNAL
-    ) or (triggered_id == r"""{"override-dropdown":"override-dropdown-hidden"}"""):
+    ) or (
+        triggered_id
+        == f"""{{"{id_constants.OVERRIDE_DROPDOWN}":"{id_constants.OVERRIDE_DROPDOWN_HIDDEN}"}}"""
+    ):
         # No-op if :
         #   the validation signal isn't OK
         #   callback fired from dummy override dropdown
@@ -116,18 +128,21 @@ def update_graph_elements(
     # This condition determines if we need to recompute node statuses.
     if triggered_id in [
         None,
-        "refresh-sli-button",
-        "virtual-node-update-signal",
-        r"""{"override-dropdown":"override-dropdown"}""",  # Dash provides the value as a stringified dict
+        id_constants.REFRESH_SLI_BUTTON,
+        id_constants.SIGNAL_VIRTUAL_NODE_UPDATE,
+        f"""{{"{id_constants.OVERRIDE_DROPDOWN}":"{id_constants.OVERRIDE_DROPDOWN}"}}""",  # Dash provides the value as a stringified dict
     ]:
-        if triggered_id == "refresh-sli-button":
+        if triggered_id == id_constants.REFRESH_SLI_BUTTON:
             state.clear_sli_cache()  # in future, conditionally clear this based on timestamp
             sli_list = state.get_slis()
             node_name_message_map = transformers.apply_slis_to_node_map(
                 sli_list, node_name_message_map
             )
 
-        if triggered_id == r"""{"override-dropdown":"override-dropdown"}""":
+        if (
+            triggered_id
+            == f"""{{"{id_constants.OVERRIDE_DROPDOWN}":"{id_constants.OVERRIDE_DROPDOWN}"}}"""
+        ):
             node_name = tap_node["data"]["ujt_id"]
             state.set_node_override_status(
                 node_name,
@@ -159,10 +174,10 @@ def update_graph_elements(
     # need to account for changes introduced each subsequent step.
     # However, this isn't the most efficient approach.
 
-    if triggered_id == "collapse-virtual-node-button":
+    if triggered_id == id_constants.COLLAPSE_VIRTUAL_NODE_BUTTON:
         state.set_virtual_node_collapsed_state(virtual_node_input_value, collapsed=True)
 
-    if triggered_id == "expand-virtual-node-button":
+    if triggered_id == id_constants.EXPAND_VIRTUAL_NODE_BUTTON:
         state.set_virtual_node_collapsed_state(
             virtual_node_input_value, collapsed=False
         )
@@ -197,7 +212,7 @@ def update_graph_elements(
     # print(elements)  # for debugging
 
     # Determine if we need to generate a new UUID. This minimizes the choppyness of the animation.
-    if triggered_id in [None, "virtual-node-update-signal"]:
+    if triggered_id in [None, id_constants.SIGNAL_VIRTUAL_NODE_UPDATE]:
         uuid = None
     else:
         uuid = utils.get_existing_uuid(state_elements)
@@ -209,12 +224,12 @@ def update_graph_elements(
 
 
 @app.callback(
-    Output("selected-info-panel", "children"),
+    Output(id_constants.SELECTED_INFO_PANEL, "children"),
     [
-        Input("cytoscape-graph", "tapNode"),
-        Input("cytoscape-graph", "tapEdge"),
-        Input("tag-update-signal", "children"),
-        Input("applied-tag-update-signal", "children"),
+        Input(id_constants.CYTOSCAPE_GRAPH, "tapNode"),
+        Input(id_constants.CYTOSCAPE_GRAPH, "tapEdge"),
+        Input(id_constants.SIGNAL_TAG_UPDATE, "children"),
+        Input(id_constants.SIGNAL_APPLIED_TAG_UPDATE, "children"),
     ],
     prevent_initial_call=True,
 )
@@ -241,17 +256,16 @@ def generate_selected_info_panel(
     if tap_node is None and tap_edge is None:
         raise PreventUpdate
 
-    ctx = dash.callback_context
-    triggered_id, triggered_prop, triggered_value = utils.ctx_triggered_info(ctx)
-
     latest_tapped_element = utils.get_latest_tapped_element(tap_node, tap_edge)
     ujt_id = latest_tapped_element["data"]["ujt_id"]
 
     out = []
+    includes_override_dropdown = False
     if latest_tapped_element == tap_node:
         node_name = tap_node["data"]["ujt_id"]
         if not utils.is_client_cytoscape_node(tap_node):
             out += components.get_node_info_panel_components(node_name)
+            includes_override_dropdown = True
     else:
         # just generate this header here for now,
         # probably don't need to make a new component function for it.
@@ -263,13 +277,35 @@ def generate_selected_info_panel(
 
     out += components.get_apply_tag_components(ujt_id)
 
+    if not includes_override_dropdown:
+        # This is a pretty bad hack.
+        # The update_graph_elements callback is called (via pattern matching)
+        # when the OVERRIDE_DROPDOWN component is removed (a node was previously selected, then a client/edge was selected).
+        # This causes us to update the UUID and re-render the graph, which is functionally OK but visually distracting.
+        # The callback is fired with triggered_id = triggered_prop = triggered_value = None, making it indistinguishible
+        # from the initial callback (at load time) from the arguments only (without perhaps creating an additional flag).
+
+        # By providing this hidden override dropdown with the same ID key, the callback fires but we can indicate that
+        # it was triggered by the removal of the override dropdown.
+        # The other workaround is to implement more complicated logic in determining when we need to append the UUID.
+        # There are a lot of different cases because the callback handles a wide variety of inputs.
+        # Although this is a hack, I feel it's preferable to complicating the logic in update_graph_elements further.
+        # I'd like to keep complexity out of update_graph_elements to ensure that it's flexible and maintainable, as
+        # that function is likely to be modified when adding additional features in the future.
+
+        dummy_override_dropdown = dcc.Dropdown(
+            id={id_constants.OVERRIDE_DROPDOWN: id_constants.OVERRIDE_DROPDOWN_HIDDEN},
+            style={"display": "none"},
+        )
+        out.append(dummy_override_dropdown)
+
     return out
 
 
 # region user journey panel
 @app.callback(
-    Output("user-journey-info-panel", "children"),
-    Input("user-journey-dropdown", "value"),
+    Output(id_constants.USER_JOURNEY_INFO_PANEL, "children"),
+    Input(id_constants.USER_JOURNEY_DROPDOWN, "value"),
     prevent_initial_call=True,
 )
 def generate_user_journey_info_panel(dropdown_value: str) -> List[Any]:
@@ -291,7 +327,7 @@ def generate_user_journey_info_panel(dropdown_value: str) -> List[Any]:
     if dropdown_value in client_name_message_map:
         client = client_name_message_map[dropdown_value]
         return converters.user_journey_datatable_from_user_journeys(
-            client.user_journeys, constants.USER_JOURNEY_DATATABLE_ID
+            client.user_journeys, id_constants.USER_JOURNEY_DATATABLE
         )
 
     # associate the name of the user journey with the nodes that it passes through
@@ -301,7 +337,7 @@ def generate_user_journey_info_panel(dropdown_value: str) -> List[Any]:
 
     if dropdown_value in node_name_message_map:
         return converters.user_journey_datatable_from_user_journeys(
-            node_user_journey_map[dropdown_value], constants.USER_JOURNEY_DATATABLE_ID
+            node_user_journey_map[dropdown_value], id_constants.USER_JOURNEY_DATATABLE
         )
 
     if dropdown_value in virtual_node_map:
@@ -309,21 +345,25 @@ def generate_user_journey_info_panel(dropdown_value: str) -> List[Any]:
             dropdown_value, node_name_message_map, virtual_node_map
         )
         user_journeys = []
-        for node_name in node_names_in_virtual_node:
+        for (
+            node_name
+        ) in (
+            node_names_in_virtual_node
+        ):  # maybe we can try to improve this if the input size is large
             for user_journey in node_user_journey_map[node_name]:
-                if user_journey not in user_journeys:  # this is sphagetti
+                if user_journey not in user_journeys:
                     user_journeys.append(user_journey)
 
         return converters.user_journey_datatable_from_user_journeys(
-            user_journeys, constants.USER_JOURNEY_DATATABLE_ID
+            user_journeys, id_constants.USER_JOURNEY_DATATABLE
         )
 
     raise ValueError
 
 
 @app.callback(
-    Output("user-journey-dropdown", "options"),
-    [Input("virtual-node-update-signal", "children")],
+    Output(id_constants.USER_JOURNEY_DROPDOWN, "options"),
+    Input(id_constants.SIGNAL_VIRTUAL_NODE_UPDATE, "children"),
 )
 def update_user_journey_dropdown_options(virtual_node_update_signal):
     """Updates the options in the user journey dropdown on virtual node changes.
@@ -350,14 +390,14 @@ def update_user_journey_dropdown_options(virtual_node_update_signal):
 
 # region virtual nodes
 @app.callback(
-    Output("virtual-node-update-signal", "children"),
+    Output(id_constants.SIGNAL_VIRTUAL_NODE_UPDATE, "children"),
     [
-        Input("add-virtual-node-button", "n_clicks_timestamp"),
-        Input("delete-virtual-node-button", "n_clicks_timestamp"),
+        Input(id_constants.ADD_VIRTUAL_NODE_BUTTON, "n_clicks_timestamp"),
+        Input(id_constants.DELETE_VIRTUAL_NODE_BUTTON, "n_clicks_timestamp"),
     ],
     [
-        State("cytoscape-graph", "selectedNodeData"),
-        State("virtual-node-input", "value"),
+        State(id_constants.CYTOSCAPE_GRAPH, "selectedNodeData"),
+        State(id_constants.VIRTUAL_NODE_INPUT, "value"),
     ],
     prevent_initial_call=True,
 )
@@ -384,7 +424,7 @@ def validate_selected_nodes_for_virtual_node(
         virtual_node_name: The name of the virtual node to add or delete.
 
     Returns:
-        A string to be placed in the children property of the virtual-node-update-signal hidden div.
+        A string to be placed in the children property of the SIGNAL_VIRTUAL_NODE_UPDATE hidden div.
         This hidden div is used to ensure the callbacks to update the error modal visibility and cytoscape graph
         are called in the correct order.
     """
@@ -392,7 +432,7 @@ def validate_selected_nodes_for_virtual_node(
     ctx = dash.callback_context
     triggered_id, triggered_prop, triggered_value = utils.ctx_triggered_info(ctx)
 
-    if triggered_id == "add-virtual-node-button":
+    if triggered_id == id_constants.ADD_VIRTUAL_NODE_BUTTON:
         if selected_node_data is None:
             return "Error: Must select at least one node to to add to virtual node."
 
@@ -422,24 +462,26 @@ def validate_selected_nodes_for_virtual_node(
             return "Error: A virtual node with that name already exists."
 
         state.add_virtual_node(virtual_node_name, selected_node_data)
-    else:
+    elif triggered_id == id_constants.DELETE_VIRTUAL_NODE_BUTTON:
         virtual_node_map = state.get_virtual_node_map()
         if virtual_node_name not in virtual_node_map:
             return "Error: The entered name doesn't match any existing virtual nodes."
 
         state.delete_virtual_node(virtual_node_name)
+    else:
+        raise ValueError
 
     return constants.OK_SIGNAL
 
 
 @app.callback(
     [
-        Output("collapse-error-modal", "is_open"),
-        Output("collapse-error-modal-body", "children"),
+        Output(id_constants.COLLAPSE_ERROR_MODAL, "is_open"),
+        Output(id_constants.COLLAPSE_ERROR_MODAL_BODY, "children"),
     ],
     [
-        Input("collapse-error-modal-close", "n_clicks_timestamp"),
-        Input("virtual-node-update-signal", "children"),
+        Input(id_constants.COLLAPSE_ERROR_MODAL_CLOSE, "n_clicks_timestamp"),
+        Input(id_constants.SIGNAL_VIRTUAL_NODE_UPDATE, "children"),
     ],
     prevent_initial_call=True,
 )
@@ -464,7 +506,7 @@ def toggle_collapse_error_modal(n_clicks_timestamp, signal_message) -> Tuple[boo
     triggered_id, triggered_prop = ctx.triggered[0]["prop_id"].split(".")
     triggered_value = ctx.triggered[0]["value"]
 
-    if triggered_id == "collapse-error-modal-close":
+    if triggered_id == id_constants.COLLAPSE_ERROR_MODAL_CLOSE:
         return False, ""
 
     if triggered_value != "OK":
@@ -480,9 +522,9 @@ def toggle_collapse_error_modal(n_clicks_timestamp, signal_message) -> Tuple[boo
 @app.callback(
     # We can't use ALL in the output, so we use MATCH.
     # However, since there's only one component with this key, the functionality is identical.
-    Output({"node-comment-textarea": MATCH}, "value"),
-    Input({"discard-comment-textarea-button": ALL}, "n_clicks_timestamp"),
-    State("cytoscape-graph", "tapNode"),
+    Output({id_constants.NODE_COMMENT_TEXTAREA: MATCH}, "value"),
+    Input({id_constants.DISCARD_COMMENT_TEXTAREA_BUTTON: ALL}, "n_clicks_timestamp"),
+    State(id_constants.CYTOSCAPE_GRAPH, "tapNode"),
     prevent_initial_call=True,
 )
 def discard_comment(discard_n_clicks_timestamp, tap_node):
@@ -512,11 +554,11 @@ def discard_comment(discard_n_clicks_timestamp, tap_node):
 
 
 @app.callback(
-    Output({"save-comment-toast": ALL}, "is_open"),
-    Input({"save-comment-textarea-button": ALL}, "n_clicks_timestamp"),
+    Output({id_constants.SAVE_COMMENT_TOAST: ALL}, "is_open"),
+    Input({id_constants.SAVE_COMMENT_TEXTAREA_BUTTON: ALL}, "n_clicks_timestamp"),
     [
-        State("cytoscape-graph", "tapNode"),
-        State({"node-comment-textarea": ALL}, "value"),
+        State(id_constants.CYTOSCAPE_GRAPH, "tapNode"),
+        State({id_constants.NODE_COMMENT_TEXTAREA: ALL}, "value"),
     ],
     prevent_initial_call=True,
 )
@@ -541,9 +583,9 @@ def save_comment(save_n_clicks_timestamp, tap_node, new_comment):
     new_comment = new_comment[0]
     node_name = tap_node["data"]["ujt_id"]
     state.set_comment(node_name, new_comment)
-    return [
-        True
-    ]  # wrap in a list since we used pattern matching. should only ever be one toast.
+
+    # wrap output in a list since we used pattern matching. should only ever be one toast.
+    return [True]
 
 
 # endregion
@@ -553,8 +595,8 @@ def save_comment(save_n_clicks_timestamp, tap_node, new_comment):
 
 # region tag creation panel
 @app.callback(
-    Output("create-tag-signal", "children"),
-    Input({"create-tag-button": ALL}, "n_clicks_timestamp"),
+    Output(id_constants.SIGNAL_TAG_CREATE, "children"),
+    Input({id_constants.CREATE_TAG_BUTTON: ALL}, "n_clicks_timestamp"),
     prevent_initial_call=True,
 )
 def create_tag(create_timestamps):
@@ -564,12 +606,12 @@ def create_tag(create_timestamps):
         when the create tag button is clicked.
 
     Args:
-        create_timestamps: List of the timestamps of the create-tag-button buttons was called.
+        create_timestamps: List of the timestamps of the CREATE_TAG_BUTTON buttons was called.
             Value unused, input only provided to register callback.
             Should only contain one value.
 
     Returns:
-        A signal to add to the create-tag-signal hidden div.
+        A signal to add to the SIGNAL_TAG_CREATE hidden div.
     """
     ctx = dash.callback_context
     triggered_id, triggered_prop, triggered_value = utils.ctx_triggered_info(ctx)
@@ -584,9 +626,10 @@ def create_tag(create_timestamps):
 
 
 @app.callback(
-    Output("delete-tag-signal", "children"),
+    Output(id_constants.SIGNAL_TAG_DELETE, "children"),
     Input(
-        {"delete-tag-button": "delete-tag-button", "index": ALL}, "n_clicks_timestamp"
+        {id_constants.DELETE_TAG_BUTTON: id_constants.DELETE_TAG_BUTTON, "index": ALL},
+        "n_clicks_timestamp",
     ),
     prevent_initial_call=True,
 )
@@ -597,12 +640,12 @@ def delete_tag(delete_timestamps):
         when a delete tag button is clicked
 
     Args:
-        delete_timestamps: List of the timestamps of when delete-tag-button buttons were called.
+        delete_timestamps: List of the timestamps of when DELETE_TAG_BUTTON buttons were called.
             Value unused, input only provided to register callback.
             Should contain only one value.
 
     Returns:
-        A signal to add to the delete-tag-signal hidden div.
+        A signal to add to the SIGNAL_TAG_DELETE hidden div.
     """
 
     ctx = dash.callback_context
@@ -625,11 +668,14 @@ def delete_tag(delete_timestamps):
 
 @app.callback(
     [
-        Output({"save-tag-toast": ALL}, "is_open"),
-        Output("save-tag-signal", "children"),
+        Output({id_constants.SAVE_TAG_TOAST: ALL}, "is_open"),
+        Output(id_constants.SIGNAL_TAG_SAVE, "children"),
     ],
-    Input({"save-tag-button": "save-tag-button", "index": ALL}, "n_clicks_timestamp"),
-    State({"tag-input": "tag-input", "index": ALL}, "value"),
+    Input(
+        {id_constants.SAVE_TAG_BUTTON: id_constants.SAVE_TAG_BUTTON, "index": ALL},
+        "n_clicks_timestamp",
+    ),
+    State({id_constants.TAG_INPUT: id_constants.TAG_INPUT, "index": ALL}, "value"),
     prevent_initial_call=True,
 )
 def save_tag(n_clicks_timestamp, input_values):
@@ -644,13 +690,13 @@ def save_tag(n_clicks_timestamp, input_values):
         when the save tag button is clicked.
 
     Args:
-        n_clicks_timestamp: List of the timestamps of when save-tag-button buttons were called.
+        n_clicks_timestamp: List of the timestamps of when SAVE_TAG_BUTTON buttons were called.
             Value unused, input only provided to register callback.
-        input_values: List of the input values in tag-input inputs.
+        input_values: List of the input values in TAG_INPUT inputs.
 
     Returns:
         A boolean indicating whether the save tag successful toast should open.
-        A signal to save in the save-tag-signal component.
+        A signal to save in the SIGNAL_TAG_SAVE component.
     """
 
     ctx = dash.callback_context
@@ -671,16 +717,16 @@ def save_tag(n_clicks_timestamp, input_values):
         raise PreventUpdate  # TODO: display an error UI element or something
 
     state.update_tag(tag_idx, tag_value)
-    # since we pattern matched the save-tag-toast, we need to provide output as a list
+    # since we pattern matched the SAVE_TAG_TOAST, we need to provide output as a list
     return [True], constants.OK_SIGNAL
 
 
 @app.callback(
-    Output("tag-update-signal", "children"),
+    Output(id_constants.SIGNAL_TAG_UPDATE, "children"),
     [
-        Input("create-tag-signal", "children"),
-        Input("delete-tag-signal", "children"),
-        Input("save-tag-signal", "children"),
+        Input(id_constants.SIGNAL_TAG_CREATE, "children"),
+        Input(id_constants.SIGNAL_TAG_DELETE, "children"),
+        Input(id_constants.SIGNAL_TAG_SAVE, "children"),
     ],
     prevent_initial_call=True,
 )
@@ -689,9 +735,9 @@ def generate_tag_update_signal(create_tag_signal, delete_tag_signal, save_tag_si
 
 
 @app.callback(
-    Output("create-tag-panel", "children"),
-    Input("create-tag-signal", "children"),
-    Input("delete-tag-signal", "children"),
+    Output(id_constants.CREATE_TAG_PANEL, "children"),
+    Input(id_constants.SIGNAL_TAG_CREATE, "children"),
+    Input(id_constants.SIGNAL_TAG_DELETE, "children"),
 )
 def generate_create_tag_panel(create_tag_signal, delete_tag_signal):
     """Handles generating the tag creation and deletion panel.
@@ -707,7 +753,7 @@ def generate_create_tag_panel(create_tag_signal, delete_tag_signal):
             Value unused, input only provided to register callback.
 
     Returns:
-        A list of components to be placed in the tag-panel.
+        A list of components to be placed in the CREATE_TAG_PANEL.
     """
     return components.get_create_tag_components()
 
@@ -717,11 +763,11 @@ def generate_create_tag_panel(create_tag_signal, delete_tag_signal):
 
 # region apply tag panel
 @app.callback(
-    Output("add-applied-tag-signal", "children"),
-    Input({"add-applied-tag-button": ALL}, "n_clicks_timestamp"),
+    Output(id_constants.SIGNAL_APPLIED_TAG_ADD, "children"),
+    Input({id_constants.ADD_APPLIED_TAG_BUTTON: ALL}, "n_clicks_timestamp"),
     [
-        State("cytoscape-graph", "tapNode"),
-        State("cytoscape-graph", "tapEdge"),
+        State(id_constants.CYTOSCAPE_GRAPH, "tapNode"),
+        State(id_constants.CYTOSCAPE_GRAPH, "tapEdge"),
     ],
     prevent_initial_call=True,
 )
@@ -732,14 +778,14 @@ def apply_new_empty_tag(add_timestamps, tap_node, tap_edge):
         when the add applied tag button is clicked.
 
     Args:
-        add_timestamps: List of the timestamps of the add-applied-tag-button buttons was called.
+        add_timestamps: List of the timestamps of the ADD_APPLIED_TAG_BUTTON buttons was called.
             Value unused, input only provided to register callback.
             Should only contain one value.
         tap_node: The cytoscape element of the latest tapped node.
         tap_edge: The cytoscape element of the latest tapped edge.
 
     Returns:
-        A signal to add to the add-applied-tag-signal hidden div.
+        A signal to add to the SIGNAL_APPLIED_TAG_ADD hidden div.
     """
 
     ctx = dash.callback_context
@@ -757,14 +803,17 @@ def apply_new_empty_tag(add_timestamps, tap_node, tap_edge):
 
 
 @app.callback(
-    Output("remove-applied-tag-signal", "children"),
+    Output(id_constants.SIGNAL_APPLIED_TAG_REMOVE, "children"),
     Input(
-        {"remove-applied-tag-button": "remove-applied-tag-button", "index": ALL},
+        {
+            id_constants.REMOVE_APPLIED_TAG_BUTTON: id_constants.REMOVE_APPLIED_TAG_BUTTON,
+            "index": ALL,
+        },
         "n_clicks_timestamp",
     ),
     [
-        State("cytoscape-graph", "tapNode"),
-        State("cytoscape-graph", "tapEdge"),
+        State(id_constants.CYTOSCAPE_GRAPH, "tapNode"),
+        State(id_constants.CYTOSCAPE_GRAPH, "tapEdge"),
     ],
     prevent_initial_call=True,
 )
@@ -776,17 +825,17 @@ def remove_applied_tag(
     """Handles removing tags from the tag map.
 
     This function is called:
-        when a delete-applied-tag-button is clicked
+        when a REMOVE_APPLIED_TAG_BUTTON is clicked
 
     Args:
-        remove_timestamps: List of the timestamps of when remove-applied-tag-button buttons were called.
+        remove_timestamps: List of the timestamps of when REMOVE_APPLIED_TAG_BUTTON buttons were called.
             Value unused, input only provided to register callback.
             Should only contain one value.
         tap_node: The cytoscape element of the latest tapped node.
         tap_edge: The cytoscape element of the latest tapped edge.
 
     Returns:
-        A signal to add to the remove-applied-tag-signal hidden div.
+        A signal to add to the SIGNAL_APPLIED_TAG_REMOVE hidden div.
     """
 
     ctx = dash.callback_context
@@ -811,11 +860,17 @@ def remove_applied_tag(
 
 
 @app.callback(
-    Output("modify-applied-tag-signal", "children"),
-    Input({"apply-tag-dropdown": "apply-tag-dropdown", "index": ALL}, "value"),
+    Output(id_constants.SIGNAL_APPLIED_TAG_MODIFY, "children"),
+    Input(
+        {
+            id_constants.APPLY_TAG_DROPDOWN: id_constants.APPLY_TAG_DROPDOWN,
+            "index": ALL,
+        },
+        "value",
+    ),
     [
-        State("cytoscape-graph", "tapNode"),
-        State("cytoscape-graph", "tapEdge"),
+        State(id_constants.CYTOSCAPE_GRAPH, "tapNode"),
+        State(id_constants.CYTOSCAPE_GRAPH, "tapEdge"),
     ],
     prevent_initial_call=True,
 )
@@ -823,15 +878,15 @@ def modify_applied_tag(dropdown_values, tap_node, tap_edge):
     """Updates the corresponding applied tag in the tag map.
 
     This function is called:
-        when an apply-tag-dropdown value is updated
+        when an APPLY_TAG_DROPDOWN value is updated
 
     Args:
-        dropdown_values: the values of the apply-tag-dropdown dropdown menus.
+        dropdown_values: the values of the APPLY_TAG_DROPDOWN dropdown menus.
         tap_node: Cytoscape element of the tapped/clicked node.
         tap_edge: Cytoscape element of the tapped/clicked edge.
 
     Returns:
-        A signal to be placed in the modify-applied-tag-signal.
+        A signal to be placed in the SIGNAL_APPLIED_TAG_MODIFY hidden div.
     """
     ctx = dash.callback_context
     triggered_id, triggered_prop, triggered_value = utils.ctx_triggered_info(ctx)
@@ -854,11 +909,11 @@ def modify_applied_tag(dropdown_values, tap_node, tap_edge):
 
 
 @app.callback(
-    Output("applied-tag-update-signal", "children"),
+    Output(id_constants.SIGNAL_APPLIED_TAG_UPDATE, "children"),
     [
-        Input("add-applied-tag-signal", "children"),
-        Input("remove-applied-tag-signal", "children"),
-        Input("modify-applied-tag-signal", "children"),
+        Input(id_constants.SIGNAL_APPLIED_TAG_ADD, "children"),
+        Input(id_constants.SIGNAL_APPLIED_TAG_REMOVE, "children"),
+        Input(id_constants.SIGNAL_APPLIED_TAG_MODIFY, "children"),
     ],
     prevent_initial_call=True,
 )
@@ -873,8 +928,8 @@ def generate_applied_tag_update_signal(
 
 # region view panel
 @app.callback(
-    Output("create-view-signal", "children"),
-    Input({"create-view-button": ALL}, "n_clicks_timestamp"),
+    Output(id_constants.SIGNAL_VIEW_CREATE, "children"),
+    Input({id_constants.CREATE_VIEW_BUTTON: ALL}, "n_clicks_timestamp"),
 )
 def create_view(create_timestamps):
     """Handles creating views
@@ -883,12 +938,12 @@ def create_view(create_timestamps):
         when the create view button is clicked.
 
     Args:
-        create_timestamps: List of the timestamps of the create-view-button buttons were called.
+        create_timestamps: List of the timestamps of the CREATE_VIEW_BUTTON buttons were called.
             Value unused, input only provided to register callback.
             Should only contain one value.
 
     Returns:
-        A signal to add to the create-view-signal hidden div.
+        A signal to add to the SIGNAL_VIEW_CREATE hidden div.
     """
     ctx = dash.callback_context
     triggered_id, triggered_prop, triggered_value = utils.ctx_triggered_info(ctx)
@@ -903,9 +958,13 @@ def create_view(create_timestamps):
 
 
 @app.callback(
-    Output("delete-view-signal", "children"),
+    Output(id_constants.SIGNAL_VIEW_DELETE, "children"),
     Input(
-        {"delete-view-button": "delete-view-button", "index": ALL}, "n_clicks_timestamp"
+        {
+            id_constants.DELETE_VIEW_BUTTON: id_constants.DELETE_VIEW_BUTTON,
+            "index": ALL,
+        },
+        "n_clicks_timestamp",
     ),
     prevent_initial_call=True,
 )
@@ -916,12 +975,12 @@ def delete_view(delete_timestamps):
         when a delete view button is clicked
 
     Args:
-        delete_timestamps: List of the timestamps of when delete-view-button buttons were called.
+        delete_timestamps: List of the timestamps of when DELETE_VIEW_BUTTON buttons were called.
             Value unused, input only provided to register callback.
             Should contain only one value.
 
     Returns:
-        A signal to add to the delete-view-signal hidden div.
+        A signal to add to the SIGNAL_VIEW_DELETE hidden div.
     """
 
     ctx = dash.callback_context
@@ -943,18 +1002,18 @@ def delete_view(delete_timestamps):
 
 
 @app.callback(
-    Output("modify-view-signal", "children"),
+    Output(id_constants.SIGNAL_VIEW_MODIFY, "children"),
     [
         Input(
             {
-                "view-tag-dropdown": "view-tag-dropdown",
+                id_constants.VIEW_TAG_DROPDOWN: id_constants.VIEW_TAG_DROPDOWN,
                 "index": ALL,
             },
             "value",
         ),
         Input(
             {
-                "view-style-dropdown": "view-style-dropdown",
+                id_constants.VIEW_STYLE_DROPDOWN: id_constants.VIEW_STYLE_DROPDOWN,
                 "index": ALL,
             },
             "value",
@@ -966,14 +1025,15 @@ def modify_view(tag_dropdown_values, style_dropdown_values):
     """Updates the corresponding applied tag in the tag map.
 
     This function is called:
-        when an apply-tag-dropdown value is updated
+        when a VIEW_TAG_DROPDOWN value is updated
+        when a VIEW_STYLE_DROPDOWN value is updated
 
     Args:
-        tag_dropdown_values: the values of the view-tag-dropdown dropdown menus.
-        style_dropdown_values: the values of the view-style-dropdown dropdown menus.
+        tag_dropdown_values: the values of the VIEW_TAG_DROPDOWN dropdown menus.
+        style_dropdown_values: the values of the VIEW_STYLE_DROPDOWN dropdown menus.
 
     Returns:
-        A signal to be placed in the modify-view-signal.
+        A signal to be placed in the SIGNAL_VIEW_MODIFY.
     """
     ctx = dash.callback_context
     triggered_id, triggered_prop, triggered_value = utils.ctx_triggered_info(ctx)
@@ -996,11 +1056,11 @@ def modify_view(tag_dropdown_values, style_dropdown_values):
 
 
 @app.callback(
-    Output("view-update-signal", "children"),
+    Output(id_constants.SIGNAL_VIEW_UPDATE, "children"),
     [
-        Input("create-view-signal", "children"),
-        Input("delete-view-signal", "children"),
-        Input("modify-view-signal", "children"),
+        Input(id_constants.SIGNAL_VIEW_CREATE, "children"),
+        Input(id_constants.SIGNAL_VIEW_DELETE, "children"),
+        Input(id_constants.SIGNAL_VIEW_MODIFY, "children"),
     ],
     prevent_initial_call=True,
 )
@@ -1011,12 +1071,12 @@ def generate_view_update_signal(
 
 
 @app.callback(
-    Output("view-panel", "children"),
+    Output(id_constants.VIEW_PANEL, "children"),
     [
-        Input("create-view-signal", "children"),
-        Input("delete-view-signal", "children"),
-        Input("tag-update-signal", "children"),
-        Input("style-update-signal", "children"),
+        Input(id_constants.SIGNAL_VIEW_CREATE, "children"),
+        Input(id_constants.SIGNAL_VIEW_DELETE, "children"),
+        Input(id_constants.SIGNAL_TAG_UPDATE, "children"),
+        Input(id_constants.SIGNAL_STYLE_UPDATE, "children"),
     ],
 )
 def generate_view_panel(
@@ -1041,7 +1101,7 @@ def generate_view_panel(
             Value unused, input only provided to register callback.
 
     Returns:
-        A list of components to be placed in the view-panel.
+        A list of components to be placed in the VIEW_PANEL.
     """
     return components.get_view_components()
 
@@ -1051,8 +1111,8 @@ def generate_view_panel(
 
 # region create style panel
 @app.callback(
-    Output("cytoscape-graph", "stylesheet"),
-    Input("style-update-signal", "children"),
+    Output(id_constants.CYTOSCAPE_GRAPH, "stylesheet"),
+    Input(id_constants.SIGNAL_STYLE_UPDATE, "children"),
 )
 def update_cytoscape_stylesheet(style_update_signal):
     """Updates the cytoscape stylesheet.
@@ -1076,15 +1136,15 @@ def update_cytoscape_stylesheet(style_update_signal):
 
 @app.callback(
     [
-        Output("save-style-toast", "is_open"),
-        Output("save-style-toast", "header"),
-        Output("save-style-toast", "icon"),
-        Output("save-style-signal", "children"),
+        Output(id_constants.SAVE_STYLE_TOAST, "is_open"),
+        Output(id_constants.SAVE_STYLE_TOAST, "header"),
+        Output(id_constants.SAVE_STYLE_TOAST, "icon"),
+        Output(id_constants.SIGNAL_STYLE_SAVE, "children"),
     ],
-    Input("save-style-textarea-button", "n_clicks_timestamp"),
+    Input(id_constants.SAVE_STYLE_TEXTAREA_BUTTON, "n_clicks_timestamp"),
     [
-        State("style-name-input", "value"),
-        State("style-textarea", "value"),
+        State(id_constants.STYLE_NAME_INPUT, "value"),
+        State(id_constants.STYLE_TEXTAREA, "value"),
     ],
     prevent_initial_call=True,
 )
@@ -1095,17 +1155,18 @@ def save_style(save_n_clicks_timestamps, style_name, style_str):
         when the save style button is clicked
 
     Args:
-        save_n_clicks_timestamps: List of the timestamps of when save-style-textarea-button buttons were called.
+        save_n_clicks_timestamps: List of the timestamps of when SAVE_STYLE_TEXTAREA_BUTTON buttons were called.
             Should contain only one value.
             Value unused, input only provided to register callback.
-        style_name_list: List of style names. Should contain only one value, from the style-name-input component.
-        style_str_list: List of strings encoding styles. Should contain only one value, from the style-textarea component.
+        style_name_list: List of style names. Should contain only one value, from the STYLE_NAME_INPUT component.
+        style_str_list: List of strings encoding styles. Should contain only one value, from the STYLE_TEXTAREA component.
 
     Returns:
         A 4 tuple, containing:
             A boolean indicating whether the save tag successful toast should open.
             A message to be placed in the header of the toast.
             A string to determine the toast icon.
+            An updated signal to be placed in the SIGNAL_STYLE_SAVE signal.
     """
 
     if " " in style_name:
@@ -1127,15 +1188,15 @@ def save_style(save_n_clicks_timestamps, style_name, style_str):
 
 @app.callback(
     [
-        Output("style-name-input", "value"),
-        Output("style-textarea", "value"),
-        Output("delete-style-signal", "children"),
+        Output(id_constants.STYLE_NAME_INPUT, "value"),
+        Output(id_constants.STYLE_TEXTAREA, "value"),
+        Output(id_constants.SIGNAL_STYLE_DELETE, "children"),
     ],
     [
-        Input("load-style-textarea-button", "n_clicks_timestamp"),
-        Input("delete-style-button", "n_clicks_timestamp"),
+        Input(id_constants.LOAD_STYLE_TEXTAREA_BUTTON, "n_clicks_timestamp"),
+        Input(id_constants.DELETE_STYLE_BUTTON, "n_clicks_timestamp"),
     ],
-    State("style-name-input", "value"),
+    State(id_constants.STYLE_NAME_INPUT, "value"),
     prevent_initial_call=True,
 )
 def update_style_input_fields(
@@ -1158,31 +1219,31 @@ def update_style_input_fields(
         when the delete style button is clicked
 
     Args:
-        load_n_clicks_timestamps: List of the timestamps of when load-style-textarea-button buttons were called.
+        load_n_clicks_timestamps: List of the timestamps of when LOAD_STYLE_TEXTAREA_BUTTON buttons were called.
             Should contain only one value.
             Value unused, input only provided to register callback.
-        delete_n_clicks_timestamp: List of the timestamps of when delete-style-textarea-button buttons were called.
+        delete_n_clicks_timestamp: List of the timestamps of when DELETE_STYLE_BUTTON buttons were called.
             Should contain only one value.
             Value unused, input only provided to register callback.
-        style_names: List of style names. Should contain only one value, from the style-name-input component.
+        style_names: List of style names. Should contain only one value, from the STYLE_NAME_INPUT component.
 
     Returns:
         A 3 tuple, containing:
-            The updated string to be placed in the style-name-input component.
-            The updated string to be placed in the style-textarea component.
-            The updated signal to be placed in the delete-style-signal
+            The updated string to be placed in the STYLE_NAME_INPUT component.
+            The updated string to be placed in the STYLE_TEXTAREA component.
+            The updated signal to be placed in the SIGNAL_STYLE_DELETE signal.
     """
     ctx = dash.callback_context
     triggered_id, triggered_prop, triggered_value = utils.ctx_triggered_info(ctx)
 
-    if triggered_id == "load-style-textarea-button":
+    if triggered_id == id_constants.LOAD_STYLE_TEXTAREA_BUTTON:
         style_map = state.get_style_map()
         textarea_value = (
             utils.dict_to_str(style_map[style_name]) if style_name in style_map else ""
         )
         return style_name, textarea_value, dash.no_update
 
-    if triggered_id == "delete-style-button":
+    if triggered_id == id_constants.DELETE_STYLE_BUTTON:
         state.delete_style(style_name)
         return "", "", constants.OK_SIGNAL
 
@@ -1190,10 +1251,10 @@ def update_style_input_fields(
 
 
 @app.callback(
-    Output("style-update-signal", "children"),
+    Output(id_constants.SIGNAL_STYLE_UPDATE, "children"),
     [
-        Input("save-style-signal", "children"),
-        Input("delete-style-signal", "children"),
+        Input(id_constants.SIGNAL_STYLE_SAVE, "children"),
+        Input(id_constants.SIGNAL_STYLE_DELETE, "children"),
     ],
     prevent_initial_call=True,
 )
@@ -1206,23 +1267,23 @@ def generate_style_update_signal(save_style_signal, delete_style_signal):
     The load and delete callback needs to update the properties of the text fields,
     and deletes the style as a side effect.
 
-    The style-update-signal is used to trigger the update_cytoscape_stylesheet callback.
-    If we want to update the style-update-signal directly from the save and delete buttons,
+    The SIGNAL_STYLE_UPDATE is used to trigger the update_cytoscape_stylesheet callback.
+    If we want to update the SIGNAL_STYLE_UPDATE directly from the save and delete buttons,
     we have to combine the two callbacks to saving and deleting (since Dash only supports assigning
     to an output with a single callback).
     In order to avoid combining the callbacks, we let them each produce their own update signals
     and combine them with this callback is a workaround.
 
     This function is called:
-        when the save-style-signal is updated (when the save style button is called)
-        when the delete-style-signal is updated (when the delete style button is called)
+        when the SIGNAL_STYLE_SAVE is updated (when the save style button is called)
+        when the SIGNAL_STYLE_DELETE is updated (when the delete style button is called)
 
     Args:
         save_style_signal: The value of the save style signal
         delete_style_signal: The value of the delete style signal.
 
     Returns:
-        The updated value of the style-update-signal
+        The updated value of the SIGNAL_STYLE_UPDATE
     """
     return constants.OK_SIGNAL
 
@@ -1231,12 +1292,12 @@ def generate_style_update_signal(save_style_signal, delete_style_signal):
 
 
 @app.callback(
-    Output("composite-tagging-update-signal", "children"),
+    Output(id_constants.SIGNAL_COMPOSITE_TAGGING_UPDATE, "children"),
     [
-        Input("tag-update-signal", "children"),
-        Input("applied-tag-update-signal", "children"),
-        Input("view-update-signal", "children"),
-        Input("style-update-signal", "children"),
+        Input(id_constants.SIGNAL_TAG_UPDATE, "children"),
+        Input(id_constants.SIGNAL_APPLIED_TAG_UPDATE, "children"),
+        Input(id_constants.SIGNAL_VIEW_UPDATE, "children"),
+        Input(id_constants.SIGNAL_STYLE_UPDATE, "children"),
     ],
     prevent_initial_call=True,
 )

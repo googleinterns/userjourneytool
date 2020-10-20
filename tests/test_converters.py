@@ -1,10 +1,4 @@
-from graph_structures_pb2 import (
-    SLI,
-    Node,
-    SLIType,
-    Status,
-    UserJourney,
-)
+from graph_structures_pb2 import SLI, Node, SLIType, Status, UserJourney
 
 import ujt.constants
 import ujt.converters
