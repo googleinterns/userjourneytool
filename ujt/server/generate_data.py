@@ -95,7 +95,7 @@ USER_JOURNEY_DEPENDENCY_MAP: Dict[str, List[str]] = {
     "WebBrowser.ViewProfile": ["WebServer.GetProfilePage"],
     "WebBrowser.ConductMicrotransaction": ["WebServer.BuyCurrency"],
 }
-SLO_BOUNDS = {
+SLO_BOUNDS: Dict[str, float] = {
     "slo_error_lower_bound": 0.1,
     "slo_warn_lower_bound": 0.2,
     "slo_warn_upper_bound": 0.8,

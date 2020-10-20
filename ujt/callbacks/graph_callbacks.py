@@ -133,7 +133,7 @@ def update_graph_elements(
             node_name = tap_node["data"]["ujt_id"]
             state.set_node_override_status(
                 node_name,
-                triggered_value,
+                triggered_value,  # type: ignore
                 node_name_message_map=node_name_message_map,
                 virtual_node_map=virtual_node_map,
             )
