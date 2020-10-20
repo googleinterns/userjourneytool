@@ -1,5 +1,5 @@
 from collections import defaultdict, deque
-from typing import TYPE_CHECKING, Any, DefaultDict, Deque, Dict, List, Set, Tuple, cast
+from typing import Any, DefaultDict, Deque, Dict, List, Set, TYPE_CHECKING, Tuple
 
 from graph_structures_pb2 import (
     SLI,

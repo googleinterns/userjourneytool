@@ -14,22 +14,19 @@
 """ Callbacks for Dash app. """
 
 import json
-from typing import Any, Dict, List, Set, Tuple, Union
+from typing import Any, Dict, List, Tuple
 
 import dash
-import dash_bootstrap_components as dbc
-import dash_core_components as dcc
 import dash_html_components as html
 from dash.dependencies import ALL, MATCH, Input, Output, State
 from dash.exceptions import PreventUpdate
-from graph_structures_pb2 import Node, NodeType, Status, UserJourney, VirtualNode
+from graph_structures_pb2 import UserJourney
 
 from . import (
     components,
     compute_status,
     constants,
     converters,
-    rpc_client,
     state,
     transformers,
     utils,
@@ -880,7 +877,7 @@ def generate_applied_tag_update_signal(
     Input({"create-view-button": ALL}, "n_clicks_timestamp"),
 )
 def create_view(create_timestamps):
-    """Handles creating views =.
+    """Handles creating views
 
     This function is called:
         when the create view button is clicked.

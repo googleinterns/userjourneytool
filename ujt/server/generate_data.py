@@ -3,7 +3,7 @@
 import pathlib
 import random
 from collections import defaultdict
-from typing import DefaultDict, Dict, List, Tuple
+from typing import DefaultDict, Dict, List
 
 from graph_structures_pb2 import SLI, Client, Dependency, Node, NodeType, UserJourney
 

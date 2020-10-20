@@ -1,7 +1,7 @@
-from unittest.mock import MagicMock, Mock, call, mock_open, patch, sentinel
+from unittest.mock import MagicMock, Mock, call, patch, sentinel
 
 import pytest
-from graph_structures_pb2 import Node, NodeType, Status
+from graph_structures_pb2 import Node
 
 import ujt.server.server_utils
 

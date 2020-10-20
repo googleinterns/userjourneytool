@@ -7,11 +7,8 @@ from graph_structures_pb2 import (
     Dependency,
     Node,
     NodeType,
-    Status,
     UserJourney,
 )
-
-import ujt.constants
 
 
 @pytest.fixture

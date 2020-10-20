@@ -1,6 +1,6 @@
 # pylint: disable=redefined-outer-name
 
-from unittest.mock import ANY, Mock, call, patch, sentinel
+from unittest.mock import ANY, Mock, call, patch
 
 import pytest
 from graph_structures_pb2 import SLI, Client, Dependency, Node, Status, UserJourney

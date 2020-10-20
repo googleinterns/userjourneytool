@@ -1,4 +1,3 @@
-import graph_structures_pb2
 import grpc
 import server_pb2
 import server_pb2_grpc
