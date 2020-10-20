@@ -1,0 +1,11 @@
+node_type: NODETYPE_SERVICE
+name: "StoreService"
+child_names: "StoreService.VerifyPayment"
+slis {
+  node_name: "StoreService"
+  sli_value: 0.8680216737360025
+  slo_error_upper_bound: 0.9
+  slo_error_lower_bound: 0.1
+  slo_warn_upper_bound: 0.8
+  slo_warn_lower_bound: 0.2
+}

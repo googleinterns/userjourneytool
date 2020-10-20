@@ -6,7 +6,7 @@ from google.protobuf.message import Message
 
 
 def named_proto_file_name(name: str, proto_type: Type[Message]):
-    """ Generates the default file name for messages with a name field.
+    """Generates the default file name for messages with a name field.
 
     Such messages include: Services, Endpoints, Clients, UserJourneys.
 
@@ -30,9 +30,7 @@ def write_proto_to_file(path: pathlib.Path, message: Message) -> None:
     path.write_text(text_format.MessageToString(message))
 
 
-def read_proto_from_file(
-        path: pathlib.Path,
-        proto_type: Type[Message]) -> Message:
+def read_proto_from_file(path: pathlib.Path, proto_type: Type[Message]) -> Message:
     """Reads a protobuf message from a file.
 
     Args:

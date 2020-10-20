@@ -24,7 +24,7 @@ from . import callbacks, constants, converters, state, utils
 
 
 def get_layout():
-    """ Generate the top-level layout for the Dash app.
+    """Generate the top-level layout for the Dash app.
 
     Returns:
         a Dash HTML Div component containing the top-level layout for the app.
@@ -36,7 +36,8 @@ def get_layout():
                 children="User Journey Tool",
                 style={
                     "textAlign": "center",
-                }),
+                },
+            ),
             get_top_row_components(),
             get_cytoscape_graph(),
             get_bottom_panel_components(),
@@ -48,7 +49,8 @@ def get_layout():
                         dbc.Button(
                             "Close",
                             id="collapse-error-modal-close",
-                            className="ml-auto"),
+                            className="ml-auto",
+                        ),
                     ),
                 ],
                 id="collapse-error-modal",
@@ -88,7 +90,8 @@ def get_signals():
         html.Div(
             id=signal_id,
             style={"display": "none"},
-        ) for signal_id in signal_ids
+        )
+        for signal_id in signal_ids
     ]
 
     return html.Div(id="signal-wrapper-div", children=signals)
@@ -102,8 +105,8 @@ def get_top_row_components():
                     children=[
                         dbc.Col(
                             dbc.Button(
-                                id="refresh-sli-button",
-                                children="Refresh SLIs"),
+                                id="refresh-sli-button", children="Refresh SLIs"
+                            ),
                         ),
                         dbc.Col(
                             children=[
@@ -114,23 +117,26 @@ def get_top_row_components():
                                                 dbc.Input(
                                                     id="virtual-node-input",
                                                     type="text",
-                                                    placeholder=
-                                                    "Virtual Node Name"),
+                                                    placeholder="Virtual Node Name",
+                                                ),
                                             ],
                                             className="mr-3",
                                         ),
                                         dbc.Button(
-                                            id="add-virtual-node-button",
-                                            children="Add"),
+                                            id="add-virtual-node-button", children="Add"
+                                        ),
                                         dbc.Button(
                                             id="delete-virtual-node-button",
-                                            children="Delete"),
+                                            children="Delete",
+                                        ),
                                         dbc.Button(
                                             id="collapse-virtual-node-button",
-                                            children="Collapse"),
+                                            children="Collapse",
+                                        ),
                                         dbc.Button(
                                             id="expand-virtual-node-button",
-                                            children="Expand"),
+                                            children="Expand",
+                                        ),
                                     ],
                                     inline=False,
                                 ),
@@ -156,7 +162,7 @@ def get_cytoscape_graph():
             "height": constants.GRAPH_HEIGHT,
             "backgroundColor": constants.GRAPH_BACKGROUND_COLOR,
         },
-        #stylesheet=*constants.DEF
+        # stylesheet=*constants.DEF
     )
 
 
@@ -178,7 +184,7 @@ def get_bottom_panel_components():
                                 html.Div(
                                     id="style-panel",
                                     children=get_create_style_components(),
-                                )
+                                ),
                             ],
                         ),
                         dbc.Col(
@@ -200,7 +206,8 @@ def get_bottom_panel_components():
                                 html.Div(
                                     id="user-journey-info-panel",
                                 ),
-                            ]),
+                            ]
+                        ),
                     ],
                 ),
                 fluid=True,
@@ -254,7 +261,8 @@ def get_node_info_panel_components(node_name):
             converters.datatable_from_nodes(
                 child_nodes,
                 use_relative_names=True,
-                table_id=constants.CHILD_DATATABLE_ID)
+                table_id=constants.CHILD_DATATABLE_ID,
+            ),
         ]
 
     # Although we generally prefer "asking forgiveness rather than permission" (try/except) rather than
@@ -263,8 +271,8 @@ def get_node_info_panel_components(node_name):
         sli_info = [
             html.H3("SLI Info"),
             converters.datatable_from_slis(
-                node.slis,  # type: ignore
-                table_id=constants.SLI_DATATABLE_ID)
+                node.slis, table_id=constants.SLI_DATATABLE_ID  # type: ignore
+            ),
         ]
 
     if not is_virtual_node and node.dependencies:  # type: ignore
@@ -277,18 +285,24 @@ def get_node_info_panel_components(node_name):
             converters.datatable_from_nodes(
                 dependency_nodes,
                 use_relative_names=False,
-                table_id=constants.DEPENDENCY_DATATABLE_ID)
+                table_id=constants.DEPENDENCY_DATATABLE_ID,
+            ),
         ]
 
     comment_components = get_comment_components(initial_value=node.comment)
 
     return (
-        [header] + status_override_components + sli_info + child_info +
-        dependency_info + comment_components)
+        [header]
+        + status_override_components
+        + sli_info
+        + child_info
+        + dependency_info
+        + comment_components
+    )
 
 
 def get_comment_components(initial_value=""):
-    """ Generates a list of components for use in comment related interactions. 
+    """Generates a list of components for use in comment related interactions.
 
     We let the id fields be dictionaries here, to prevent Dash errors
     when registering callbacks to dynamically created components.
@@ -328,10 +342,7 @@ def get_comment_components(initial_value=""):
             children="Save Comment",
         ),
         dbc.Button(
-            id={
-                "discard-comment-textarea-button":
-                    "discard-comment-textarea-button"
-            },
+            id={"discard-comment-textarea-button": "discard-comment-textarea-button"},
             children="Discard Comment Changes",
         ),
         dbc.Toast(
@@ -360,10 +371,9 @@ def get_apply_tag_components(ujt_id):
                         children=dcc.Dropdown(
                             id={
                                 "apply-tag-dropdown": "apply-tag-dropdown",
-                                "index": idx
+                                "index": idx,
                             },
-                            options=converters.tag_dropdown_options_from_tags(
-                                tag_list),
+                            options=converters.tag_dropdown_options_from_tags(tag_list),
                             value=tag,
                         ),
                         width=10,
@@ -373,10 +383,8 @@ def get_apply_tag_components(ujt_id):
                         children=dbc.Button(
                             children="x",
                             id={
-                                "remove-applied-tag-button":
-                                    "remove-applied-tag-button",
-                                "index":
-                                    idx
+                                "remove-applied-tag-button": "remove-applied-tag-button",
+                                "index": idx,
                             },
                         ),
                         width="auto",
@@ -400,7 +408,8 @@ def get_apply_tag_components(ujt_id):
             ),
         ],
         no_gutters=True,
-        justify="end")
+        justify="end",
+    )
 
     # This is a pretty bad hack.
     # The update_graph_elements callback is called (via pattern matching)
@@ -440,7 +449,7 @@ def get_create_tag_components():
                             value=tag,
                         ),
                         width=9,
-                        className="m-1", # margin around all sides https://getbootstrap.com/docs/4.0/utilities/spacing/
+                        className="m-1",  # margin around all sides https://getbootstrap.com/docs/4.0/utilities/spacing/
                     ),
                     dbc.Col(
                         children=dbc.Button(
@@ -506,12 +515,8 @@ def get_view_components():
                 children=[
                     dbc.Col(
                         children=dcc.Dropdown(
-                            id={
-                                "view-tag-dropdown": "view-tag-dropdown",
-                                "index": idx
-                            },
-                            options=converters.tag_dropdown_options_from_tags(
-                                tag_list),
+                            id={"view-tag-dropdown": "view-tag-dropdown", "index": idx},
+                            options=converters.tag_dropdown_options_from_tags(tag_list),
                             value=view_tuple[0],
                         ),
                         width=5,
@@ -521,10 +526,11 @@ def get_view_components():
                         children=dcc.Dropdown(
                             id={
                                 "view-style-dropdown": "view-style-dropdown",
-                                "index": idx
+                                "index": idx,
                             },
                             options=converters.style_dropdown_options_from_styles(
-                                style_map),
+                                style_map
+                            ),
                             value=view_tuple[1],
                         ),
                         width=5,
@@ -533,7 +539,10 @@ def get_view_components():
                     dbc.Col(
                         children=dbc.Button(
                             children="x",
-                            id={"delete-view-button": "delete-view-button", "index": idx},
+                            id={
+                                "delete-view-button": "delete-view-button",
+                                "index": idx,
+                            },
                         ),
                         width="auto",
                         className=constants.BOOTSTRAP_BUTTON_COLUMN_CLASSES,

@@ -16,8 +16,8 @@ WARN_COLOR = "orange"
 ERROR_COLOR = "red"
 HIGHLIGHTED_UJ_EDGE_COLOR = "purple"
 
-COMPOUND_BACKGROUND_BLACKEN_FACTOR = -.5
-VIRTUAL_BACKGROUND_BLACKEN_FACTOR = -.8
+COMPOUND_BACKGROUND_BLACKEN_FACTOR = -0.5
+VIRTUAL_BACKGROUND_BLACKEN_FACTOR = -0.8
 SELECTED_NODE_BORDER_WIDTH = 1
 SELECTED_NODE_BORDER_COLOR = "black"
 
@@ -33,17 +33,15 @@ DEPENDENCY_DATATABLE_ID = "datatable-dependency-nodes"
 BOOTSTRAP_BUTTON_COLUMN_CLASSES = "m-1 d-flex justify-content-center"
 
 DEFAULT_STYLE_MAP = {
-    NodeType.Name(NodeType.NODETYPE_SERVICE):
-        {
-            "shape": "rectangle",
-            "background-blacken": COMPOUND_BACKGROUND_BLACKEN_FACTOR,
-        },
-    NodeType.Name(NodeType.NODETYPE_VIRTUAL):
-        {
-            "border-style": "dashed",
-            "shape": "octagon",
-            "background-blacken": VIRTUAL_BACKGROUND_BLACKEN_FACTOR,
-        },
+    NodeType.Name(NodeType.NODETYPE_SERVICE): {
+        "shape": "rectangle",
+        "background-blacken": COMPOUND_BACKGROUND_BLACKEN_FACTOR,
+    },
+    NodeType.Name(NodeType.NODETYPE_VIRTUAL): {
+        "border-style": "dashed",
+        "shape": "octagon",
+        "background-blacken": VIRTUAL_BACKGROUND_BLACKEN_FACTOR,
+    },
     Status.Name(Status.STATUS_HEALTHY): {
         "background-color": HEALTHY_COLOR,
     },
@@ -67,47 +65,36 @@ BASE_CYTO_STYLESHEET = [
         "selector": "node",
         "style": {
             "content": "data(label)",
-        }
+        },
     },
     {
         "selector": "edge",
-        "style":
-            {
-                "curve-style": "straight",
-                "target-arrow-shape": "triangle",
-                "arrow-scale": 2,
-            }
+        "style": {
+            "curve-style": "straight",
+            "target-arrow-shape": "triangle",
+            "arrow-scale": 2,
+        },
     },
     {
         "selector": ":selected",
-        "style":
-            {
-                "border-width": SELECTED_NODE_BORDER_WIDTH,
-                "border-color": SELECTED_NODE_BORDER_COLOR,
-            }
+        "style": {
+            "border-width": SELECTED_NODE_BORDER_WIDTH,
+            "border-color": SELECTED_NODE_BORDER_COLOR,
+        },
     },
 ]
 
 DATATABLE_CONDITIONAL_STYLE = [
     {
-        "if": {
-            "column_id": "Status",
-            "filter_query": "{Status} = HEALTHY"
-        },
+        "if": {"column_id": "Status", "filter_query": "{Status} = HEALTHY"},
         "color": HEALTHY_COLOR,
     },
     {
-        "if": {
-            "column_id": "Status",
-            "filter_query": "{Status} = WARN"
-        },
+        "if": {"column_id": "Status", "filter_query": "{Status} = WARN"},
         "color": WARN_COLOR,
     },
     {
-        "if": {
-            "column_id": "Status",
-            "filter_query": "{Status} = ERROR"
-        },
+        "if": {"column_id": "Status", "filter_query": "{Status} = ERROR"},
         "color": ERROR_COLOR,
-    }
+    },
 ]

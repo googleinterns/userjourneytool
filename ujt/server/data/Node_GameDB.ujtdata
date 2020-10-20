@@ -1,0 +1,12 @@
+node_type: NODETYPE_SERVICE
+name: "GameDB"
+child_names: "GameDB.ReadHighScore"
+child_names: "GameDB.WriteHighScore"
+slis {
+  node_name: "GameDB"
+  sli_value: 0.5574785443876733
+  slo_error_upper_bound: 0.9
+  slo_error_lower_bound: 0.1
+  slo_warn_upper_bound: 0.8
+  slo_warn_lower_bound: 0.2
+}

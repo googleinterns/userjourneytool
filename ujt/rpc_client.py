@@ -13,8 +13,9 @@ import server_pb2
 import server_pb2_grpc
 
 if TYPE_CHECKING:
-    from graph_structures_pb2 import \
-        StatusValue  # pylint: disable=no-name-in-module  # pragma: no cover
+    from graph_structures_pb2 import (
+        StatusValue,  # pylint: disable=no-name-in-module  # pragma: no cover
+    )
 
 # Let's hardcode this for now... later can move into cfg file. Doesn't really fit in constants file
 # Not sure how to provide it as a cmd line argument from ujt module.
