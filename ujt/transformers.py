@@ -34,8 +34,10 @@ def apply_node_classes(
 
         if element_ujt_id in node_name_message_map:
             node = node_name_message_map[element_ujt_id]
-        else:  # element_ujt_id in virtual_node_map
+        elif element_ujt_id in virtual_node_map:
             node = virtual_node_map[element_ujt_id]
+        else:
+            raise ValueError
 
         class_list = [NodeType.Name(node.node_type)]
         if node.override_status != Status.STATUS_UNSPECIFIED:
@@ -44,11 +46,29 @@ def apply_node_classes(
                 constants.OVERRIDE_CLASS
             ]
         else:
-            class_list += [Status.Name(node.status)]
+            class_list.append(Status.Name(node.status))
 
         element["classes"] = " ".join(class_list)
 
     # no return since we directly mutated elements
+
+
+def apply_views(elements, tag_map, view_list):
+    for element in elements:
+        element_ujt_id = element["data"]["ujt_id"]
+        class_list = []
+        if element_ujt_id in tag_map:
+            tags = tag_map[element_ujt_id]
+            # The following is an O(len(tags) * len(view_list)) operation.
+            # Should be okay if these are small lists. We're limited to using lists over dicts or sets
+            # since we need to keep a consistent order in the UI.
+            # Of course, we could do some preprocessing here to convert them to intermediate dicts.
+            # Let's make that optimization later if this turns out to be excessively slow.
+            for tag in tags:
+                for view_tag, view_style_name in view_list:
+                    if tag == view_tag and tag != "":
+                        class_list.append(view_style_name)
+        element["classes"] += f" {' '.join(class_list)}"
 
 
 def apply_highlighted_edge_class_to_elements(elements, user_journey_name):

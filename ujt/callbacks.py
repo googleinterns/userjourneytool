@@ -57,6 +57,8 @@ from .dash_app import app
               "n_clicks_timestamp"),
         Input({"override-dropdown": ALL},
               "value"),
+        Input("composite-tagging-update-signal",
+              "children")
     ],
     [
         State("cytoscape-graph",
@@ -77,6 +79,7 @@ def update_graph_elements(
         collapse_n_clicks_timestamp: int,
         expand_n_clicks_timestamp: int,
         override_dropdown_value: int,
+        composite_tagging_update_signal: str,
         # State
         state_elements: List[Dict[str,
                                   Any]],
@@ -116,9 +119,7 @@ def update_graph_elements(
 
     ctx = dash.callback_context
     triggered_id, triggered_prop, triggered_value = utils.ctx_triggered_info(ctx)
-    #print(ctx.triggered)
-    #print(triggered_id, triggered_prop, triggered_value)  # for debugging...
-    print("updating elements")
+    #print("updating elements:", ctx.triggered)  # for debugging
     if (triggered_id == "virtual-node-update-signal" and
             triggered_value != constants.OK_SIGNAL) or (
                 triggered_id
@@ -211,7 +212,15 @@ def update_graph_elements(
         client_name_message_map,
         virtual_node_map,
     )
-    #print(elements)
+
+    tag_map = state.get_tag_map()
+    view_list = state.get_view_list()
+    transformers.apply_views(
+        elements,
+        tag_map,
+        view_list,
+    )
+    #print(elements)  # for debugging
 
     # Determine if we need to generate a new UUID. This minimizes the choppyness of the animation.
     if triggered_id in [None, "virtual-node-update-signal"]:
@@ -355,6 +364,17 @@ def generate_user_journey_info_panel(dropdown_value: str) -> List[Any]:
            "children")],
 )
 def update_user_journey_dropdown_options(virtual_node_update_signal):
+    """ Updates the options in the user journey dropdown on virtual node changes.
+
+    This function is called:
+        when a virtual node is created or deleted.
+
+    Args:
+        virtual_node_update_signal: Signal indicating a virtual node was modified.
+
+    Returns:
+        A list of options for the user journey dropdown.
+    """
     node_name_message_map, client_name_message_map = state.get_message_maps()
     virtual_node_map = state.get_virtual_node_map()
 
@@ -579,6 +599,8 @@ def save_comment(save_n_clicks_timestamp, tap_node, new_comment):
 
 #endregion
 
+#region tagging feature
+
 
 #region tag creation panel
 @app.callback(
@@ -738,9 +760,6 @@ def generate_tag_update_signal(
         create_tag_signal,
         delete_tag_signal,
         save_tag_signal):
-    print(
-        "generating tag update signal with ctx",
-        dash.callback_context.triggered)
     return constants.OK_SIGNAL
 
 
@@ -859,7 +878,7 @@ def remove_applied_tag(
 
     ctx = dash.callback_context
     triggered_id, triggered_prop, triggered_value = utils.ctx_triggered_info(ctx)
-    print("adding applied tag with ctx", ctx.triggered)
+
     # When the button is initially added, it fires a callback.
     # We want to prevent this callback from making changes to the update signal.
     if triggered_value is None:
@@ -947,7 +966,6 @@ def generate_applied_tag_update_signal(
         add_applied_tag_signal,
         remove_applied_tag_signal,
         modify_applied_tag_signal):
-    print("apply tag update signal fired")
     return constants.OK_SIGNAL
 
 
@@ -1113,19 +1131,23 @@ def generate_view_update_signal(
         Input("delete-view-signal",
               "children"),
         Input("tag-update-signal",
-              "children")
+              "children"),
+        Input("style-update-signal",
+              "children"),
     ],
 )
 def generate_view_panel(
         create_view_signal,
         delete_view_signal,
-        tag_update_signal):
+        tag_update_signal,
+        style_update_signal):
     """ Handles generating the view creation and deletion panel.
 
     This function is called:
         when a new view is created.
         when a view is deleted.
         when a tag is updated.
+        when a style is updated
 
     Args:
         create_view_signal: Signal indicating that a view was created.
@@ -1134,7 +1156,8 @@ def generate_view_panel(
             Value unused, input only provided to register callback.
         tag_update_signal: Signal indicating that a tag was updated.
             Value unused, input only provided to register callback.
-        
+        style_update_signal: Signal indicating that a style was updated.
+            Value unused, input only provided to register callback.
 
     Returns:
         A list of components to be placed in the view-panel.
@@ -1152,16 +1175,23 @@ def generate_view_panel(
     Input("style-update-signal",
           "children"),
 )
-def update_cytoscape_stylesheet(style_map_update_signal):
-    print(
-        "updating cytoscape stylesheet with ctx",
-        dash.callback_context.triggered)
+def update_cytoscape_stylesheet(style_update_signal):
+    """ Updates the cytoscape stylesheet.
+
+    This function is called:
+        when a style is updated.
+
+    Args:
+        style_update_signal: Signal indicating a style was updated.
+
+    Returns:
+        A dictionary encoding a cytoscape format stylesheet.
+    """
     style_map = state.get_style_map()
     stylesheet = [
         *constants.BASE_CYTO_STYLESHEET,
         *converters.cytoscape_stylesheet_from_style_map(style_map)
     ]
-    #print(stylesheet)
     return stylesheet
 
 
@@ -1205,7 +1235,9 @@ def save_style(save_n_clicks_timestamps, style_name, style_str):
             A message to be placed in the header of the toast.
             A string to determine the toast icon.
     """
-    print(dash.callback_context.triggered)
+
+    if " " in style_name:
+        return True, "Style name cannot contain spaces!", "danger", dash.no_update
 
     try:
         style_dict = utils.string_to_dict(style_str)
@@ -1213,7 +1245,7 @@ def save_style(save_n_clicks_timestamps, style_name, style_str):
         return True, "Error decoding string into valid Cytoscape style format!", "danger", dash.no_update
 
     state.update_style(style_name, style_dict)
-    return True, "Successfull saved style!", "success", constants.OK_SIGNAL
+    return True, "Successfully saved style!", "success", constants.OK_SIGNAL
 
 
 @app.callback(
@@ -1324,6 +1356,32 @@ def generate_style_update_signal(save_style_signal, delete_style_signal):
     Returns:
         The updated value of the style-update-signal
     """
+    return constants.OK_SIGNAL
+
+
+#endregion
+
+
+@app.callback(
+    Output("composite-tagging-update-signal",
+           "children"),
+    [
+        Input("tag-update-signal",
+              "children"),
+        Input("applied-tag-update-signal",
+              "children"),
+        Input("view-update-signal",
+              "children"),
+        Input("style-update-signal",
+              "children"),
+    ],
+    prevent_initial_call=True,
+)
+def generate_composite_tagging_update_signal(
+        tag_update_signal,
+        applied_tag_update_signal,
+        view_update_signal,
+        style_update_signal):
     return constants.OK_SIGNAL
 
 

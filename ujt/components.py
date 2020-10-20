@@ -80,6 +80,8 @@ def get_signals():
         "save-style-signal",
         "delete-style-signal",
         "style-update-signal",
+        # ---
+        "composite-tagging-update-signal",
     ]
 
     signals = [
@@ -565,6 +567,11 @@ def get_view_components():
 def get_create_style_components():
     style_components = [
         html.H3("Styles"),
+        html.A(
+            children="Style Reference",
+            href="https://js.cytoscape.org/#style",
+            target="_blank",
+        ),
         dbc.Input(
             id="style-name-input",
             type="text",

@@ -361,7 +361,7 @@ def set_node_override_status(
     cache.set("override_status_map", override_status_map)
 
 
-#@cache.memoize()  # this is commented out for consistent testing
+#@cache.memoize()  # this is commented out for consistent testing # DEBUG_REMOVE
 def get_node_to_user_journey_map() -> Dict[str, List[UserJourney]]:
     # map the node name to user journey names that pass through the node
     # should this be in state? it's memoized but doesn't really affect state
@@ -425,16 +425,20 @@ def set_tag_list(tag_list):
 
 def create_tag(new_tag):
     tag_list = get_tag_list()
-    if " " in new_tag:  # where should validation be done? in the callback or here?
-        raise ValueError("Tags cannot contain spaces!")
     tag_list.append(new_tag)
     set_tag_list(tag_list)
 
 
 def delete_tag(tag_index):
     tag_list = get_tag_list()
+
+    tag_value = tag_list[tag_index]
+    tag_map = get_tag_map()
+    for ujt_id in tag_map:
+        tag_map[ujt_id] = [tag for tag in tag_map[ujt_id] if tag != tag_value]
+    set_tag_map(tag_map)
+
     del tag_list[tag_index]
-    # TODO: delete this tag from the tag map
     set_tag_list(tag_list)
 
 
@@ -514,12 +518,25 @@ def set_style_map(style_map):
 
 def update_style(style_name: str, style_dict: Dict[str, str]):
     style_map = get_style_map()
+
+    if " " in style_name:  # where should validation be done? in the callback or here?
+        raise ValueError("Styles cannot contain spaces!")
+
     style_map[style_name] = style_dict
     set_style_map(style_map)
 
 
 def delete_style(style_name: str):
     style_map = get_style_map()
+
+    view_list = get_view_list()
+    view_list = [
+        [view_tag,
+         view_style_name] for view_tag,
+        view_style_name in view_list if view_style_name != style_name
+    ]
+    set_view_list(view_list)
+
     del style_map[style_name]
     set_style_map(style_map)
 
