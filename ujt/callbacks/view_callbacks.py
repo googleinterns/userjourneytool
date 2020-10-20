@@ -72,6 +72,9 @@ def update_view_store(
     Moreover, it's relatively clean.
 
     However, the complexity would probably increase dramatically in the apply tag callbacks case.
+    We also lose the granularity of output signals. (In theory, we could assign different values to the output
+    signal, but each callback that registers the signal would have to check the signal value.)
+    
     I think we can just accept this inconsistency in the view case and leave the other callbacks as-is.
 
     This function is called:
