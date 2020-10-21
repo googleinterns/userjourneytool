@@ -1,7 +1,15 @@
 from unittest.mock import MagicMock, Mock, call, patch, sentinel
 
 import pytest
-from graph_structures_pb2 import SLI, Client, Dependency, Node, NodeType, UserJourney
+from graph_structures_pb2 import (
+    SLI,
+    Client,
+    Dependency,
+    Node,
+    NodeType,
+    SLIType,
+    UserJourney,
+)
 
 import ujt.server.generate_data
 
@@ -70,6 +78,8 @@ def test_generate_nodes_functional(patch_path, assert_same_elements):
                 SLI(
                     node_name=service_relative_names[0],
                     sli_value=0.5,
+                    slo_target=ujt.server.generate_data.SLO_TARGET,
+                    sli_type=SLIType.SLITYPE_AVAILABILITY,
                     **ujt.server.generate_data.SLO_BOUNDS,
                 ),
             ],
@@ -82,6 +92,8 @@ def test_generate_nodes_functional(patch_path, assert_same_elements):
                 SLI(
                     node_name=service_relative_names[1],
                     sli_value=0.5,
+                    slo_target=ujt.server.generate_data.SLO_TARGET,
+                    sli_type=SLIType.SLITYPE_AVAILABILITY,
                     **ujt.server.generate_data.SLO_BOUNDS,
                 ),
             ],
@@ -104,6 +116,8 @@ def test_generate_nodes_functional(patch_path, assert_same_elements):
                 SLI(
                     node_name=f"{service_relative_names[0]}.{endpoint_relative_names[0]}",
                     sli_value=0.5,
+                    slo_target=ujt.server.generate_data.SLO_TARGET,
+                    sli_type=SLIType.SLITYPE_LATENCY,
                     **ujt.server.generate_data.SLO_BOUNDS,
                 ),
             ],
@@ -122,6 +136,8 @@ def test_generate_nodes_functional(patch_path, assert_same_elements):
                 SLI(
                     node_name=f"{service_relative_names[0]}.{endpoint_relative_names[1]}",
                     sli_value=0.5,
+                    slo_target=ujt.server.generate_data.SLO_TARGET,
+                    sli_type=SLIType.SLITYPE_LATENCY,
                     **ujt.server.generate_data.SLO_BOUNDS,
                 ),
             ],
@@ -134,6 +150,8 @@ def test_generate_nodes_functional(patch_path, assert_same_elements):
                 SLI(
                     node_name=f"{service_relative_names[1]}.{endpoint_relative_names[2]}",
                     sli_value=0.5,
+                    slo_target=ujt.server.generate_data.SLO_TARGET,
+                    sli_type=SLIType.SLITYPE_LATENCY,
                     **ujt.server.generate_data.SLO_BOUNDS,
                 ),
             ],

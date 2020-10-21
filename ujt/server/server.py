@@ -4,7 +4,7 @@ import datetime as dt
 import pathlib
 import random
 from concurrent import futures
-from typing import List, Dict, Optional, TYPE_CHECKING
+from typing import TYPE_CHECKING, Dict, List
 
 import grpc
 import server_pb2
@@ -18,6 +18,7 @@ if TYPE_CHECKING:
     from graph_structures_pb2 import (
         SLITypeValue,  # pylint: disable=no-name-in-module  # pragma: no cover
     )
+
 
 def read_local_data():
     """ Read and return protos from values in data directory. """
@@ -33,11 +34,13 @@ def read_local_data():
 
     return node_map, client_map
 
+
 def node_contains_sli_type(node: Node, sli_type: "SLITypeValue"):
     for sli in node.slis:
         if sli.sli_type == sli_type:
             return True
     return False
+
 
 def generate_new_random_slis(
     node_map: Dict[str, Node],
@@ -61,6 +64,7 @@ def generate_new_random_slis(
                 slis.append(sli)
 
     return slis
+
 
 class ReportingServiceServicer(server_pb2_grpc.ReportingServiceServicer):
     """Provides methods that implement functionality of Reporting Service."""
@@ -97,17 +101,24 @@ class ReportingServiceServicer(server_pb2_grpc.ReportingServiceServicer):
             else current_timestamp.ToDatetime()
         )
 
+        if end_dt > start_dt:
+            context.abort(
+                grpc.StatusCode.INVALID_ARGUMENT,
+                "End time must not be later than start time!",
+            )
+
         requested_node_names = (
-            request.node_names
-            if request.node_names != []
-            else self.node_map.keys()
+            request.node_names if request.node_names != [] else self.node_map.keys()
         )
 
         requested_sli_types = (
             request.sli_types
             if request.sli_types != []
             # get all SLI types if sli_types was empty in request message
-            else [value_descriptor.number for value_descriptor in SLIType.DESCRIPTOR.values]
+            else [
+                value_descriptor.number
+                for value_descriptor in SLIType.DESCRIPTOR.values
+            ]
         )
 
         slis_output = []
@@ -115,20 +126,21 @@ class ReportingServiceServicer(server_pb2_grpc.ReportingServiceServicer):
         # In this implementation, the timestamps are inclusive since we generate new SLIs
         # However, this is not inherent to the proto semantics
         while start_dt <= end_dt:
-            slis_at_timestamp = generate_new_random_slis(self.node_map, requested_node_names, start_dt, requested_sli_types)
+            slis_at_timestamp = generate_new_random_slis(
+                self.node_map, requested_node_names, start_dt, requested_sli_types
+            )
             slis_output += slis_at_timestamp
             start_dt += dt.timedelta(seconds=self.reporting_interval)
 
         # Can we improve this logic? Doesn't seem very elegant.
-        if slis_at_timestamp != []:
-            this_last_reported_timestamp = slis_at_timestamp[0].timestamp.ToDatetime()
-            if this_last_reported_timestamp > self.last_reported_timestamp:
-                self.last_reported_timestamp = this_last_reported_timestamp
-                # Update the server's internal Node state
-                sli_name_map = {sli.node_name: sli for sli in slis_at_timestamp}
-                for node_name, node in self.node_map:
-                    del node.slis[:]
-                    node.slis.extend([sli_name_map[node.name]])
+        this_last_reported_timestamp = slis_at_timestamp[0].timestamp.ToDatetime()
+        if this_last_reported_timestamp > self.last_reported_timestamp:
+            self.last_reported_timestamp = this_last_reported_timestamp
+            # Update the server's internal Node state
+            sli_name_map = {sli.node_name: sli for sli in slis_at_timestamp}
+            for node_name, node in self.node_map:
+                del node.slis[:]
+                node.slis.extend([sli_name_map[node.name]])
 
         return server_pb2.GetSLIsResponse(slis=slis_output)
 
