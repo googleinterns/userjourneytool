@@ -5,7 +5,7 @@ import random
 from collections import defaultdict
 from typing import DefaultDict, Dict, List
 
-from graph_structures_pb2 import SLI, Client, Dependency, Node, NodeType, UserJourney
+from graph_structures_pb2 import SLI, Client, Dependency, Node, NodeType, UserJourney, SLIType
 
 from . import server_utils
 
@@ -93,6 +93,7 @@ SLO_BOUNDS = {
     "slo_warn_upper_bound": 0.8,
     "slo_error_upper_bound": 0.9,
 }
+SLO_TARGET = 0.5
 
 
 def generate_nodes():
@@ -112,7 +113,13 @@ def generate_nodes():
         ]
         service.child_names.extend(fully_qualified_endpoint_names)
         service.slis.extend(
-            [SLI(node_name=service_name, sli_value=random.random(), **SLO_BOUNDS)]
+            [SLI(
+                node_name=service_name, 
+                sli_value=random.random(), 
+                slo_target=SLO_TARGET,
+                sli_type=SLIType.SLITYPE_AVAILABILITY,
+                **SLO_BOUNDS,
+            )]
         )
         services.append(service)
 
@@ -129,7 +136,13 @@ def generate_nodes():
                 ]
             )
             endpoint.slis.extend(
-                [SLI(node_name=endpoint_name, sli_value=random.random(), **SLO_BOUNDS)]
+                [SLI(
+                    node_name=endpoint_name, 
+                    sli_value=random.random(), 
+                    slo_target=SLO_TARGET,
+                    sli_type=SLIType.SLITYPE_LATENCY,
+                    **SLO_BOUNDS,
+                )]
             )
             endpoints.append(endpoint)
 

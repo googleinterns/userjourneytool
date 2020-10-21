@@ -3,11 +3,12 @@ Not part of the UJT -- only used to test the server without
 having to run or setup the UJT to call the server.
 """
 
-import datetime
+import datetime as dt
 
 import grpc
 import server_pb2
 import server_pb2_grpc
+import graph_structures_pb2
 
 with grpc.insecure_channel("localhost:50051") as channel:  # pragma: no cover
     stub = server_pb2_grpc.ReportingServiceStub(channel)
@@ -24,16 +25,20 @@ with grpc.insecure_channel("localhost:50051") as channel:  # pragma: no cover
 
     print("---")
 
-    start_time = datetime.datetime.now() - datetime.timedelta(hours=1)
-    end_time = start_time + datetime.timedelta(seconds=10)
+    start_time = dt.datetime.now() - dt.timedelta(hours=1)
+    end_time = start_time + dt.timedelta(seconds=10)
     sli_request.start_time.FromDatetime(start_time)
     sli_request.end_time.FromDatetime(end_time)
 
     sli_response = stub.GetSLIs(sli_request)
     print(len(sli_response.slis))
-    print(sli_response.slis)
+    #print(sli_response.slis)
 
-    sli_request.node_names.extend(["ProfileDb.WriteFriendsList"])
+    sli_request.node_names.extend(["ProfileDB.WriteFriendsList"])
     sli_response = stub.GetSLIs(sli_request)
     print(len(sli_response.slis))
-    print(sli_response.slis)
+    #print(sli_response.slis)
+
+    sli_request.sli_types.extend([graph_structures_pb2.SLIType.SLITYPE_UNSPECIFIED])
+    sli_response = stub.GetSLIs(sli_request)
+    print(len(sli_response.slis))

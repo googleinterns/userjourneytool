@@ -1,19 +1,23 @@
 """Implementation of Reporting Server."""
 
-import datetime
+import datetime as dt
 import pathlib
 import random
 from concurrent import futures
-from typing import List
+from typing import List, Dict, Optional, TYPE_CHECKING
 
 import grpc
 import server_pb2
 import server_pb2_grpc
 from google.protobuf.timestamp_pb2 import Timestamp
-from graph_structures_pb2 import SLI, Client, Node
+from graph_structures_pb2 import SLI, Client, Node, SLIType
 
 from . import generate_data, server_utils
 
+if TYPE_CHECKING:
+    from graph_structures_pb2 import (
+        SLITypeValue,  # pylint: disable=no-name-in-module  # pragma: no cover
+    )
 
 def read_local_data():
     """ Read and return protos from values in data directory. """
@@ -24,39 +28,54 @@ def read_local_data():
     clients = [server_utils.read_proto_from_file(path, Client) for path in client_paths]
     nodes = [server_utils.read_proto_from_file(path, Node) for path in node_paths]
 
-    return nodes, clients
+    client_map = {client.name: client for client in clients}
+    node_map = {node.name: node for node in nodes}
 
+    return node_map, client_map
 
-def generate_new_random_slis(node_names: List[str], timestamp: datetime.datetime):
+def node_contains_sli_type(node: Node, sli_type: "SLITypeValue"):
+    for sli in node.slis:
+        if sli.sli_type == sli_type:
+            return True
+    return False
+
+def generate_new_random_slis(
+    node_map: Dict[str, Node],
+    node_names: List[str],
+    timestamp: dt.datetime,
+    sli_types: List["SLITypeValue"],
+):
     slis = []
     for node_name in node_names:
-        proto_timestamp = Timestamp()
-        proto_timestamp.FromDatetime(timestamp)
-        sli = SLI(
-            node_name=node_name,
-            sli_value=random.random(),
-            timestamp=proto_timestamp,
-            **generate_data.SLO_BOUNDS,  # type: ignore
-        )
-        slis.append(sli)
+        for sli_type in sli_types:
+            if node_contains_sli_type(node_map[node_name], sli_type):
+                sli = SLI(
+                    node_name=node_name,
+                    sli_value=random.random(),
+                    slo_target=generate_data.SLO_TARGET,
+                    sli_type=sli_type,
+                    **generate_data.SLO_BOUNDS,  # type: ignore
+                )
+                sli.timestamp.FromDatetime(timestamp)
+
+                slis.append(sli)
 
     return slis
-
 
 class ReportingServiceServicer(server_pb2_grpc.ReportingServiceServicer):
     """Provides methods that implement functionality of Reporting Service."""
 
-    def __init__(self, nodes, clients):
-        self.nodes: List[Node] = nodes
-        self.clients: List[Client] = clients
-        self.last_reported_timestamp: datetime.datetime = datetime.datetime.now()
+    def __init__(self, node_map, client_map):
+        self.node_map: Dict[str, Node] = node_map
+        self.client_map: Dict[str, Client] = client_map
+        self.last_reported_timestamp: dt.datetime = dt.datetime.now()
         self.reporting_interval: int = 5
 
     def GetNodes(self, request, context):
-        return server_pb2.GetNodesResponse(nodes=self.nodes)
+        return server_pb2.GetNodesResponse(nodes=self.node_map.values())
 
     def GetClients(self, request, context):
-        return server_pb2.GetClientsResponse(clients=self.clients)
+        return server_pb2.GetClientsResponse(clients=self.client_map.values())
 
     def GetSLIs(self, request, context):
         """Returns updated SLI values to clients.
@@ -81,16 +100,24 @@ class ReportingServiceServicer(server_pb2_grpc.ReportingServiceServicer):
         requested_node_names = (
             request.node_names
             if request.node_names != []
-            else [node.name for node in self.nodes]
+            else self.node_map.keys()
         )
+
+        requested_sli_types = (
+            request.sli_types
+            if request.sli_types != []
+            # get all SLI types if sli_types was empty in request message
+            else [value_descriptor.number for value_descriptor in SLIType.DESCRIPTOR.values]
+        )
+
         slis_output = []
         slis_at_timestamp = []
         # In this implementation, the timestamps are inclusive since we generate new SLIs
         # However, this is not inherent to the proto semantics
         while start_dt <= end_dt:
-            slis_at_timestamp = generate_new_random_slis(requested_node_names, start_dt)
+            slis_at_timestamp = generate_new_random_slis(self.node_map, requested_node_names, start_dt, requested_sli_types)
             slis_output += slis_at_timestamp
-            start_dt += datetime.timedelta(seconds=self.reporting_interval)
+            start_dt += dt.timedelta(seconds=self.reporting_interval)
 
         # Can we improve this logic? Doesn't seem very elegant.
         if slis_at_timestamp != []:
@@ -99,7 +126,7 @@ class ReportingServiceServicer(server_pb2_grpc.ReportingServiceServicer):
                 self.last_reported_timestamp = this_last_reported_timestamp
                 # Update the server's internal Node state
                 sli_name_map = {sli.node_name: sli for sli in slis_at_timestamp}
-                for node in self.nodes:
+                for node_name, node in self.node_map:
                     del node.slis[:]
                     node.slis.extend([sli_name_map[node.name]])
 
@@ -109,17 +136,17 @@ class ReportingServiceServicer(server_pb2_grpc.ReportingServiceServicer):
 def serve():
     server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
 
-    nodes, clients = read_local_data()
-    reporting_service_servicer = ReportingServiceServicer(nodes, clients)
+    node_map, client_map = read_local_data()
+    reporting_service_servicer = ReportingServiceServicer(node_map, client_map)
 
     server_pb2_grpc.add_ReportingServiceServicer_to_server(
         reporting_service_servicer, server
     )
     server.add_insecure_port("[::]:50051")
     server.start()
+    print("starting server!")
     server.wait_for_termination()
 
 
 if __name__ == "__main__":
-    print("starting server!")
     serve()

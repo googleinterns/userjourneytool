@@ -44,6 +44,7 @@ message SLI {
     optional string comment = 9;
 
     optional google.protobuf.Timestamp timestamp = 10;
+    optional double slo_target = 11;
 }
 
 message UserJourney {
