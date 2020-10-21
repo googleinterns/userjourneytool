@@ -54,7 +54,7 @@ def update_view_store(
     Notice that the style of this callback is different from the apply tag or create tag callbacks,
     even though they both handle the same type of UI elements (dynamically creating rows).
     This callback updates the VIEW_STORE by reading the current state of the rows of dropdown menus.
-    In turn, the generate_view_panel callback updates the dropdown menus based on the contents of the VIEW_STORE. 
+    In turn, the generate_view_panel callback updates the dropdown menus based on the contents of the VIEW_STORE.
 
     Views are written to the VIEW_STORE in order to make them local for each user.
     Thus, we must combine all the functionality into a single callback to write to the component.
@@ -62,19 +62,19 @@ def update_view_store(
     their respective data structure to the Dash server via the state module as a side effect.
 
     We could theoretically refactor the tag creation panel and tag application panel to be in this style.
-    It would probably be a little cleaner in the case of the tag creation panel, since the panel only 
-    changes in response to create or delete tag buttons. 
-    In contrast, the tag application panel changes based on any tag update, its own apply/remove buttons, and 
-    user interactions with the cytoscape graph. 
+    It would probably be a little cleaner in the case of the tag creation panel, since the panel only
+    changes in response to create or delete tag buttons.
+    In contrast, the tag application panel changes based on any tag update, its own apply/remove buttons, and
+    user interactions with the cytoscape graph.
 
     This style offers a more functional approach, so we can be a little more confident in the correctness of
-    the state of our data structures. 
+    the state of our data structures.
     Moreover, it's relatively clean.
 
     However, the complexity would probably increase dramatically in the apply tag callbacks case.
     We also lose the granularity of output signals. (In theory, we could assign different values to the output
     signal, but each callback that registers the signal would have to check the signal value.)
-    
+
     I think we can just accept this inconsistency in the view case and leave the other callbacks as-is.
 
     This function is called:

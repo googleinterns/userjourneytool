@@ -12,8 +12,9 @@ from graph_structures_pb2 import Client, Node, SLIType, Status, VirtualNode
 
 from . import constants, utils
 
-#region cytoscape
-#region elements
+
+# region cytoscape
+# region elements
 def cytoscape_elements_from_maps(
     node_name_message_map: Dict[str, Node], client_name_message_map: Dict[str, Client]
 ):
@@ -141,7 +142,10 @@ def cytoscape_elements_from_client_map(client_name_message_map: Dict[str, Client
                 edge_elements.append(cytoscape_element_from_dependency(dependency))
 
     return node_elements + edge_elements
-#endregion
+
+
+# endregion
+
 
 def cytoscape_stylesheet_from_style_map(style_map):
     return [
@@ -152,9 +156,10 @@ def cytoscape_stylesheet_from_style_map(style_map):
         for style_name, style_value in style_map.items()
     ]
 
-#endregion
 
-#region datatables
+# endregion
+
+# region datatables
 def datatable_from_nodes(nodes, use_relative_names, table_id):
     columns = [{"name": name, "id": name} for name in ["Node", "Status"]]
     data = [
@@ -226,10 +231,12 @@ def user_journey_datatable_from_user_journeys(user_journeys, table_id):
         row_selectable="single",
         style_data_conditional=constants.DATATABLE_CONDITIONAL_STYLE,
     )
-#endregion
 
 
-#region dropdowns
+# endregion
+
+
+# region dropdowns
 def dropdown_options_from_maps(
     node_name_message_map: Dict[str, Node],
     client_name_message_map: Dict[str, Client],
@@ -295,6 +302,7 @@ def style_dropdown_options_from_style_names(style_names):
         for style in style_names
     ]
 
+
 def timestamped_tag_dropdown_options_from_tags(tags):
     return [
         {
@@ -305,8 +313,9 @@ def timestamped_tag_dropdown_options_from_tags(tags):
         if "@" in tag
     ]
 
+
 def sli_type_dropdown_options():
-    # This is really constant, but feels like it should be placed 
+    # This is really constant, but feels like it should be placed
     # in converters...
     return [
         {
@@ -315,4 +324,6 @@ def sli_type_dropdown_options():
         }
         for value_descriptor in SLIType.DESCRIPTOR.values
     ]
-#endregion
+
+
+# endregion

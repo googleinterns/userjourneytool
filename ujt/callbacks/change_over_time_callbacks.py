@@ -1,10 +1,8 @@
-import dash
-from dash.dependencies import ALL, Input, Output, State
-from dash.exceptions import PreventUpdate
-import dash_html_components as html
 import dash_bootstrap_components as dbc
+import dash_html_components as html
+from dash.dependencies import Input, Output
 
-from .. import constants, converters, id_constants, state, utils
+from .. import constants, id_constants
 from ..dash_app import app
 
 
@@ -27,7 +25,7 @@ def update_time_select_panel(tag):
     other parts of our application.
 
     This function is called:
-        when the CHANGE_OVER_TIME_TAG_DROPDOWN value is updated 
+        when the CHANGE_OVER_TIME_TAG_DROPDOWN value is updated
 
     Args:
         tag: Dropdown value in the CHANGE_OVER_TIME_TAG_DROPDOWN.

@@ -142,7 +142,7 @@ STYLE_MAP = "style_map"
 VIEW_LIST = "view_list"
 # endregion
 
-#region change over time
+# region change over time
 CHANGE_OVER_TIME_PANEL = "change-over-time-panel"
 CHANGE_OVER_TIME_SLI_TYPE_DROPDOWN = "change-over-time-sli-type-dropdown"
 CHANGE_OVER_TIME_TAG_DROPDOWN = "change-over-time-tag-dropdown"
@@ -152,4 +152,4 @@ CHANGE_OVER_TIME_QUERY_BUTTON = "change-over-time-query-button"
 START_TIME_INPUT = "start-time-input"
 END_TIME_INPUT = "end-time-input"
 WINDOW_SIZE_INPUT = "window-size-input"
-#endregion
+# endregion

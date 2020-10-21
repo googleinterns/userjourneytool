@@ -222,7 +222,7 @@ def get_bottom_panel_components():
                                 html.Div(
                                     id=id_constants.CHANGE_OVER_TIME_PANEL,
                                     children=get_change_over_time_components(),
-                                )
+                                ),
                             ]
                         ),
                     ],
@@ -645,11 +645,11 @@ def get_change_over_time_components():
         dbc.Button(
             id=id_constants.CHANGE_OVER_TIME_QUERY_BUTTON,
             children="Query",
-            # This method to align the button to the right isn't consistent with 
+            # This method to align the button to the right isn't consistent with
             # the method used in the other panels for the tag feature using bootstrap tables.
             # It's a bit excessive and inconvenient to create an entire bootstrap table just to align
             # this one button.
-            style={ "float": "right" },
+            style={"float": "right"},
         ),
     ]
     return components
