@@ -15,7 +15,7 @@ def patch_path():
     return "ujt.transformers"
 
 
-def test_apply_node_classes(assert_same_elements):
+def test_apply_node_property_classes(assert_same_elements):
     node_name = "node"
     node_name_message_map = {
         node_name: Node(
@@ -78,7 +78,7 @@ def test_apply_node_classes(assert_same_elements):
         },
     ]
 
-    ujt.transformers.apply_node_classes(
+    ujt.transformers.apply_node_property_classes(
         elements,
         node_name_message_map,
         client_name_message_map,
@@ -239,7 +239,6 @@ def test_apply_virtual_nodes_to_elements(patch_path, assert_same_elements):
                 "id": virtual_node_names[0],
                 "ujt_id": virtual_node_names[0],
             },
-            "classes": "NODETYPE_VIRTUAL STATUS_UNSPECIFIED",
         },
         {
             "data": {
@@ -247,7 +246,6 @@ def test_apply_virtual_nodes_to_elements(patch_path, assert_same_elements):
                 "id": virtual_node_names[1],
                 "ujt_id": virtual_node_names[1],
             },
-            "classes": "NODETYPE_VIRTUAL STATUS_UNSPECIFIED",
         },
     ]
 
@@ -260,7 +258,8 @@ def test_apply_virtual_nodes_to_elements(patch_path, assert_same_elements):
         returned_elements = ujt.transformers.apply_virtual_nodes_to_elements(
             node_elements + edge_elements
         )
-
+        print(len(returned_elements))
+        print(len(expected_elements))
         assert_same_elements(returned_elements, expected_elements)
 
 

@@ -161,6 +161,7 @@ def example_node_elements_from_node_map(
                 "label": service_relative_names[0],
                 "ujt_id": service_relative_names[0],
             },
+            "classes": "",
         },
         {
             "data": {
@@ -168,6 +169,7 @@ def example_node_elements_from_node_map(
                 "label": service_relative_names[1],
                 "ujt_id": service_relative_names[1],
             },
+            "classes": "",
         },
         {
             "data": {
@@ -176,6 +178,7 @@ def example_node_elements_from_node_map(
                 "parent": service_relative_names[0],
                 "ujt_id": f"{service_relative_names[0]}.{endpoint_relative_names[0]}",
             },
+            "classes": "",
         },
         {
             "data": {
@@ -184,6 +187,7 @@ def example_node_elements_from_node_map(
                 "parent": service_relative_names[0],
                 "ujt_id": f"{service_relative_names[0]}.{endpoint_relative_names[1]}",
             },
+            "classes": "",
         },
         {
             "data": {
@@ -192,6 +196,7 @@ def example_node_elements_from_node_map(
                 "parent": service_relative_names[1],
                 "ujt_id": f"{service_relative_names[1]}.{endpoint_relative_names[2]}",
             },
+            "classes": "",
         },
     ]
     return expected_node_elements
@@ -212,7 +217,8 @@ def example_edge_elements_from_node_map(
                 "target": f"{service_relative_names[0]}.{endpoint_relative_names[1]}",
                 "id": f"{service_relative_names[0]}.{endpoint_relative_names[0]}/{service_relative_names[0]}.{endpoint_relative_names[1]}",
                 "ujt_id": f"{service_relative_names[0]}.{endpoint_relative_names[0]}/{service_relative_names[0]}.{endpoint_relative_names[1]}",
-            }
+            },
+            "classes": "",
         },
         {
             "data": {
@@ -220,7 +226,8 @@ def example_edge_elements_from_node_map(
                 "target": f"{service_relative_names[1]}.{endpoint_relative_names[2]}",
                 "id": f"{service_relative_names[0]}.{endpoint_relative_names[0]}/{service_relative_names[1]}.{endpoint_relative_names[2]}",
                 "ujt_id": f"{service_relative_names[0]}.{endpoint_relative_names[0]}/{service_relative_names[1]}.{endpoint_relative_names[2]}",
-            }
+            },
+            "classes": "",
         },
         {
             "data": {
@@ -228,7 +235,8 @@ def example_edge_elements_from_node_map(
                 "target": f"{service_relative_names[1]}.{endpoint_relative_names[2]}",
                 "id": f"{service_relative_names[0]}.{endpoint_relative_names[1]}/{service_relative_names[1]}.{endpoint_relative_names[2]}",
                 "ujt_id": f"{service_relative_names[0]}.{endpoint_relative_names[1]}/{service_relative_names[1]}.{endpoint_relative_names[2]}",
-            }
+            },
+            "classes": "",
         },
     ]
     return expected_edge_elements
@@ -340,6 +348,7 @@ def example_node_elements_from_client_map(
                 "label": client_relative_names[0],
                 "ujt_id": client_relative_names[0],
             },
+            "classes": "",
         },
         {
             "data": {
@@ -347,6 +356,7 @@ def example_node_elements_from_client_map(
                 "label": client_relative_names[1],
                 "ujt_id": client_relative_names[1],
             },
+            "classes": "",
         },
     ]
     return expected_node_elements
@@ -372,7 +382,8 @@ def example_edge_elements_from_client_map(
                 "id": f"{client_relative_names[0]}/{service_relative_names[0]}",
                 "ujt_id": f"{client_relative_names[0]}/{service_relative_names[0]}",
                 "user_journey_name": f"{client_relative_names[0]}.{user_journey_relative_names[0]}",
-            }
+            },
+            "classes": "",
         },
         {
             "data": {
@@ -381,7 +392,8 @@ def example_edge_elements_from_client_map(
                 "id": f"{client_relative_names[0]}/{service_relative_names[1]}",
                 "ujt_id": f"{client_relative_names[0]}/{service_relative_names[1]}",
                 "user_journey_name": f"{client_relative_names[0]}.{user_journey_relative_names[0]}",
-            }
+            },
+            "classes": "",
         },
         {
             "data": {
@@ -390,7 +402,8 @@ def example_edge_elements_from_client_map(
                 "id": f"{client_relative_names[0]}/{service_relative_names[2]}",
                 "ujt_id": f"{client_relative_names[0]}/{service_relative_names[2]}",
                 "user_journey_name": f"{client_relative_names[0]}.{user_journey_relative_names[1]}",
-            }
+            },
+            "classes": "",
         },
         {
             "data": {
@@ -399,7 +412,8 @@ def example_edge_elements_from_client_map(
                 "id": f"{client_relative_names[1]}/{service_relative_names[3]}",
                 "ujt_id": f"{client_relative_names[1]}/{service_relative_names[3]}",
                 "user_journey_name": f"{client_relative_names[1]}.{user_journey_relative_names[2]}",
-            }
+            },
+            "classes": "",
         },
     ]
     return expected_edge_elements

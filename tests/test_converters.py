@@ -68,6 +68,7 @@ def test_datatable_from_slis():
     sli = SLI(
         sli_type=SLIType.SLITYPE_UNSPECIFIED,
         sli_value=0.511,
+        slo_target=0.611,
         slo_error_lower_bound=0.1,
         slo_warn_lower_bound=0.2,
         slo_warn_upper_bound=0.8,
@@ -80,6 +81,7 @@ def test_datatable_from_slis():
         {"name": "Type", "id": "Type"},
         {"name": "Status", "id": "Status"},
         {"name": "Value", "id": "Value"},
+        {"name": "Target", "id": "Target"},
         {"name": "Warn Range", "id": "Warn Range"},
         {"name": "Error Range", "id": "Error Range"},
     ]
@@ -88,6 +90,7 @@ def test_datatable_from_slis():
             "Type": "UNSPECIFIED",
             "Status": "HEALTHY",
             "Value": 0.51,
+            "Target": 0.61,
             "Warn Range": "(0.2, 0.8)",
             "Error Range": "(0.1, 0.9)",
         }
