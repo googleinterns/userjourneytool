@@ -60,7 +60,7 @@ def generate_selected_info_panel(
         # just generate this header here for now,
         # probably don't need to make a new component function for it.
         source, target = ujt_id.split("/")
-        header = html.P(
+        header = html.Div(
             f"Edge from {utils.relative_name(source)} to {utils.relative_name(target)}"
         )
         out.append(header)

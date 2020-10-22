@@ -9,16 +9,19 @@ from graph_structures_pb2 import NodeType, Status
 
 from . import id_constants
 
+# functional constants
 CLIENT_CLASS = "CLIENT"
 HIGHLIGHTED_UJ_EDGE_CLASS = "HIGHLIGHTED_UJ_EDGE"
 OVERRIDE_CLASS = "OVERRIDE"
+CUSTOM_TIME_RANGE_DROPDOWN_VALUE = "Custom Range"
 OK_SIGNAL = "OK"
+DATE_FORMAT = "YYYY-MM-DDTHH:MM:SS"  # ISO 8601
 
+# styling constants
 HEALTHY_COLOR = "green"
 WARN_COLOR = "orange"
 ERROR_COLOR = "red"
 HIGHLIGHTED_UJ_EDGE_COLOR = "purple"
-
 
 COMPOUND_BACKGROUND_BLACKEN_FACTOR = -0.5
 VIRTUAL_BACKGROUND_BLACKEN_FACTOR = -0.8

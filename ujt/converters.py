@@ -13,6 +13,8 @@ from graph_structures_pb2 import Client, Node, SLIType, Status, VirtualNode
 from . import constants, utils
 
 
+# region cytoscape
+# region elements
 def cytoscape_elements_from_maps(
     node_name_message_map: Dict[str, Node], client_name_message_map: Dict[str, Client]
 ):
@@ -142,6 +144,22 @@ def cytoscape_elements_from_client_map(client_name_message_map: Dict[str, Client
     return node_elements + edge_elements
 
 
+# endregion
+
+
+def cytoscape_stylesheet_from_style_map(style_map):
+    return [
+        {
+            "selector": f".{style_name}",
+            "style": style_value,
+        }
+        for style_name, style_value in style_map.items()
+    ]
+
+
+# endregion
+
+# region datatables
 def datatable_from_nodes(nodes, use_relative_names, table_id):
     columns = [{"name": name, "id": name} for name in ["Node", "Status"]]
     data = [
@@ -215,6 +233,10 @@ def user_journey_datatable_from_user_journeys(user_journeys, table_id):
     )
 
 
+# endregion
+
+
+# region dropdowns
 def dropdown_options_from_maps(
     node_name_message_map: Dict[str, Node],
     client_name_message_map: Dict[str, Client],
@@ -281,11 +303,27 @@ def style_dropdown_options_from_style_names(style_names):
     ]
 
 
-def cytoscape_stylesheet_from_style_map(style_map):
+def timestamped_tag_dropdown_options_from_tags(tags):
     return [
         {
-            "selector": f".{style_name}",
-            "style": style_value,
+            "label": tag,
+            "value": tag,
         }
-        for style_name, style_value in style_map.items()
+        for tag in tags
+        if "@" in tag
     ]
+
+
+def sli_type_dropdown_options():
+    # This is really constant, but feels like it should be placed
+    # in converters...
+    return [
+        {
+            "label": utils.human_readable_enum_name(value_descriptor.number, SLIType),
+            "value": value_descriptor.number,
+        }
+        for value_descriptor in SLIType.DESCRIPTOR.values
+    ]
+
+
+# endregion

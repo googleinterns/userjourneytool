@@ -216,6 +216,15 @@ def get_bottom_panel_components():
                                 ),
                             ]
                         ),
+                        dbc.Col(
+                            [
+                                html.H1("Change Over Time"),
+                                html.Div(
+                                    id=id_constants.CHANGE_OVER_TIME_PANEL,
+                                    children=get_change_over_time_components(),
+                                ),
+                            ]
+                        ),
                     ],
                 ),
                 fluid=True,
@@ -442,7 +451,7 @@ def get_create_tag_components():
                                 id_constants.TAG_INPUT: id_constants.TAG_INPUT,
                                 "index": idx,
                             },
-                            placeholder="Tag name",
+                            placeholder=f"tag@{constants.DATE_FORMAT} (timestamp optional)",
                             value=tag,
                         ),
                         width=9,
@@ -615,3 +624,32 @@ def get_create_style_components():
         ),
     ]
     return style_components
+
+
+def get_change_over_time_components():
+    components = [
+        dcc.Dropdown(
+            id=id_constants.CHANGE_OVER_TIME_SLI_TYPE_DROPDOWN,
+            placeholder="SLI Type",
+            className="m-1",
+            options=converters.sli_type_dropdown_options(),
+        ),
+        dcc.Dropdown(
+            id=id_constants.CHANGE_OVER_TIME_TAG_DROPDOWN,
+            placeholder="Timestamped Tag",
+            className="m-1",
+        ),
+        html.Div(
+            id=id_constants.TIME_SELECT_PANEL,
+        ),
+        dbc.Button(
+            id=id_constants.CHANGE_OVER_TIME_QUERY_BUTTON,
+            children="Query",
+            # This method to align the button to the right isn't consistent with
+            # the method used in the other panels for the tag feature using bootstrap tables.
+            # It's a bit excessive and inconvenient to create an entire bootstrap table just to align
+            # this one button.
+            style={"float": "right"},
+        ),
+    ]
+    return components

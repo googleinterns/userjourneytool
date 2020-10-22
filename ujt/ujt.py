@@ -11,6 +11,7 @@ from . import components, constants, state
 # Python importing is confusing...
 from .callbacks import (  # noqa
     apply_tag_callbacks,
+    change_over_time_callbacks,
     comment_callbacks,
     create_tag_callbacks,
     graph_callbacks,

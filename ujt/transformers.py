@@ -250,16 +250,5 @@ def apply_slis_to_node_map(sli_list, node_map):
 
         del node.slis[:]
         node.slis.extend(new_node_slis)
-        """
-        # this following is a more elegant solution, but not sure why assignment doesn't work.
-        # it seems to be supported in the documentation. This appears to be related to 
-        # a similar issue in server.py.
-
-        existing_matching_sli_type_idx = next((idx for idx, node_sli in enumerate(node.slis) if sli.sli_type == node_sli.sli_type), None)
-        if existing_matching_sli_type_idx is None:  # we need "is None" condition to support idx = 0 case, this is generally good practice
-            node.slis.append(sli)
-        else:
-            node.slis[existing_matching_sli_type_idx] = sli
-        """
 
     return node_map
