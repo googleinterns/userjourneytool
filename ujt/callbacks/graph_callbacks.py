@@ -1,7 +1,7 @@
 """ Callbacks that modify properties of the cytoscape graph. 
 """
 
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Tuple
 
 import dash
 from dash.dependencies import ALL, Input, Output, State
@@ -35,6 +35,7 @@ from ..dash_app import app
         State(id_constants.CYTOSCAPE_GRAPH, "selectedNodeData"),
         State(id_constants.VIRTUAL_NODE_INPUT, "value"),
         State(id_constants.CYTOSCAPE_GRAPH, "tapNode"),
+        State(id_constants.VIEW_STORE, "data"),
     ],
 )
 def update_graph_elements(
@@ -51,6 +52,7 @@ def update_graph_elements(
     selected_node_data: List[Dict[str, Any]],
     virtual_node_input_value: str,
     tap_node: Dict[str, Any],
+    view_list: List[Tuple[str, str]],
 ):
     """Update the elements of the cytoscape graph.
 
@@ -61,6 +63,7 @@ def update_graph_elements(
         when a virtual node is added or deleted (via the SIGNAL_VIRTUAL_NODE_UPDATE)
         when the collapse button is clicked virtual node
         when the expand button is clicked to expand virtual nodes
+        when a tag, style, or view is updated.
 
     We need this callback to handle these (generally unrelated) situations because Dash only supports assigning
     a single callback to a given output element.
@@ -84,6 +87,7 @@ def update_graph_elements(
             Used to perform all virtual node operations.
         tap_node: The cytoscape element of the latest tapped node.
             Used to check which node to override the status of.
+        view_list: The current list of views (specific to each browser).
     Returns:
         A dictionary of cytoscape elements describing the nodes and edges of the graph.
     """
@@ -186,7 +190,6 @@ def update_graph_elements(
     )
 
     tag_map = state.get_tag_map()
-    view_list = state.get_view_list()
     transformers.apply_views(
         elements,
         tag_map,

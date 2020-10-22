@@ -11,7 +11,7 @@ Admittedly, this line is blurry, but it's nice to have a separate module to cont
 level functions to generate components, rather than placing them in ujt or callbacks.
 """
 
-from typing import List, Union
+from typing import List, Tuple, Union
 
 import dash_bootstrap_components as dbc
 import dash_core_components as dcc
@@ -55,6 +55,12 @@ def get_layout():
                 id=id_constants.COLLAPSE_ERROR_MODAL,
             ),
             get_signals(),
+            # place this store here for now -- if we need to add more stores we can refactor this
+            dcc.Store(
+                id=id_constants.VIEW_STORE,
+                data=[],
+                storage_type="local",
+            ),
         ],
     )
 
@@ -75,9 +81,6 @@ def get_signals():
         id_constants.SIGNAL_APPLIED_TAG_MODIFY,
         id_constants.SIGNAL_APPLIED_TAG_UPDATE,
         # ---
-        id_constants.SIGNAL_VIEW_CREATE,
-        id_constants.SIGNAL_VIEW_DELETE,
-        id_constants.SIGNAL_VIEW_MODIFY,
         id_constants.SIGNAL_VIEW_UPDATE,
         # ---
         id_constants.SIGNAL_STYLE_SAVE,
@@ -503,10 +506,9 @@ def get_create_tag_components():
     return [header] + tag_rows + [add_button_row, save_tag_toast]
 
 
-def get_view_components():
+def get_view_components(view_list: List[Tuple[str, str]]):
     tag_list = state.get_tag_list()
     style_map = state.get_style_map()
-    view_list = state.get_view_list()
 
     view_rows = []
     for idx, view_tuple in enumerate(view_list):

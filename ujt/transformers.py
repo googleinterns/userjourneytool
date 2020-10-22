@@ -60,7 +60,7 @@ def apply_views(elements, tag_map, view_list):
             # Let's make that optimization later if this turns out to be excessively slow.
             for tag in tags:
                 for view_tag, view_style_name in view_list:
-                    if tag == view_tag and tag != "":
+                    if tag == view_tag and tag != "" and view_style_name != "":
                         class_list.append(view_style_name)
         element["classes"] += f" {' '.join(class_list)}"
 
