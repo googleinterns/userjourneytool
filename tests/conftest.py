@@ -17,6 +17,7 @@ def assert_same_elements():
         """
         # although it's slower/not strictly necessary to wrap the generator in
         # a list, pytest will give a more informative error message this way.
+        assert len(list1) == len(list2)
         assert all([element1 in list2 for element1 in list1])
         assert all([element2 in list1 for element2 in list2])
 

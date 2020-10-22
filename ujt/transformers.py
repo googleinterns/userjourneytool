@@ -12,7 +12,7 @@ from graph_structures_pb2 import NodeType, Status
 from . import constants, state, utils
 
 
-def apply_node_classes(
+def apply_node_property_classes(
     elements, node_name_message_map, client_name_message_map, virtual_node_map
 ):
     for element in elements:
@@ -166,7 +166,10 @@ def apply_virtual_nodes_to_elements(elements):
                 "id"
             ] = f"{element['data']['source']}/{element['data']['target']}"
 
-            if element["data"]["source"] != element["data"]["target"]:
+            if (
+                element["data"]["source"] != element["data"]["target"]
+                and element not in new_elements
+            ):
                 new_elements.append(element)
 
     for virtual_node_name in virtual_node_map:
@@ -182,19 +185,12 @@ def apply_virtual_nodes_to_elements(elements):
             # This if statement determines if the virtual node should be visible
             # first condition: entire stack of virtual nodes is expanded
             # second condition: the virtual node itself is the toplevel, collapsed node
-            virtual_node = virtual_node_map[virtual_node_name]
             element = {
                 "data": {
                     "label": virtual_node_name,
                     "id": virtual_node_name,
                     "ujt_id": virtual_node_name,
                 },
-                "classes": " ".join(
-                    [
-                        NodeType.Name(NodeType.NODETYPE_VIRTUAL),
-                        Status.Name(virtual_node.status),
-                    ]
-                ),
             }
             if virtual_node_name in parent_virtual_node_map:
                 element["data"]["parent"] = parent_virtual_node_map[virtual_node_name]

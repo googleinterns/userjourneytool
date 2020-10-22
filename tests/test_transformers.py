@@ -258,8 +258,7 @@ def test_apply_virtual_nodes_to_elements(patch_path, assert_same_elements):
         returned_elements = ujt.transformers.apply_virtual_nodes_to_elements(
             node_elements + edge_elements
         )
-        print(len(returned_elements))
-        print(len(expected_elements))
+
         assert_same_elements(returned_elements, expected_elements)
 
 
