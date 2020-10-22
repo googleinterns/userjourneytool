@@ -15,5 +15,10 @@ app = dash.Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
 cache = Cache()
 cache.init_app(
     app.server,
-    config={"CACHE_TYPE": "filesystem", "CACHE_DIR": "cache_dir"},
+    config={
+        "CACHE_TYPE": "filesystem",
+        "CACHE_DIR": "cache_dir",
+        "CACHE_DEFAULT_TIMEOUT": 0,
+        "CACHE_THRESHOLD": 0,
+    },
 )
