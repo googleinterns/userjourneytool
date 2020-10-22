@@ -1,5 +1,5 @@
 import datetime as dt
-from typing import List, Optional, TYPE_CHECKING
+from typing import TYPE_CHECKING, List, Optional
 
 import dash
 import dash_bootstrap_components as dbc
@@ -13,6 +13,7 @@ if TYPE_CHECKING:
     from graph_structures_pb2 import (
         SLITypeValue,  # pylint: disable=no-name-in-module  # pragma: no cover
     )
+
 
 @app.callback(
     Output(id_constants.TIME_SELECT_PANEL, "children"),
@@ -141,9 +142,15 @@ def update_time_range_store(
                 end_time_input_values[0], constants.DATE_FORMAT_STRING
             )
         else:
-            temp_datetime = dt.datetime.strptime(window_size_input_values[0], constants.WINDOW_SIZE_FORMAT_STRING)
-            window_size_timedelta = dt.timedelta(hours=temp_datetime.hour, minutes=temp_datetime.minute, seconds=temp_datetime.second)
-            
+            temp_datetime = dt.datetime.strptime(
+                window_size_input_values[0], constants.WINDOW_SIZE_FORMAT_STRING
+            )
+            window_size_timedelta = dt.timedelta(
+                hours=temp_datetime.hour,
+                minutes=temp_datetime.minute,
+                seconds=temp_datetime.second,
+            )
+
             tag_timestamp_string = tag_selection.split("@")[-1]
             tag_timestamp = dt.datetime.strptime(
                 tag_timestamp_string, constants.DATE_FORMAT_STRING
@@ -159,7 +166,11 @@ def update_time_range_store(
     # in the documentation how it does so.
     # This makes it confusing when we try to store datetime objects directly, so
     # we choose to store their timestamps for a clearer interface.
-    return [{
-        "start_timestamp": start_time.timestamp(),
-        "end_timestamp": end_time.timestamp(),
-    }, False, None]
+    return [
+        {
+            "start_timestamp": start_time.timestamp(),
+            "end_timestamp": end_time.timestamp(),
+        },
+        False,
+        None,
+    ]

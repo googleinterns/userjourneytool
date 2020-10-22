@@ -105,8 +105,18 @@ def apply_change_over_time_classes(
     start_time: dt.datetime,
     end_time: dt.datetime,
     sli_type: "SLITypeValue",
-):
-    """ Applies classes to elements based on the change in SLIs over the time range. """
+) -> List[Dict[str, Any]]:
+    """Applies classes to elements based on the change in SLIs over the time range.
+
+    Args:
+        elements: A list of cytoscape elements
+        start_time: The start time of the time range to compute aggregate status over.
+        end_time: The end time of the time range to compute aggregate status over.
+        sli_type: The SLI type of interest
+
+    Returns:
+        a A new list of elements with the change over time classes applied.
+    """
     sli_response = rpc_client.get_slis(
         start_time=start_time,
         end_time=end_time,
@@ -136,7 +146,7 @@ def apply_change_over_time_classes(
 
 def get_change_over_time_class_from_sli_list(
     slis: List[SLI], start_time: dt.datetime, end_time: dt.datetime
-):
+) -> str:
     """Returns the correct coloring/gradient based on the SLI values over time.
 
     We denote parts of a full styling class as a subclass.
