@@ -149,6 +149,7 @@ CHANGE_OVER_TIME_TAG_DROPDOWN = "change-over-time-tag-dropdown"
 TIME_SELECT_PANEL = "time-select-panel"
 CHANGE_OVER_TIME_QUERY_BUTTON = "change-over-time-query-button"
 CHANGE_OVER_TIME_RESET_BUTTON = "change-over-time-reset-button"
+CHANGE_OVER_TIME_ERROR_TOAST = "change-over-time-error-toast"
 
 START_TIME_INPUT = "start-time-input"
 END_TIME_INPUT = "end-time-input"

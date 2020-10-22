@@ -652,7 +652,7 @@ def get_change_over_time_components():
         ),
         dcc.Dropdown(
             id=id_constants.CHANGE_OVER_TIME_TAG_DROPDOWN,
-            placeholder="Timestamped Tag",
+            placeholder="Timestamped Tag or Custom Range",
             className="m-1",
         ),
         html.Div(
@@ -670,6 +670,14 @@ def get_change_over_time_components():
             # It's a bit excessive and inconvenient to create an entire bootstrap table just to align
             # this one button.
             style={"float": "right"},
+        ),
+        dbc.Toast(
+            id=id_constants.CHANGE_OVER_TIME_ERROR_TOAST,
+            duration=3000,
+            dismissable=True,
+            body_style={"display": "none"},
+            is_open=False,
+            icon="danger",
         ),
     ]
     return components
