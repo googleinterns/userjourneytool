@@ -55,12 +55,7 @@ def get_layout():
                 id=id_constants.COLLAPSE_ERROR_MODAL,
             ),
             get_signals(),
-            # place this store here for now -- if we need to add more stores we can refactor this
-            dcc.Store(
-                id=id_constants.VIEW_STORE,
-                data=[],
-                storage_type="local",
-            ),
+            get_stores(),
         ],
     )
 
@@ -99,6 +94,25 @@ def get_signals():
     ]
 
     return html.Div(id=id_constants.SIGNAL_WRAPPER_DIV, children=signals)
+
+
+def get_stores():
+    # manually declare these for now,
+    # if we increase the number of stores we can dynamically generate them
+    return html.Div(
+        children=[
+            dcc.Store(
+                id=id_constants.VIEW_STORE,
+                data=[],
+                storage_type="local",
+            ),
+            dcc.Store(
+                id=id_constants.TIME_RANGE_STORE,
+                data={},
+                storage_type="memory",
+            ),
+        ]
+    )
 
 
 def get_top_row_components():
@@ -643,6 +657,10 @@ def get_change_over_time_components():
         ),
         html.Div(
             id=id_constants.TIME_SELECT_PANEL,
+        ),
+        dbc.Button(
+            id=id_constants.CHANGE_OVER_TIME_RESET_BUTTON,
+            children="Reset Change Over Time View",
         ),
         dbc.Button(
             id=id_constants.CHANGE_OVER_TIME_QUERY_BUTTON,

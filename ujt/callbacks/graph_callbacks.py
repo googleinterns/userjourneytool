@@ -1,7 +1,8 @@
 """ Callbacks that modify properties of the cytoscape graph. 
 """
 
-from typing import Any, Dict, List, Tuple
+import datetime as dt
+from typing import TYPE_CHECKING, Any, Dict, List, Tuple
 
 import dash
 from dash.dependencies import ALL, Input, Output, State
@@ -18,6 +19,11 @@ from .. import (
 )
 from ..dash_app import app
 
+if TYPE_CHECKING:
+    from graph_structures_pb2 import (
+        SLITypeValue,  # pylint: disable=no-name-in-module  # pragma: no cover
+    )
+
 
 @app.callback(
     Output(id_constants.CYTOSCAPE_GRAPH, "elements"),
@@ -29,6 +35,7 @@ from ..dash_app import app
         Input(id_constants.EXPAND_VIRTUAL_NODE_BUTTON, "n_clicks_timestamp"),
         Input({id_constants.OVERRIDE_DROPDOWN: ALL}, "value"),
         Input(id_constants.SIGNAL_COMPOSITE_TAGGING_UPDATE, "children"),
+        Input(id_constants.TIME_RANGE_STORE, "data"),
     ],
     [
         State(id_constants.CYTOSCAPE_GRAPH, "elements"),
@@ -36,6 +43,7 @@ from ..dash_app import app
         State(id_constants.VIRTUAL_NODE_INPUT, "value"),
         State(id_constants.CYTOSCAPE_GRAPH, "tapNode"),
         State(id_constants.VIEW_STORE, "data"),
+        State(id_constants.CHANGE_OVER_TIME_SLI_TYPE_DROPDOWN, "value"),
     ],
 )
 def update_graph_elements(
@@ -47,12 +55,14 @@ def update_graph_elements(
     expand_n_clicks_timestamp: int,
     override_dropdown_value: int,
     composite_tagging_update_signal: str,
+    time_range: Dict[str, float],
     # State
     state_elements: List[Dict[str, Any]],
     selected_node_data: List[Dict[str, Any]],
     virtual_node_input_value: str,
     tap_node: Dict[str, Any],
     view_list: List[Tuple[str, str]],
+    sli_type: "SLITypeValue",
 ):
     """Update the elements of the cytoscape graph.
 
@@ -79,6 +89,8 @@ def update_graph_elements(
         expand_n_clicks_timestamp: Timestamp of when the expand button was clicked.
             Value unused, input only provided to register callback.
         override_dropdown_value: Status enum value of the status to override for the node.
+        time_range: Either an empty dictionary, or a dictionary with keys "start_timestamp" and "end_timestamp" mapped to float POSIX timestamps.
+            Used to apply styles for the Change Over Time feature
 
         state_elements: The list of current cytoscape graph elements.
         selected_node_data: The list of data dictionaries for selected nodes.
@@ -88,6 +100,7 @@ def update_graph_elements(
         tap_node: The cytoscape element of the latest tapped node.
             Used to check which node to override the status of.
         view_list: The current list of views (specific to each browser).
+        sli_type: The value of the change over time sli type dropdown.
     Returns:
         A dictionary of cytoscape elements describing the nodes and edges of the graph.
     """
@@ -114,7 +127,7 @@ def update_graph_elements(
 
     # This condition determines if we need to recompute node statuses.
     if triggered_id in [
-        None,
+        None,  # initial call
         id_constants.REFRESH_SLI_BUTTON,
         id_constants.SIGNAL_VIRTUAL_NODE_UPDATE,
         f"""{{"{id_constants.OVERRIDE_DROPDOWN}":"{id_constants.OVERRIDE_DROPDOWN}"}}""",  # Dash provides the value as a stringified dict
@@ -182,19 +195,30 @@ def update_graph_elements(
         elements, active_user_journey_name
     )
 
-    transformers.apply_node_property_classes(
-        elements,
-        node_name_message_map,
-        client_name_message_map,
-        virtual_node_map,
-    )
+    if time_range == {}:
+        # The following calls to apply classes to elements, which are then matched to styles
+        transformers.apply_node_property_classes(
+            elements,
+            node_name_message_map,
+            client_name_message_map,
+            virtual_node_map,
+        )
 
-    tag_map = state.get_tag_map()
-    transformers.apply_views(
-        elements,
-        tag_map,
-        view_list,
-    )
+        tag_map = state.get_tag_map()
+        transformers.apply_view_classes(
+            elements,
+            tag_map,
+            view_list,
+        )
+    else:
+        start_time = dt.datetime.fromtimestamp(time_range["start_timestamp"])
+        end_time = dt.datetime.fromtimestamp(time_range["end_timestamp"])
+        elements = transformers.apply_change_over_time_classes(
+            elements,
+            start_time,
+            end_time,
+            sli_type,
+        )
     # print(elements)  # for debugging
 
     # Determine if we need to generate a new UUID. This minimizes the choppyness of the animation.

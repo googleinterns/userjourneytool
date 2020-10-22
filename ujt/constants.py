@@ -16,11 +16,27 @@ OVERRIDE_CLASS = "OVERRIDE"
 CUSTOM_TIME_RANGE_DROPDOWN_VALUE = "Custom Range"
 OK_SIGNAL = "OK"
 DATE_FORMAT = "YYYY-MM-DDTHH:MM:SS"  # ISO 8601
+DATE_FORMAT_STRING = "%Y-%m-%dT%H:%M:%S"
+
+NO_DATA_SUBCLASS = "NODATA"
+IMPROVED_SUBCLASS = "IMPROVED"
+WORSENED_SUBCLASS = "WORSENED"
 
 # styling constants
 HEALTHY_COLOR = "green"
+HEALTHY_IMPROVED_COLOR = "lightgreen"
+HEALTHY_WORSENED_COLOR = "darkgreen"
+
 WARN_COLOR = "orange"
+WARN_IMPROVED_COLOR = "sandybrown"
+WARN_WORSENED_COLOR = "darkorange"
+
 ERROR_COLOR = "red"
+ERROR_IMPROVED_COLOR = "salmon"
+ERROR_WORSENED_COLOR = "darkred"
+
+NO_DATA_COLOR = "black"
+
 HIGHLIGHTED_UJ_EDGE_COLOR = "purple"
 
 COMPOUND_BACKGROUND_BLACKEN_FACTOR = -0.5
@@ -116,6 +132,44 @@ BASE_CYTO_STYLESHEET = [
     },
 ]
 
+# Generate the necessary gradient styles for change over time feature
+subclasses = [
+    Status.Name(Status.STATUS_HEALTHY),
+    f"{Status.Name(Status.STATUS_HEALTHY)}_{IMPROVED_SUBCLASS}",
+    f"{Status.Name(Status.STATUS_HEALTHY)}_{WORSENED_SUBCLASS}",
+    Status.Name(Status.STATUS_WARN),
+    f"{Status.Name(Status.STATUS_WARN)}_{IMPROVED_SUBCLASS}",
+    f"{Status.Name(Status.STATUS_WARN)}_{WORSENED_SUBCLASS}",
+    Status.Name(Status.STATUS_ERROR),
+    f"{Status.Name(Status.STATUS_ERROR)}_{IMPROVED_SUBCLASS}",
+    f"{Status.Name(Status.STATUS_ERROR)}_{WORSENED_SUBCLASS}",
+    NO_DATA_SUBCLASS,
+]
+subclass_colors = [
+    HEALTHY_COLOR,
+    HEALTHY_IMPROVED_COLOR,
+    HEALTHY_WORSENED_COLOR,
+    WARN_COLOR,
+    WARN_IMPROVED_COLOR,
+    WARN_WORSENED_COLOR,
+    ERROR_COLOR,
+    ERROR_IMPROVED_COLOR,
+    ERROR_WORSENED_COLOR,
+    NO_DATA_COLOR,
+]
+for before_subclass, before_color in zip(subclasses, subclass_colors):
+    for after_subclass, after_color in zip(subclasses, subclass_colors):
+        BASE_CYTO_STYLESHEET.append(
+            {
+                "selector": f".{before_subclass}_{after_subclass}",
+                "style": {
+                    "background-fill": "linear-gradient",
+                    "background-gradient-stop-colors": f"{before_color} {after_color}",
+                    "background-gradient-direction": "to-right",
+                },
+            }
+        )
+
 DEFAULT_STYLE_MAP: Dict[str, Dict[str, Any]] = {
     "HIDDEN": {
         "display": "none",
@@ -143,7 +197,7 @@ DATATABLE_CONDITIONAL_STYLE = [
     },
 ]
 
-CLEAR_CACHE_ON_STARTUP = True
+CLEAR_CACHE_ON_STARTUP = True  # DEBUG_REMOVE
 CACHE_DEFAULT_VALUES = {
     id_constants.VIRTUAL_NODE_MAP: {},  # Dict[str, VirtualNode]
     id_constants.PARENT_VIRTUAL_NODE_MAP: {},  # Dict[str, str]

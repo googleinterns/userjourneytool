@@ -4,17 +4,38 @@ Transformer functions take an input data structure, make a change, and return an
 They are commonly used to perform operations on cytoscape graph elements.
 """
 
+import datetime as dt
 import uuid
 from collections import defaultdict, deque
+from typing import TYPE_CHECKING, Any, Dict, List, Optional
 
-from graph_structures_pb2 import NodeType, Status
+from graph_structures_pb2 import SLI, NodeType, Status
 
-from . import constants, state, utils
+from . import compute_status, constants, rpc_client, state, utils
+
+if TYPE_CHECKING:
+    from graph_structures_pb2 import (
+        SLITypeValue,  # pylint: disable=no-name-in-module  # pragma: no cover
+    )
 
 
 def apply_node_property_classes(
     elements, node_name_message_map, client_name_message_map, virtual_node_map
 ):
+    """Adds classes to elements based on the properties of their corresponding nodes.
+
+    Currently, these properties include:
+        if the element corresponds to a client
+        the overall status of a node or virtual node
+        the override status of a node or virtual node
+
+    Args:
+        elements: A list of cytoscape elements
+        node_name_message_map: A dictionary mapping node names to Node protos.
+        client_name_message_map: A dictionary mapping client names to Client protos.
+        virtual_node_map: A dictionary mapping virtual node names to VirtualNode protos.
+
+    """
     for element in elements:
         if not utils.is_node_element(element):
             continue
@@ -47,7 +68,21 @@ def apply_node_property_classes(
     # no return since we directly mutated elements
 
 
-def apply_views(elements, tag_map, view_list):
+def apply_view_classes(elements, tag_map, view_list):
+    """Applies classes to elements based on the user defined tags and views.
+
+    The stylesheet is updated upon every style update.
+    Given a view composed of a tag and style name, we change
+    the actual appearance of elements, by appending the style name
+    to all elements tagged with the tag.
+
+    Notice that the tag name itself is not appended to the class list.
+
+    Args:
+        elements: A list of cytoscape elements.
+        tag_map: A dictionary mapping element_ujt_ids to a list of applied tags
+        view_list: The list of user defined views.
+    """
     for element in elements:
         element_ujt_id = element["data"]["ujt_id"]
         class_list = []
@@ -63,6 +98,106 @@ def apply_views(elements, tag_map, view_list):
                     if tag == view_tag and tag != "" and view_style_name != "":
                         class_list.append(view_style_name)
         element["classes"] += f" {' '.join(class_list)}"
+
+
+def apply_change_over_time_classes(
+    elements: List[Dict[str, Any]],
+    start_time: dt.datetime,
+    end_time: dt.datetime,
+    sli_type: "SLITypeValue",
+):
+    """ Applies classes to elements based on the change in SLIs over the time range. """
+    sli_response = rpc_client.get_slis(
+        start_time=start_time,
+        end_time=end_time,
+        sli_types=[sli_type],
+    )
+    node_name_sli_map = defaultdict(list)
+    for sli in sli_response.slis:
+        node_name_sli_map[sli.node_name].append(sli)
+
+    output_elements = []
+    for element in elements:
+        ujt_id = element["data"]["ujt_id"]
+        if ujt_id not in node_name_sli_map:
+            output_elements.append(element.copy())
+        else:
+            element_copy = element.copy()
+            change_over_time_class = get_change_over_time_class_from_sli_list(
+                node_name_sli_map[ujt_id],
+                start_time,
+                end_time,
+            )
+            element_copy["classes"] += f" {change_over_time_class}"
+            output_elements.append(element_copy)
+
+    return output_elements
+
+
+def get_change_over_time_class_from_sli_list(
+    slis: List[SLI], start_time: dt.datetime, end_time: dt.datetime
+):
+    """Returns the correct coloring/gradient based on the SLI values over time.
+
+    We denote parts of a full styling class as a subclass.
+    These include STATUS_HEALTHY, IMPROVED, etc.
+    We join the subclasses together with underscore as a delimiter to create a full class name,
+    that has an assoiated style.
+
+    Args:
+        slis: A non-empty list of timestamped SLIs.
+
+    Returns:
+        a class name to be added to the element
+    """
+
+    # This shouldn't occur, since the caller uses a defaultdict
+    if slis == []:
+        raise ValueError
+
+    mid_time = start_time + (end_time - start_time) / 2
+    slis_before, slis_after = [], []
+    for sli in slis:
+        if sli.timestamp.ToDatetime() < mid_time:
+            slis_before.append(sli)
+        else:
+            slis_after.append(sli)
+
+    # Compute the average value before and after min_time, and note the appropriate class
+    composite_slis: List[Optional[SLI]] = [None, None]
+    # subclasses holds the class for styling of the left and right half of the element
+    subclasses: List[str] = [constants.NO_DATA_SUBCLASS, constants.NO_DATA_SUBCLASS]
+    for idx, sli_sublist in enumerate([slis_before, slis_after]):
+        if sli_sublist != []:
+            composite_sli = SLI()
+            # copy the slo bound/target values from the input,
+            # these should be constant across all slis in the input list
+            composite_sli.CopyFrom(sli_sublist[0])
+            # compute the average value, this can be more sophisticated
+            composite_sli.sli_value = sum([sli.sli_value for sli in sli_sublist]) / len(
+                sli_sublist
+            )
+            compute_status.compute_sli_status(composite_sli)
+
+            composite_slis[idx] = composite_sli
+            subclasses[idx] = Status.Name(composite_sli.status)
+
+    # Notice that composite_slis can never be [None, None], since we ensured slis != [] above.
+    # Thus, the subclasses can never be equal unless there are two valid composite SLIs
+    if subclasses[0] == subclasses[1]:
+        # Extra asserts here to make mypy happy
+        assert composite_slis[0] is not None
+        assert composite_slis[1] is not None
+
+        slo_target = composite_slis[0].slo_target
+        if abs(slo_target - composite_slis[0].sli_value) < abs(
+            slo_target - composite_slis[1].sli_value
+        ):
+            subclasses[1] += f"_{constants.IMPROVED_SUBCLASS}"
+        else:
+            subclasses[1] += f"_{constants.WORSENED_SUBCLASS}"
+
+    return "_".join(subclasses)
 
 
 def apply_highlighted_edge_class_to_elements(elements, user_journey_name):
