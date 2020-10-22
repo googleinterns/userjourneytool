@@ -1,5 +1,6 @@
 syntax = "proto2";
 import "graph_structures.proto";
+import "google/protobuf/timestamp.proto";
 package ujt_protos;
 
 service ReportingService {
@@ -24,7 +25,23 @@ message GetNodesResponse {
 }
 
 message GetSLIsRequest {
-    // ...
+    // The list of node names to get the SLIs from.
+    // If not specified, server should return SLIs for all nodes.
+    repeated string node_names = 1;
+    // The SLI types to return.
+    // If not specified, server should return SLIs of all types.
+    repeated SLIType sli_types = 2;
+    // The start time of the query.
+    // If not specified, defaults to timestamp of when request was received by server.
+    optional google.protobuf.Timestamp start_time = 3;
+    // The end time of the query.
+    // If not specified, defaults to timestamp of when request was received by server.
+    optional google.protobuf.Timestamp end_time = 4;
+
+    // To request the current SLIs, leave start_time and end_time unset.
+    // To request all SLIs after a given time, set start_time and leave end_time unset.
+    // Notice that there may not be a returned SLIs timestamped at exactly the start_time or end_time,
+    // since the server implementation dictates the interval/granularity of data to report.
 }
 
 message GetSLIsResponse {
