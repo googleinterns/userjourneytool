@@ -84,8 +84,12 @@ def update_graph_elements(
         expand_n_clicks_timestamp: Timestamp of when the expand button was clicked.
             Value unused, input only provided to register callback.
         override_dropdown_value: Status enum value of the status to override for the node.
-        change_over_time_data: Either an empty dictionary, or a dictionary with keys "start_timestamp" and "end_timestamp" mapped to float POSIX timestamps.
-            Used to apply styles for the Change Over Time feature
+        change_over_time_data: Either an empty dictionary, or a dictionary with keys
+            "start_timestamp" mapped to a float POSIX timestamp,
+            "end_timestamp" mapped to a float POSIX timestamp, and
+            "dict_slis" mapped to a list of SLIs represented as dictionaries.
+            The SLIs as dictionaries need to be parsed by the json_format module.
+            Used to apply styles for the Change Over Time feature.
 
         state_elements: The list of current cytoscape graph elements.
         selected_node_data: The list of data dictionaries for selected nodes.

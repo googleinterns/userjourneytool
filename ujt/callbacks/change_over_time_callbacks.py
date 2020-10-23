@@ -199,6 +199,18 @@ def update_change_over_time_sli_store(
     prevent_initial_call=True,
 )
 def update_change_over_time_text_output_panel(change_over_time_data):
+    """Renders the datatable that displays SLI changes over time.
+
+    Args:
+        change_over_time_data: Either an empty dictionary, or a dictionary with keys
+            "start_timestamp" mapped to a float POSIX timestamp,
+            "end_timestamp" mapped to a float POSIX timestamp, and
+            "dict_slis" mapped to a list of SLIs represented as dictionaries.
+            The SLIs as dictionaries need to be parsed by the json_format module.
+
+    Returns:
+        A component to be placed in the CHANGE_OVER_TIME_TEXT_OUTPUT_PANEL
+    """
     if change_over_time_data == {}:
         return None
 
