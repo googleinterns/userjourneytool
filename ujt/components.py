@@ -107,7 +107,7 @@ def get_stores():
                 storage_type="local",
             ),
             dcc.Store(
-                id=id_constants.TIME_RANGE_STORE,
+                id=id_constants.CHANGE_OVER_TIME_SLI_STORE,
                 data={},
                 storage_type="memory",
             ),
@@ -678,6 +678,9 @@ def get_change_over_time_components():
             body_style={"display": "none"},
             is_open=False,
             icon="danger",
+        ),
+        html.Div(
+            id=id_constants.CHANGE_OVER_TIME_TEXT_OUTPUT_PANEL,
         ),
     ]
     return components

@@ -1,12 +1,15 @@
 import datetime as dt
-from typing import TYPE_CHECKING, List, Optional
+from collections import defaultdict
+from typing import TYPE_CHECKING, Any, Dict, List, Optional
 
 import dash
 import dash_bootstrap_components as dbc
 import dash_html_components as html
+import google.protobuf.json_format as json_format
 from dash.dependencies import ALL, Input, Output, State
+from graph_structures_pb2 import SLI
 
-from .. import constants, id_constants, utils
+from .. import constants, converters, id_constants, rpc_client, transformers, utils
 from ..dash_app import app
 
 if TYPE_CHECKING:
@@ -68,7 +71,7 @@ def update_time_select_panel(tag):
 
 @app.callback(
     [
-        Output(id_constants.TIME_RANGE_STORE, "data"),
+        Output(id_constants.CHANGE_OVER_TIME_SLI_STORE, "data"),
         Output(id_constants.CHANGE_OVER_TIME_ERROR_TOAST, "is_open"),
         Output(id_constants.CHANGE_OVER_TIME_ERROR_TOAST, "header"),
     ],
@@ -85,7 +88,7 @@ def update_time_select_panel(tag):
     ],
     prevent_initial_call=True,
 )
-def update_time_range_store(
+def update_change_over_time_sli_store(
     query_n_clicks_timestamp: Optional[int],
     reset_n_clicks_timestamp: Optional[int],
     start_time_input_values: List[str],
@@ -94,16 +97,18 @@ def update_time_range_store(
     tag_selection: str,
     sli_type: Optional["SLITypeValue"],
 ):
-    """Updates the TIME_RANGE_STORE with the selected time range.
+    """Updates the CHANGE_OVER_TIME_SLI_STORE with the selected time range.
 
-    The TIME_RANGE_STORE acts like a signal, updating whenever the Query or Reset button is clicked.
+    The CHANGE_OVER_TIME_SLI_STORE acts like a signal, updating whenever the Query or Reset button is clicked.
     We choose to store the time range in this store in order to isolate the input parsing functionality here.
     This allows users of the store (namely, update_graph_elements) to avoid having to deal with the
     separate cases of custom time range and window size input.
-    Since the SLI Type dropdown doesn't require parsing, update_graph_elements can directly read it as state,
-    without an intermediate step.
 
     Notice we also validate the SLI type dropdown here as well.
+
+    Finally, this callback makes the RPC to the reporting server to get SLIs for the time range.
+    This approach avoids making repeated RPC calls if multiple components need to update based on the SLI data,
+    namely, the cytoscape graph and the CHANGE_OVER_TIME_TEXT_OUTPUT_PANEL.
 
     This function is called:
         when the CHANGE_OVER_TIME_QUERY_BUTTON is clicked
@@ -119,7 +124,7 @@ def update_time_range_store(
         sli_type; The value from the CHANGE_OVER_TIME_SLI_TYPE_DROPDOWN. Used for input validation.
 
     Returns:
-        A dictionary to be placed in the TIME_RANGE_STORE.
+        A dictionary to be placed in the CHANGE_OVER_TIME_SLI_STORE.
         The dictionary has keys "start_timestamp" and "end_timestamp", which map
         to the POSIX timestamps of their respective times.
     """
@@ -162,15 +167,54 @@ def update_time_range_store(
         # TypeError occurs when input box is blank
         return dash.no_update, True, "Error parsing time input, please check format."
 
-    # Dash serializes the objects placed into Stores, but it's not specified
-    # in the documentation how it does so.
-    # This makes it confusing when we try to store datetime objects directly, so
-    # we choose to store their timestamps for a clearer interface.
+    sli_response = rpc_client.get_slis(
+        start_time=start_time,
+        end_time=end_time,
+        sli_types=[sli_type],
+    )
+
+    dict_slis: List[Dict[str, Any]] = [
+        json_format.MessageToDict(sli) for sli in sli_response.slis
+    ]
+
+    # Dash serializes the objects placed into Stores via json, but this can lead to
+    # unexpected behavior with objects (particularly datetimes).
+    # This can make it confusing to store objects directly, so we choose to store
+    # timestamps instead of datetimes for a clearer interface from the reader's perspective.
+    # We are forced to convert SLI protos to dictionaries to store them as well.
     return [
         {
             "start_timestamp": start_time.timestamp(),
             "end_timestamp": end_time.timestamp(),
+            "dict_slis": dict_slis,
         },
         False,
         None,
     ]
+
+
+@app.callback(
+    Output(id_constants.CHANGE_OVER_TIME_TEXT_OUTPUT_PANEL, "children"),
+    Input(id_constants.CHANGE_OVER_TIME_SLI_STORE, "data"),
+    prevent_initial_call=True,
+)
+def update_change_over_time_text_output_panel(change_over_time_data):
+    if change_over_time_data == {}:
+        return None
+
+    start_time = dt.datetime.fromtimestamp(change_over_time_data["start_timestamp"])
+    end_time = dt.datetime.fromtimestamp(change_over_time_data["end_timestamp"])
+    dict_slis = change_over_time_data["dict_slis"]
+    slis = [json_format.ParseDict(dict_sli, SLI()) for dict_sli in dict_slis]
+
+    node_name_sli_map = defaultdict(list)
+    for sli in slis:
+        node_name_sli_map[sli.node_name].append(sli)
+
+    composite_slis = [
+        transformers.generate_before_after_composite_slis(slis, start_time, end_time)
+        for slis in node_name_sli_map.values()
+    ]
+    return converters.change_over_time_datatable_from_composite_slis(
+        composite_slis, id_constants.CHANGE_OVER_TIME_DATATABLE
+    )

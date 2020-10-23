@@ -20,6 +20,8 @@ import json
 from collections import deque
 from typing import Any, Dict, Optional, Tuple
 
+from graph_structures_pb2 import SLI, Status
+
 from . import constants
 
 
@@ -133,3 +135,48 @@ def get_latest_tapped_element(
         return tap_node
 
     return tap_node if tap_node["timeStamp"] > tap_edge["timeStamp"] else tap_edge
+
+
+def get_change_over_time_class_from_composite_slis(
+    before_composite_sli: Optional[SLI], after_composite_sli: Optional[SLI]
+) -> str:
+    """Returns the appropriate coloring/gradient based on the composite SLIs.
+
+    We denote parts of a full styling class as a subclass.
+    These include STATUS_HEALTHY, IMPROVED, etc.
+    We join the subclasses together with underscore as a delimiter to create a full class name,
+    that has an assoiated style.
+
+    Args:
+        before_composite_sli: A composite SLI holding the average value of the SLIs over the former half of a time interval.
+        after_composite_sli: A composite SLI holding the average value of the SLIs over the latter half of a time interval.
+
+    Returns:
+        A class name to be added to the element.
+    """
+
+    before_subclass, after_subclass = (
+        constants.NO_DATA_SUBCLASS,
+        constants.NO_DATA_SUBCLASS,
+    )
+    if before_composite_sli is not None:
+        before_subclass = Status.Name(before_composite_sli.status)
+    if after_composite_sli is not None:
+        after_subclass = Status.Name(after_composite_sli.status)
+
+    if before_subclass == after_subclass != constants.NO_DATA_SUBCLASS:
+        # Extra asserts here to make mypy happy
+        assert before_composite_sli is not None
+        assert after_composite_sli is not None
+
+        slo_target = (
+            before_composite_sli.slo_target
+        )  # this should be the same for both the before and after sli
+        if abs(slo_target - before_composite_sli.sli_value) < abs(
+            slo_target - after_composite_sli.sli_value
+        ):
+            after_subclass += f"_{constants.WORSENED_SUBCLASS}"
+        else:
+            after_subclass += f"_{constants.IMPROVED_SUBCLASS}"
+
+    return f"{before_subclass}_{after_subclass}"

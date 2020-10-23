@@ -7,16 +7,11 @@ They are commonly used to perform operations on cytoscape graph elements.
 import datetime as dt
 import uuid
 from collections import defaultdict, deque
-from typing import TYPE_CHECKING, Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Tuple
 
 from graph_structures_pb2 import SLI, NodeType, Status
 
-from . import compute_status, constants, rpc_client, state, utils
-
-if TYPE_CHECKING:
-    from graph_structures_pb2 import (
-        SLITypeValue,  # pylint: disable=no-name-in-module  # pragma: no cover
-    )
+from . import compute_status, constants, state, utils
 
 
 def apply_node_property_classes(
@@ -102,28 +97,25 @@ def apply_view_classes(elements, tag_map, view_list):
 
 def apply_change_over_time_classes(
     elements: List[Dict[str, Any]],
+    slis: List[SLI],
     start_time: dt.datetime,
     end_time: dt.datetime,
-    sli_type: "SLITypeValue",
 ) -> List[Dict[str, Any]]:
     """Applies classes to elements based on the change in SLIs over the time range.
 
     Args:
-        elements: A list of cytoscape elements
+        elements: A list of cytoscape elements.
+        slis: A list of SLI protos.
         start_time: The start time of the time range to compute aggregate status over.
         end_time: The end time of the time range to compute aggregate status over.
-        sli_type: The SLI type of interest
+        sli_type: The SLI type of interest.
 
     Returns:
-        a A new list of elements with the change over time classes applied.
+        A new list of elements with the change over time classes applied.
     """
-    sli_response = rpc_client.get_slis(
-        start_time=start_time,
-        end_time=end_time,
-        sli_types=[sli_type],
-    )
+
     node_name_sli_map = defaultdict(list)
-    for sli in sli_response.slis:
+    for sli in slis:
         node_name_sli_map[sli.node_name].append(sli)
 
     output_elements = []
@@ -133,10 +125,19 @@ def apply_change_over_time_classes(
             output_elements.append(element.copy())
         else:
             element_copy = element.copy()
-            change_over_time_class = get_change_over_time_class_from_sli_list(
+            (
+                before_composite_sli,
+                after_composite_sli,
+            ) = generate_before_after_composite_slis(
                 node_name_sli_map[ujt_id],
                 start_time,
                 end_time,
+            )
+            change_over_time_class = (
+                utils.get_change_over_time_class_from_composite_slis(
+                    before_composite_sli,
+                    after_composite_sli,
+                )
             )
             element_copy["classes"] += f" {change_over_time_class}"
             output_elements.append(element_copy)
@@ -144,24 +145,21 @@ def apply_change_over_time_classes(
     return output_elements
 
 
-def get_change_over_time_class_from_sli_list(
+def generate_before_after_composite_slis(
     slis: List[SLI], start_time: dt.datetime, end_time: dt.datetime
-) -> str:
-    """Returns the correct coloring/gradient based on the SLI values over time.
+) -> Tuple[Optional[SLI], Optional[SLI]]:
+    """Generates two composite SLIs from the slis in each half of the specified time range.
 
-    We denote parts of a full styling class as a subclass.
-    These include STATUS_HEALTHY, IMPROVED, etc.
-    We join the subclasses together with underscore as a delimiter to create a full class name,
-    that has an assoiated style.
+    The composite SLI's value is the average of the individual SLI values in the appropriate range.
 
     Args:
-        slis: A non-empty list of timestamped SLIs.
+        slis: A list of SLIs within the tine range
+        start_time: The start of the time range
+        end_time: The end of the time range
 
     Returns:
-        a class name to be added to the element
+        A tuple of two composite SLIs. It will never return (None, None)
     """
-
-    # This shouldn't occur, since the caller uses a defaultdict
     if slis == []:
         raise ValueError
 
@@ -175,8 +173,6 @@ def get_change_over_time_class_from_sli_list(
 
     # Compute the average value before and after min_time, and note the appropriate class
     composite_slis: List[Optional[SLI]] = [None, None]
-    # subclasses holds the class for styling of the left and right half of the element
-    subclasses: List[str] = [constants.NO_DATA_SUBCLASS, constants.NO_DATA_SUBCLASS]
     for idx, sli_sublist in enumerate([slis_before, slis_after]):
         if sli_sublist != []:
             composite_sli = SLI()
@@ -190,24 +186,8 @@ def get_change_over_time_class_from_sli_list(
             compute_status.compute_sli_status(composite_sli)
 
             composite_slis[idx] = composite_sli
-            subclasses[idx] = Status.Name(composite_sli.status)
 
-    # Notice that composite_slis can never be [None, None], since we ensured slis != [] above.
-    # Thus, the subclasses can never be equal unless there are two valid composite SLIs
-    if subclasses[0] == subclasses[1]:
-        # Extra asserts here to make mypy happy
-        assert composite_slis[0] is not None
-        assert composite_slis[1] is not None
-
-        slo_target = composite_slis[0].slo_target
-        if abs(slo_target - composite_slis[0].sli_value) < abs(
-            slo_target - composite_slis[1].sli_value
-        ):
-            subclasses[1] += f"_{constants.IMPROVED_SUBCLASS}"
-        else:
-            subclasses[1] += f"_{constants.WORSENED_SUBCLASS}"
-
-    return "_".join(subclasses)
+    return (composite_slis[0], composite_slis[1])  # explicitly return as a tuple
 
 
 def apply_highlighted_edge_class_to_elements(elements, user_journey_name):

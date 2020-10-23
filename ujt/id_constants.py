@@ -154,5 +154,8 @@ CHANGE_OVER_TIME_ERROR_TOAST = "change-over-time-error-toast"
 START_TIME_INPUT = "start-time-input"
 END_TIME_INPUT = "end-time-input"
 WINDOW_SIZE_INPUT = "window-size-input"
-TIME_RANGE_STORE = "time-range-store"
+CHANGE_OVER_TIME_SLI_STORE = "change-over-time-sli-store"
+
+CHANGE_OVER_TIME_TEXT_OUTPUT_PANEL = "change-over-time-text-output-panel"
+CHANGE_OVER_TIME_DATATABLE = "change-over-time-datatable"
 # endregion
