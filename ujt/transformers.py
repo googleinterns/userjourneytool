@@ -373,3 +373,29 @@ def apply_slis_to_node_map(sli_list, node_map):
         node.slis.extend(new_node_slis)
 
     return node_map
+
+
+def reorder_elements_by_type(elements):
+    """Returns a list of elements organized by element type.
+
+    For context, see https://github.com/plotly/dash-cytoscape/issues/112
+    and https://github.com/googleinterns/userjourneytool/issues/63
+
+    Args:
+        elements: a list of cytoscape elements.
+
+    Retruns:
+        a list of cytoscape elements organized by element type.
+    """
+
+    # other_nodes holds elements representing parents, or nodes without children
+    edges, children, other_nodes = [], [], []
+    for element in elements:
+        if "source" in element["data"]:
+            edges.append(element)
+        elif "parent" in element["data"]:
+            children.append(element)
+        else:
+            other_nodes.append(element)
+
+    return edges + other_nodes + children
