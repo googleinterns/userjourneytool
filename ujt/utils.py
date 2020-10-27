@@ -18,31 +18,32 @@ Can be refactored into multiple files if necessary.
 
 import json
 from collections import deque
+from typing import Any, Dict, Optional, Tuple
 
 from . import constants
 
 
-def is_client_cytoscape_node(tap_node):
+def is_client_cytoscape_node(tap_node: Dict[str, Any]) -> bool:
     return constants.CLIENT_CLASS in tap_node["classes"].split(" ")
 
 
-def relative_name(full_name):
+def relative_name(full_name: str) -> str:
     return full_name.split(".")[-1]
 
 
-def parent_full_name(full_name):
+def parent_full_name(full_name) -> str:
     return full_name.rsplit(".", 1)[0]
 
 
-def human_readable_enum_name(enum_value, enum_class):
+def human_readable_enum_name(enum_value, enum_class) -> str:
     return enum_class.Name(enum_value).split("_")[-1]
 
 
-def is_node_element(element):
+def is_node_element(element) -> bool:
     return not "source" in element["data"].keys()
 
 
-def ctx_triggered_info(ctx):
+def ctx_triggered_info(ctx) -> Tuple[Optional[str], Optional[str], Optional[Any]]:
     triggered_id, triggered_prop, triggered_value = None, None, None
     if ctx.triggered:
         triggered_id, triggered_prop = ctx.triggered[0]["prop_id"].split(".")
@@ -122,13 +123,13 @@ def dict_to_str(input_dict, indent=4):
     return json.dumps(input_dict, indent=indent)
 
 
-def get_latest_tapped_element(tap_node, tap_edge):
-    # is this a hack?
-    try:
-        element = (
-            tap_node if tap_node["timeStamp"] > tap_edge["timeStamp"] else tap_edge
-        )
-    except TypeError:  # either tap_node or tap_edge are None
-        element = tap_node if tap_edge is None else tap_edge
+def get_latest_tapped_element(
+    tap_node: Optional[Dict[str, Any]], tap_edge: Optional[Dict[str, Any]]
+):
+    if tap_node is None:
+        return tap_edge
 
-    return element
+    if tap_edge is None:
+        return tap_node
+
+    return tap_node if tap_node["timeStamp"] > tap_edge["timeStamp"] else tap_edge

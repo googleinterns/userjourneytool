@@ -243,9 +243,11 @@ def get_node_info_panel_components(node_name):
     if node_name in node_name_message_map:
         node = node_name_message_map[node_name]
         is_virtual_node = False
-    else:
+    elif node_name in virutal_node_map:
         node = virutal_node_map[node_name]
         is_virtual_node = True
+    else:
+        raise ValueError
 
     header = html.H2(
         f"{utils.relative_name(node_name)} ({utils.human_readable_enum_name(node.node_type, NodeType)})"

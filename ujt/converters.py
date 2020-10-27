@@ -49,6 +49,7 @@ def cytoscape_element_from_node(node):
             # ujt_id is left unmodified, used for internal indexing into maps
             "ujt_id": node.name,
         },
+        "classes": "",
     }
     if node.parent_name:
         node_element["data"]["parent"] = node.parent_name
@@ -70,6 +71,7 @@ def cytoscape_element_from_client(client):
             "label": client.name,
             "ujt_id": client.name,
         },
+        "classes": "",
     }
     return client_element
 
@@ -87,7 +89,8 @@ def cytoscape_element_from_dependency(dependency):
         "data": {
             "source": dependency.source_name,
             "target": dependency.target_name,
-        }
+        },
+        "classes": "",
     }
     # careful! cytoscape element source is the Client node, but the Dependency's source_name should be a fully qualified UserJourney name
     if dependency.toplevel:
@@ -184,13 +187,14 @@ def datatable_from_slis(slis, table_id):
             "name": name,
             "id": name,
         }
-        for name in ["Type", "Status", "Value", "Warn Range", "Error Range"]
+        for name in ["Type", "Status", "Value", "Target", "Warn Range", "Error Range"]
     ]
     data = [
         {
             "Type": utils.human_readable_enum_name(sli.sli_type, SLIType),
             "Status": utils.human_readable_enum_name(sli.status, Status),
             "Value": round(sli.sli_value, 2),
+            "Target": round(sli.slo_target, 2),
             "Warn Range": f"({sli.slo_warn_lower_bound}, {sli.slo_warn_upper_bound})",
             "Error Range": f"({sli.slo_error_lower_bound}, {sli.slo_error_upper_bound})",
         }
