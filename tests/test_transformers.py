@@ -311,3 +311,70 @@ def test_apply_uuid_to_elements(patch_path, assert_same_elements):
             node_elements + edge_elements
         )
         assert_same_elements(returned_elements, expected_elements)
+
+
+def test_sort_nodes_by_parent_relationship():
+    node_names = ["Node0", "Node1", "Node2", "Node3", "Node4"]
+    # Node0 contains Node1 and Node2
+    # Node1 contains Node3
+    # Node2 contains Node4
+    node_elements = [
+        {
+            "data": {
+                "id": node_names[0],
+            },
+        },
+        {
+            "data": {
+                "id": node_names[1],
+                "parent": node_names[0],
+            },
+        },
+        {
+            "data": {
+                "id": node_names[2],
+                "parent": node_names[0],
+            },
+        },
+        {
+            "data": {
+                "id": node_names[3],
+                "parent": node_names[1],
+            },
+        },
+        {
+            "data": {
+                "id": node_names[4],
+                "parent": node_names[2],
+            },
+        },
+    ]
+    # We declare the input in topological order so it's easier to understand
+    # Reverse so it's in reverse topological order
+    reversed_node_elements = node_elements[::-1]
+
+    edge_elements = [
+        {
+            "data": {
+                "source": node_names[0],
+                "target": node_names[1],
+            },
+        },
+    ]
+
+    returned_elements = ujt.transformers.sort_nodes_by_parent_relationship(
+        reversed_node_elements + edge_elements
+    )
+
+    assert returned_elements.index(node_elements[0]) < returned_elements.index(
+        node_elements[1]
+    )
+    assert returned_elements.index(node_elements[0]) < returned_elements.index(
+        node_elements[2]
+    )
+    assert returned_elements.index(node_elements[1]) < returned_elements.index(
+        node_elements[3]
+    )
+    assert returned_elements.index(node_elements[2]) < returned_elements.index(
+        node_elements[4]
+    )
