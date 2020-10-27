@@ -200,6 +200,17 @@ DATATABLE_CONDITIONAL_STYLE = [
     },
 ]
 
+DATATABLE_STYLE = {
+    "overflowX": "auto",
+}
+
+DATATABLE_CSS = [
+    {
+        "selector": ".row",
+        "rule": "margin: 0",
+    },
+]
+
 CLEAR_CACHE_ON_STARTUP = True  # DEBUG_REMOVE
 CACHE_DEFAULT_VALUES = {
     id_constants.VIRTUAL_NODE_MAP: {},  # Dict[str, VirtualNode]
