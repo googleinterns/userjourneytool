@@ -375,8 +375,8 @@ def apply_slis_to_node_map(sli_list, node_map):
     return node_map
 
 
-def reorder_elements_by_type(elements):
-    """Returns a list of elements organized by element type.
+def sort_nodes_by_parent_relationship(elements):
+    """Returns a list of elements where node parents always appear before node children.
 
     For context, see https://github.com/plotly/dash-cytoscape/issues/112
     and https://github.com/googleinterns/userjourneytool/issues/63
@@ -384,18 +384,33 @@ def reorder_elements_by_type(elements):
     Args:
         elements: a list of cytoscape elements.
 
-    Retruns:
-        a list of cytoscape elements organized by element type.
+    Returns:
+        a list of topologically sorted cytoscape elements.
     """
-
-    # other_nodes holds elements representing parents, or nodes without children
-    edges, children, other_nodes = [], [], []
+    edges = []
+    node_id_element_map = {}
     for element in elements:
-        if "source" in element["data"]:
-            edges.append(element)
-        elif "parent" in element["data"]:
-            children.append(element)
+        if utils.is_node_element(element):
+            node_id_element_map[element["data"]["id"]] = element
         else:
-            other_nodes.append(element)
+            edges.append(element)
 
-    return edges + other_nodes + children
+    parent_child_map = defaultdict(list)
+    bfs_queue = deque()
+    # build a tree from parents to children
+    # (reversing the edge direction of cytoscape format)
+    for node in node_id_element_map.values():
+        node_id = node["data"]["id"]
+        if "parent" in node["data"]:
+            parent_id = node["data"]["parent"]
+            parent_child_map[parent_id].append(node_id)
+        else:
+            bfs_queue.append(node_id)
+
+    topologically_sorted_nodes = []
+    while bfs_queue:
+        node_id = bfs_queue.popleft()
+        bfs_queue.extend(parent_child_map[node_id])
+        topologically_sorted_nodes.append(node_id_element_map[node_id])
+
+    return edges + topologically_sorted_nodes

@@ -230,7 +230,7 @@ def update_graph_elements(
     # Workaround for https://github.com/plotly/dash-cytoscape/issues/106
     # Give new ids to Cytoscape to avoid immutability of edges and parent relationships.
     elements = transformers.apply_uuid_to_elements(elements, this_uuid=uuid)
-    elements = transformers.reorder_elements_by_type(elements)
+    elements = transformers.sort_nodes_by_parent_relationship(elements)
     return elements
 
 
