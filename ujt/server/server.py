@@ -4,7 +4,7 @@ import datetime as dt
 import pathlib
 import random
 from concurrent import futures
-from typing import Dict, TYPE_CHECKING
+from typing import TYPE_CHECKING, Dict
 
 import grpc
 import server_pb2
@@ -94,6 +94,7 @@ def generate_interval_slis(
             sli_value=sli_value,
             slo_target=generate_data.SLO_TARGET,
             sli_type=sli_type,
+            intra_status_change_threshold=generate_data.INTRA_STATUS_CHANGE_THRESHOLD,
             **generate_data.SLO_BOUNDS,  # type: ignore
         )
         sli.timestamp.FromDatetime(current_time)

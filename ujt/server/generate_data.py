@@ -102,6 +102,7 @@ SLO_BOUNDS: Dict[str, float] = {
     "slo_error_upper_bound": 0.9,
 }
 SLO_TARGET = 0.5
+INTRA_STATUS_CHANGE_THRESHOLD = 0.03
 
 
 def generate_nodes():
@@ -127,6 +128,7 @@ def generate_nodes():
                     sli_value=random.random(),
                     slo_target=SLO_TARGET,
                     sli_type=SLIType.SLITYPE_AVAILABILITY,
+                    intra_status_change_threshold=INTRA_STATUS_CHANGE_THRESHOLD,
                     **SLO_BOUNDS,
                 )
             ]
@@ -152,6 +154,7 @@ def generate_nodes():
                         sli_value=random.random(),
                         slo_target=SLO_TARGET,
                         sli_type=SLIType.SLITYPE_LATENCY,
+                        intra_status_change_threshold=INTRA_STATUS_CHANGE_THRESHOLD,
                         **SLO_BOUNDS,
                     )
                 ]

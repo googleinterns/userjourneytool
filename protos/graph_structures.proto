@@ -45,6 +45,7 @@ message SLI {
 
     optional google.protobuf.Timestamp timestamp = 10;
     optional double slo_target = 11;
+    optional double intra_status_change_threshold = 12;
 }
 
 message UserJourney {
