@@ -1,13 +1,18 @@
 """ Provides a function to register callbacks connecting the relevant signals.
 """
 
+import dash
 from dash.dependencies import Input, Output
 
-from .. import constants, id_constants
+from .. import id_constants, utils
 from ..dash_app import app
 
 # We don't place this in constants or id_constants since it's more relevant here.
 COMPOSITE_SIGNAL_MAP = {
+    id_constants.SIGNAL_VIRTUAL_NODE_UPDATE: (
+        id_constants.SIGNAL_VIRTUAL_NODE_ADD,
+        id_constants.SIGNAL_VIRTUAL_NODE_DELETE,
+    ),
     id_constants.SIGNAL_TAG_UPDATE: (
         id_constants.SIGNAL_TAG_CREATE,
         id_constants.SIGNAL_TAG_DELETE,
@@ -55,9 +60,13 @@ def generate_generic_update_signal(*args, **kwargs):
     and combine them with this callback is a workaround.
 
     Returns:
-        A OK signal constant.
+        The value of the signal that caused the composite signal to update.
     """
-    return constants.OK_SIGNAL
+
+    ctx = dash.callback_context
+    triggered_id, triggered_prop, triggered_value = utils.ctx_triggered_info(ctx)
+
+    return triggered_value
 
 
 def generate_composite_signals():
