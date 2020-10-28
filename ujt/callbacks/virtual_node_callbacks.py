@@ -88,8 +88,7 @@ def delete_virtual_node(
 
     Args:
         delete_n_clicks_timestamp: Timestamp of when the delete button was clicked. Value unused, input only provided to register callback.
-        selected_node_data: List of data dictionaries of selected cytoscape elements.
-        virtual_node_name: The name of the virtual node to add or delete.
+        virtual_node_name: The name of the virtual node to delete.
 
     Returns:
         A string to be placed in the children property of the SIGNAL_VIRTUAL_NODE_DELETE hidden div.
@@ -107,6 +106,72 @@ def delete_virtual_node(
 
 
 @app.callback(
+    Output(id_constants.SIGNAL_VIRTUAL_NODE_EXPAND, "children"),
+    Input(id_constants.EXPAND_VIRTUAL_NODE_BUTTON, "n_clicks_timestamp"),
+    State(id_constants.VIRTUAL_NODE_INPUT, "value"),
+    prevent_initial_call=True,
+)
+def expand_virtual_node(
+    expand_n_clicks_timestamp,
+    virtual_node_name,
+) -> str:
+    """Expands a virtual node.
+
+    This function is called:
+        when the expand virtual node button is clicked
+
+    Args:
+        expand_n_clicks_timestamp: Timestamp of when the virtual node button was clicked.
+            Value unused, input only provided to register callback.
+        virtual_node_name: The name of the virtual node to expand.
+
+    Returns:
+        OK_SIGNAL or an error message to be placed in the error modal.
+    """
+    virtual_node_map = state.get_virtual_node_map()
+
+    if virtual_node_name not in virtual_node_map:
+        return "Error: Please enter a name of virtual node!"
+
+    state.set_virtual_node_collapsed_state(virtual_node_name, collapsed=False)
+
+    return constants.OK_SIGNAL
+
+
+@app.callback(
+    Output(id_constants.SIGNAL_VIRTUAL_NODE_COLLAPSE, "children"),
+    Input(id_constants.COLLAPSE_VIRTUAL_NODE_BUTTON, "n_clicks_timestamp"),
+    State(id_constants.VIRTUAL_NODE_INPUT, "value"),
+    prevent_initial_call=True,
+)
+def collapse_virtual_node(
+    collapse_n_clicks_timestamp,
+    virtual_node_name,
+) -> str:
+    """Collapses a virtual node.
+
+    This function is called:
+        when the collapse virtual node button is clicked
+
+    Args:
+        expand_n_clicks_timestamp: Timestamp of when the virtual node button was clicked.
+            Value unused, input only provided to register callback.
+        virtual_node_name: The name of the virtual node to expand.
+
+    Returns:
+        OK_SIGNAL or an error message to be placed in the error modal.
+    """
+    virtual_node_map = state.get_virtual_node_map()
+
+    if virtual_node_name not in virtual_node_map:
+        return "Error: Please enter a name of virtual node!"
+
+    state.set_virtual_node_collapsed_state(virtual_node_name, collapsed=True)
+
+    return constants.OK_SIGNAL
+
+
+@app.callback(
     [
         Output(id_constants.COLLAPSE_ERROR_MODAL, "is_open"),
         Output(id_constants.COLLAPSE_ERROR_MODAL_BODY, "children"),
@@ -117,10 +182,11 @@ def delete_virtual_node(
     ],
     prevent_initial_call=True,
 )
-def toggle_collapse_error_modal(
-    n_clicks_timestamp, signal_message
+def update_virtual_node_error_modal(
+    n_clicks_timestamp,
+    signal_message,
 ) -> Tuple[bool, Optional[Any]]:
-    """Closes and opens the error modal.
+    """Updates the error modal message and open state.
 
     This function is called:
         when an error occurs during the validation of virtual node creation/deletion
@@ -149,16 +215,23 @@ def toggle_collapse_error_modal(
 
 @app.callback(
     Output(id_constants.USER_JOURNEY_DROPDOWN, "options"),
-    Input(id_constants.SIGNAL_VIRTUAL_NODE_UPDATE, "children"),
+    [
+        Input(id_constants.SIGNAL_VIRTUAL_NODE_ADD, "children"),
+        Input(id_constants.SIGNAL_VIRTUAL_NODE_DELETE, "children"),
+    ],
 )
-def update_user_journey_dropdown_options(virtual_node_update_signal):
+def update_user_journey_dropdown_options(
+    virtual_node_add_signal,
+    virtual_node_delete_signal,
+):
     """Updates the options in the user journey dropdown on virtual node changes.
 
     This function is called:
         when a virtual node is created or deleted.
 
     Args:
-        virtual_node_update_signal: Signal indicating a virtual node was modified.
+        virtual_node_add_signal: Signal indicating a virtual node was added.
+        virtual_node_delete_signal: Signal indicating a virtual node was deleted.
 
     Returns:
         A list of options for the user journey dropdown.

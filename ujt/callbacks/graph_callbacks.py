@@ -28,8 +28,6 @@ from ..dash_app import app
         Input(id_constants.REFRESH_SLI_BUTTON, "n_clicks_timestamp"),
         Input({id_constants.USER_JOURNEY_DATATABLE: ALL}, "selected_row_ids"),
         Input(id_constants.SIGNAL_VIRTUAL_NODE_UPDATE, "children"),
-        Input(id_constants.COLLAPSE_VIRTUAL_NODE_BUTTON, "n_clicks_timestamp"),
-        Input(id_constants.EXPAND_VIRTUAL_NODE_BUTTON, "n_clicks_timestamp"),
         Input({id_constants.OVERRIDE_DROPDOWN: ALL}, "value"),
         Input(id_constants.SIGNAL_COMPOSITE_TAGGING_UPDATE, "children"),
         Input(id_constants.CHANGE_OVER_TIME_SLI_STORE, "data"),
@@ -37,7 +35,6 @@ from ..dash_app import app
     [
         State(id_constants.CYTOSCAPE_GRAPH, "elements"),
         State(id_constants.CYTOSCAPE_GRAPH, "selectedNodeData"),
-        State(id_constants.VIRTUAL_NODE_INPUT, "value"),
         State(id_constants.CYTOSCAPE_GRAPH, "tapNode"),
         State(id_constants.VIEW_STORE, "data"),
     ],
@@ -47,15 +44,12 @@ def update_graph_elements(
     refresh_n_clicks_timestamp: int,
     user_journey_table_selected_row_ids: List[str],
     virtual_node_update_signal: str,
-    collapse_n_clicks_timestamp: int,
-    expand_n_clicks_timestamp: int,
     override_dropdown_value: int,
     composite_tagging_update_signal: str,
     change_over_time_data: Dict[str, Any],
     # State
     state_elements: List[Dict[str, Any]],
     selected_node_data: List[Dict[str, Any]],
-    virtual_node_input_value: str,
     tap_node: Dict[str, Any],
     view_list: List[Tuple[str, str]],
 ):
@@ -65,9 +59,7 @@ def update_graph_elements(
         on startup to generate the graph
         when the refresh button is clicked to regenerate the graph
         when row is selected in the User Journey Datatable to highlight the User Journey edges through the path
-        when a virtual node is added or deleted (via the SIGNAL_VIRTUAL_NODE_UPDATE)
-        when the collapse button is clicked virtual node
-        when the expand button is clicked to expand virtual nodes
+        when a virtual node is updated (via the SIGNAL_VIRTUAL_NODE_UPDATE)
         when a tag, style, or view is updated.
 
     We need this callback to handle these (generally unrelated) situations because Dash only supports assigning
@@ -79,10 +71,6 @@ def update_graph_elements(
         user_journey_table_selected_row_ids: List of selected row ids from the user journey datatable.
             Should contain only one element. Used for highlighting a path through the graph.
         virtual_node_update_signal: String used as a signal to indicate that the virtual node addition/deletion was valid.
-        collapse_n_clicks_timestamp: Timestamp of when the collapse button was clicked.
-            Value unused, input only provided to register callback.
-        expand_n_clicks_timestamp: Timestamp of when the expand button was clicked.
-            Value unused, input only provided to register callback.
         override_dropdown_value: Status enum value of the status to override for the node.
         change_over_time_data: Either an empty dictionary, or a dictionary with keys
             "start_timestamp" mapped to a float POSIX timestamp,
@@ -94,8 +82,6 @@ def update_graph_elements(
         state_elements: The list of current cytoscape graph elements.
         selected_node_data: The list of data dictionaries for selected nodes.
             Used to create virtual nodes.
-        virtual_node_input_value: The value of the virtual node input box.
-            Used to perform all virtual node operations.
         tap_node: The cytoscape element of the latest tapped node.
             Used to check which node to override the status of.
         view_list: The current list of views (specific to each browser).
@@ -171,14 +157,6 @@ def update_graph_elements(
     # This greatly simplifies the implementation each individual transformation, since each step doesn't
     # need to account for changes introduced each subsequent step.
     # However, this isn't the most efficient approach.
-
-    if triggered_id == id_constants.COLLAPSE_VIRTUAL_NODE_BUTTON:
-        state.set_virtual_node_collapsed_state(virtual_node_input_value, collapsed=True)
-
-    if triggered_id == id_constants.EXPAND_VIRTUAL_NODE_BUTTON:
-        state.set_virtual_node_collapsed_state(
-            virtual_node_input_value, collapsed=False
-        )
 
     elements = transformers.apply_virtual_nodes_to_elements(elements)
 

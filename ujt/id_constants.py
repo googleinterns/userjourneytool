@@ -22,6 +22,8 @@ component ids place the component type at the end.
 # region signals
 SIGNAL_VIRTUAL_NODE_ADD = "add-virtual-node-signal"
 SIGNAL_VIRTUAL_NODE_DELETE = "delete-virtual-node-signal"
+SIGNAL_VIRTUAL_NODE_COLLAPSE = "collapse-virtual-node-signal"
+SIGNAL_VIRTUAL_NODE_EXPAND = "expand-virtual-node-signal"
 SIGNAL_VIRTUAL_NODE_UPDATE = "virtual-node-update-signal"
 
 SIGNAL_TAG_CREATE = "create-tag-signal"
@@ -50,6 +52,8 @@ SIGNAL_WRAPPER_DIV = "signal-wrapper-div"
 SIGNALS = [
     SIGNAL_VIRTUAL_NODE_ADD,
     SIGNAL_VIRTUAL_NODE_DELETE,
+    SIGNAL_VIRTUAL_NODE_COLLAPSE,
+    SIGNAL_VIRTUAL_NODE_EXPAND,
     SIGNAL_VIRTUAL_NODE_UPDATE,
     # ---
     SIGNAL_TAG_CREATE,
