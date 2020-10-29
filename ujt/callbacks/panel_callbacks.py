@@ -149,8 +149,10 @@ def generate_user_journey_info_panel(dropdown_value: str) -> List[Any]:
 
 @app.callback(
     Output(id_constants.CREATE_TAG_PANEL, "children"),
-    Input(id_constants.SIGNAL_TAG_CREATE, "children"),
-    Input(id_constants.SIGNAL_TAG_DELETE, "children"),
+    [
+        Input(id_constants.SIGNAL_TAG_CREATE, "children"),
+        Input(id_constants.SIGNAL_TAG_DELETE, "children"),
+    ],
 )
 def generate_create_tag_panel(create_tag_signal, delete_tag_signal):
     """Handles generating the tag creation and deletion panel.
