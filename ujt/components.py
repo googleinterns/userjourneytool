@@ -135,6 +135,10 @@ def get_virtual_node_control_components():
             id=id_constants.EXPAND_VIRTUAL_NODE_BUTTON,
             children="Expand",
         ),
+        dbc.Button(
+            id=id_constants.TOGGLE_ALL_VIRTUAL_NODE_BUTTON,
+            children="Toggle All Collapsed State",
+        ),
     ]
     return components
 

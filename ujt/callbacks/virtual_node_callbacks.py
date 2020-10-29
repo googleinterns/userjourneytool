@@ -172,6 +172,32 @@ def collapse_virtual_node(
 
 
 @app.callback(
+    Output(id_constants.SIGNAL_VIRTUAL_NODE_TOGGLE_ALL, "children"),
+    Input(id_constants.TOGGLE_ALL_VIRTUAL_NODE_BUTTON, "n_clicks"),
+    prevent_initial_call=True,
+)
+def toggle_all_collapse_virtual_node(toggle_all_n_clicks: int) -> str:
+    """Collapses and expands all virtual nodes.
+
+    This function is called:
+        when the toggle all virtual node button is clicked
+
+    Args:
+        toggle_all_n_clicks: Number of times the toggle all virtual node button was clicked.
+
+    Returns:
+        OK_SIGNAL.
+    """
+
+    collapsed = toggle_all_n_clicks % 2 == 0
+    virtual_node_map = state.get_virtual_node_map()
+    for virtual_node_name in virtual_node_map:
+        state.set_virtual_node_collapsed_state(virtual_node_name, collapsed=collapsed)
+
+    return constants.OK_SIGNAL
+
+
+@app.callback(
     [
         Output(id_constants.COLLAPSE_ERROR_MODAL, "is_open"),
         Output(id_constants.COLLAPSE_ERROR_MODAL_BODY, "children"),
