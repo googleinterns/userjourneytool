@@ -322,20 +322,25 @@ def change_over_time_datatable_from_composite_slis(
 
 
 # region dropdowns
-def dropdown_options_from_maps(
+def user_journey_dropdown_options_from_maps(
     node_name_message_map: Dict[str, Node],
     client_name_message_map: Dict[str, Client],
     virtual_node_map: Dict[str, VirtualNode],
 ):
 
-    type_labels = ["NODE", "CLIENT", "VIRTUAL NODE"]
+    type_labels = ["CLIENT", "NODE", "VIRTUAL NODE"]
     maps: List[Dict[str, Any]] = [
-        node_name_message_map,
         client_name_message_map,
+        node_name_message_map,
         virtual_node_map,
     ]
 
-    options = []
+    options = [
+        {
+            "label": constants.ALL_USER_JOURNEY_DROPDOWN_VALUE,
+            "value": constants.ALL_USER_JOURNEY_DROPDOWN_VALUE,
+        }
+    ]
 
     for type_label, proto_map in zip(type_labels, maps):
         options += [

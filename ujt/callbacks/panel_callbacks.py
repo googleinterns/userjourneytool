@@ -9,7 +9,7 @@ from dash.dependencies import Input, Output, State
 from dash.exceptions import PreventUpdate
 from graph_structures_pb2 import UserJourney
 
-from .. import components, converters, id_constants, state, utils
+from .. import components, constants, converters, id_constants, state, utils
 from ..dash_app import app
 
 
@@ -113,6 +113,14 @@ def generate_user_journey_info_panel(dropdown_value: str) -> List[Any]:
     node_name_message_map, client_name_message_map = state.get_message_maps()
     virtual_node_map = state.get_virtual_node_map()
 
+    if dropdown_value == constants.ALL_USER_JOURNEY_DROPDOWN_VALUE:
+        all_user_journeys: List[UserJourney] = []
+        for client in client_name_message_map.values():
+            all_user_journeys += client.user_journeys
+        return converters.user_journey_datatable_from_user_journeys(
+            all_user_journeys, id_constants.USER_JOURNEY_DATATABLE
+        )
+
     if dropdown_value in client_name_message_map:
         client = client_name_message_map[dropdown_value]
         return converters.user_journey_datatable_from_user_journeys(
@@ -133,15 +141,16 @@ def generate_user_journey_info_panel(dropdown_value: str) -> List[Any]:
         node_names_in_virtual_node = utils.get_all_node_names_within_virtual_node(
             dropdown_value, node_name_message_map, virtual_node_map
         )
-        user_journeys = []
-        # maybe we can try to improve this if the input size is large
+
+        user_journey_map = {}
         for node_name in node_names_in_virtual_node:
             for user_journey in node_user_journey_map[node_name]:
-                if user_journey not in user_journeys:
-                    user_journeys.append(user_journey)
+                user_journey_name = f"{user_journey.client_name}.{user_journey.name}"
+                if user_journey_name not in user_journey_map:
+                    user_journey_map[user_journey_name] = user_journey
 
         return converters.user_journey_datatable_from_user_journeys(
-            user_journeys, id_constants.USER_JOURNEY_DATATABLE
+            user_journey_map.values(), id_constants.USER_JOURNEY_DATATABLE
         )
 
     raise ValueError
