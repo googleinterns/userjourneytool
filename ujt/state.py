@@ -420,40 +420,54 @@ def set_node_override_status(
     set_override_status_map(override_status_map)
 
 
-# @cache.memoize()  # this is commented out for consistent testing # DEBUG_REMOVE
+@cache.memoize()
 def get_node_to_user_journey_map() -> Dict[str, List[UserJourney]]:
-    # map the node name to user journey names that pass through the node
-    # should this be in state? it's memoized but doesn't really affect state
-    # however, it's kind of similar to the other maps we expose in state.py,
-    # only this one is dynamically generated once...
+    """Generates a map from node name to user journey that pass through the node.
+
+    We place this function in module state, but it doesn't really produce/modify state.
+    It is, however, conceptually similar to the other maps that are exposed in this module.
+    This one is just dynamically generated once.
+
+    Returns:
+        a dictionary associating node names and user journeys that pass through the node.
+    """
     node_name_message_map, client_name_message_map = get_message_maps()
-    output_map: DefaultDict[str, List[UserJourney]] = defaultdict(
-        list
-    )  # we would prefer to use a set here, but protobufs are not hashable
+
+    user_journey_map: Dict[str, UserJourney] = {}
+    node_name_user_journey_name_map: DefaultDict[str, Set[str]] = defaultdict(set)
+
     for client in client_name_message_map.values():
         for user_journey in client.user_journeys:
+            user_journey_name = f"{user_journey.client_name}.{user_journey.name}"
+            user_journey_map[user_journey_name] = user_journey
+
+            # perform a BFS through the user journey
             node_frontier = deque(
                 [dependency.target_name for dependency in user_journey.dependencies]
             )
-
             while node_frontier:
                 current_node_name = node_frontier.popleft()
-                if (
-                    user_journey not in output_map[current_node_name]
-                ):  # since we don't use a set, we check if it exists in the list already
-                    output_map[current_node_name].append(user_journey)
+                node_name_user_journey_name_map[current_node_name].add(
+                    user_journey_name
+                )
 
                 # add all the node's parents
                 parent_name = node_name_message_map[current_node_name].parent_name
                 while parent_name != "":
-                    if user_journey not in output_map[parent_name]:
-                        output_map[parent_name].append(user_journey)
+                    node_name_user_journey_name_map[parent_name].add(user_journey_name)
                     parent_name = node_name_message_map[parent_name].parent_name
 
                 for dependency in node_name_message_map[current_node_name].dependencies:
                     node_frontier.append(dependency.target_name)
 
-    return output_map
+    node_name_user_journey_map: Dict[str, List[UserJourney]] = {}
+    for node_name, user_journey_names in node_name_user_journey_name_map.items():
+        node_name_user_journey_map[node_name] = [
+            user_journey_map[user_journey_name]
+            for user_journey_name in user_journey_names
+        ]
+
+    return node_name_user_journey_map
 
 
 # Maybe we can think about making the following functions the result of
