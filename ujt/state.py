@@ -11,7 +11,7 @@ from graph_structures_pb2 import (
     VirtualNode,
 )
 
-from . import converters, id_constants, rpc_client, utils
+from . import constants, converters, id_constants, rpc_client, utils
 from .dash_app import cache
 
 if TYPE_CHECKING:
@@ -24,11 +24,9 @@ def clear_sli_cache():
     cache.delete_memoized(get_slis)
 
 
-# We use cache.memoize here since the UJT doesn't explicitly write
-# to the list of SLIs, unlike the node or client message maps.
-# This memoization prevents multiple UJT frontends from requesting the reporting server
-# for new data within the same interval.
-@cache.memoize()
+# This memoization prevents multiple UJT frontends from requesting
+# the reporting server for new data within the same interval.
+@cache.memoize(timeout=constants.SERVER_SLI_REFRESH_INTERVAL_SECONDS)
 def get_slis() -> List[SLI]:
     """Gets a list of updated SLIs.
 

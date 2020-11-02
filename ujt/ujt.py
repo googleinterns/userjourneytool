@@ -1,6 +1,6 @@
 """ Main entry point for UJT. """
 
-from . import components, constants, state
+from . import components, constants, id_constants, state
 
 # Ask python reviewer about this.
 # from .callbacks import * doesn't import all modules
@@ -17,6 +17,7 @@ from .callbacks import (  # noqa
     graph_callbacks,
     panel_callbacks,
     signal_callbacks,
+    sli_refresh_callbacks,
     style_callbacks,
     view_callbacks,
     virtual_node_callbacks,
@@ -34,6 +35,10 @@ def initialize_ujt():
     for cache_key, default_value in constants.CACHE_DEFAULT_VALUES.items():
         if cache.get(cache_key) is None:
             cache.set(cache_key, default_value)
+
+    if constants.REFRESH_TOPOLOGY_ON_STARTUP:
+        cache.set(id_constants.NODE_NAME_MESSAGE_MAP, None)
+        cache.set(id_constants.CLIENT_NAME_MESSAGE_MAP, None)
 
     # Request and cache the dependency topology from the reporting server
     state.get_message_maps()

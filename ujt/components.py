@@ -103,6 +103,11 @@ def get_top_row_components():
                                 children="Refresh SLIs",
                             ),
                         ),
+                        dcc.Interval(
+                            id=id_constants.REFRESH_SLI_INTERVAL,
+                            disabled=(not constants.REFRESH_SLI_ON_INTERVAL),
+                            interval=constants.CLIENT_SLI_REFRESH_INTERVAL_MILLIS,
+                        ),
                         dbc.Col(children=get_virtual_node_control_components()),
                         dbc.Col(children=get_batch_apply_tag_components()),
                     ],

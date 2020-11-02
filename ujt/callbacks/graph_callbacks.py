@@ -25,7 +25,7 @@ from ..dash_app import app
 @app.callback(
     Output(id_constants.CYTOSCAPE_GRAPH, "elements"),
     [
-        Input(id_constants.REFRESH_SLI_BUTTON, "n_clicks_timestamp"),
+        Input(id_constants.SIGNAL_SLI_REFRESH, "children"),
         Input({id_constants.USER_JOURNEY_DATATABLE: ALL}, "selected_row_ids"),
         Input(id_constants.SIGNAL_VIRTUAL_NODE_UPDATE, "children"),
         Input({id_constants.OVERRIDE_DROPDOWN: ALL}, "value"),
@@ -41,7 +41,7 @@ from ..dash_app import app
 )
 def update_graph_elements(
     # Input
-    refresh_n_clicks_timestamp: int,
+    sli_refresh_signal: str,
     user_journey_table_selected_row_ids: List[str],
     virtual_node_update_signal: str,
     override_dropdown_value: int,
@@ -66,8 +66,8 @@ def update_graph_elements(
     a single callback to a given output element.
 
     Args:
-        refresh_n_clicks_timestamp: Timestamp of when the refresh button was clicked.
-            Value unused, input only provided to register callback.
+        sli_refresh_signal: Signal indicating SLIs should be refreshed.
+            Value holds the trigger source id (REFRESH_SLI_BUTTON or REFRESH_SLI_INTERVAL)
         user_journey_table_selected_row_ids: List of selected row ids from the user journey datatable.
             Should contain only one element. Used for highlighting a path through the graph.
         virtual_node_update_signal: String used as a signal to indicate that the virtual node addition/deletion was valid.
@@ -112,12 +112,13 @@ def update_graph_elements(
     # This condition determines if we need to recompute node statuses.
     if triggered_id in [
         None,  # initial call
-        id_constants.REFRESH_SLI_BUTTON,
+        id_constants.SIGNAL_SLI_REFRESH,
         id_constants.SIGNAL_VIRTUAL_NODE_UPDATE,
         f"""{{"{id_constants.OVERRIDE_DROPDOWN}":"{id_constants.OVERRIDE_DROPDOWN}"}}""",  # Dash provides the value as a stringified dict
     ]:
-        if triggered_id == id_constants.REFRESH_SLI_BUTTON:
-            state.clear_sli_cache()  # in future, conditionally clear this based on timestamp
+        if triggered_id == id_constants.SIGNAL_SLI_REFRESH:
+            if sli_refresh_signal == id_constants.REFRESH_SLI_BUTTON:
+                state.clear_sli_cache()
             sli_list = state.get_slis()
             node_name_message_map = transformers.apply_slis_to_node_map(
                 sli_list, node_name_message_map
@@ -194,7 +195,7 @@ def update_graph_elements(
             start_time,
             end_time,
         )
-    # print(elements)  # for debugging
+    # print(elements)  # DEBUG_REMOVE
 
     # Determine if we need to generate a new UUID. This minimizes the choppyness of the animation.
     if triggered_id in [None, id_constants.SIGNAL_VIRTUAL_NODE_UPDATE]:
