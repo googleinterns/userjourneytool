@@ -18,7 +18,7 @@ Can be refactored into multiple files if necessary.
 
 import json
 from collections import deque
-from typing import Any, Dict, Optional, Tuple
+from typing import Any, Dict, List, Optional, Tuple
 
 from graph_structures_pb2 import SLI, Status
 
@@ -187,3 +187,18 @@ def get_change_over_time_class_from_composite_slis(
                 after_subclass += f"_{constants.IMPROVED_SUBCLASS}"
 
     return f"{before_subclass}_{after_subclass}"
+
+
+def add_class_mutable(element: Dict[str, Any], class_names: List[str]):
+    """Adds a class to a cytoscape element.
+
+    This function mutates the input element.
+    As such, it should be called only on a copy of the original element
+    when used in a transformer.
+
+    Args:
+        element: a cytoscape element
+        class_names: a list of class names to add to add
+    """
+    class_name_str = " ".join(class_names)
+    element["classes"] += f" {class_name_str}"

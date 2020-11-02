@@ -438,8 +438,7 @@ def get_node_to_user_journey_map() -> Dict[str, List[UserJourney]]:
 
     for client in client_name_message_map.values():
         for user_journey in client.user_journeys:
-            user_journey_name = f"{user_journey.client_name}.{user_journey.name}"
-            user_journey_map[user_journey_name] = user_journey
+            user_journey_map[user_journey.name] = user_journey
 
             # perform a BFS through the user journey
             node_frontier = deque(
@@ -448,13 +447,13 @@ def get_node_to_user_journey_map() -> Dict[str, List[UserJourney]]:
             while node_frontier:
                 current_node_name = node_frontier.popleft()
                 node_name_user_journey_name_map[current_node_name].add(
-                    user_journey_name
+                    user_journey.name
                 )
 
                 # add all the node's parents
                 parent_name = node_name_message_map[current_node_name].parent_name
                 while parent_name != "":
-                    node_name_user_journey_name_map[parent_name].add(user_journey_name)
+                    node_name_user_journey_name_map[parent_name].add(user_journey.name)
                     parent_name = node_name_message_map[parent_name].parent_name
 
                 for dependency in node_name_message_map[current_node_name].dependencies:

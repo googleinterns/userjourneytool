@@ -162,18 +162,15 @@ def update_graph_elements(
 
     # user_journey_table_selected_row_ids == [] when the user journey datatable isn't created yet
     # it equals [None] when the datatable is created but no row is selected
-    if user_journey_table_selected_row_ids in [[], [None]]:
-        active_user_journey_name = None
-    else:
+    if user_journey_table_selected_row_ids not in [[], [None]]:
         active_user_journey_name = user_journey_table_selected_row_ids[0][0]
-
-    elements = transformers.apply_highlighted_edge_class_to_elements(
-        elements, active_user_journey_name
-    )
+        elements = transformers.apply_highlighted_edge_class_to_elements(
+            elements, active_user_journey_name
+        )
 
     if change_over_time_data == {}:
         # The following calls to apply classes to elements, which are then matched to styles
-        transformers.apply_node_property_classes(
+        elements = transformers.apply_node_property_classes(
             elements,
             node_name_message_map,
             client_name_message_map,
@@ -181,7 +178,7 @@ def update_graph_elements(
         )
 
         tag_map = state.get_tag_map()
-        transformers.apply_view_classes(
+        elements = transformers.apply_view_classes(
             elements,
             tag_map,
             view_list,
@@ -207,7 +204,7 @@ def update_graph_elements(
 
     # Workaround for https://github.com/plotly/dash-cytoscape/issues/106
     # Give new ids to Cytoscape to avoid immutability of edges and parent relationships.
-    elements = transformers.apply_uuid_to_elements(elements, this_uuid=uuid)
+    elements = transformers.apply_uuid_to_elements(elements, uuid_to_apply=uuid)
     elements = transformers.sort_nodes_by_parent_relationship(elements)
     return elements
 
