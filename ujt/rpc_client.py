@@ -19,19 +19,28 @@ if TYPE_CHECKING:
         StatusValue,
     )
 
-# Let's hardcode this for now... later can move into cfg file. Doesn't really fit in constants file
-# Not sure how to provide it as a cmd line argument from ujt module.
-channel = grpc.insecure_channel("localhost:50051")
-reporting_service_stub = server_pb2_grpc.ReportingServiceStub(channel)
+from . import config
+
+reporting_service_stub = None
+
+
+def connect():
+    global reporting_service_stub
+    channel = grpc.insecure_channel(config.REPORTING_SERVER_ADDRESS)
+    reporting_service_stub = server_pb2_grpc.ReportingServiceStub(channel)
 
 
 def get_nodes():
     """ Reads a list of Nodes from the remote Reporting Service. """
+    global reporting_service_stub
+    assert reporting_service_stub
     return reporting_service_stub.GetNodes(server_pb2.GetNodesRequest())
 
 
 def get_clients():
     """ Reads a list of Clients from the remote Reporting Service. """
+    global reporting_service_stub
+    assert reporting_service_stub
     return reporting_service_stub.GetClients(server_pb2.GetClientsRequest())
 
 
@@ -42,6 +51,8 @@ def get_slis(
     sli_types: Optional[List["SLITypeValue"]] = None,
 ):
     """ Reads a list of SLIs from the remote Reporting Service. """
+    global reporting_service_stub
+    assert reporting_service_stub
     get_slis_request = server_pb2.GetSLIsRequest()
     if node_names is not None:
         get_slis_request.node_names.extend(node_names)

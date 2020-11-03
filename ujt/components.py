@@ -19,7 +19,7 @@ import dash_cytoscape as cyto
 import dash_html_components as html
 from graph_structures_pb2 import Node, NodeType, VirtualNode
 
-from . import constants, converters, id_constants, state, utils
+from . import config, constants, converters, id_constants, state, utils
 
 
 def get_layout():
@@ -105,8 +105,8 @@ def get_top_row_components():
                         ),
                         dcc.Interval(
                             id=id_constants.REFRESH_SLI_INTERVAL,
-                            disabled=(not constants.REFRESH_SLI_ON_INTERVAL),
-                            interval=constants.CLIENT_SLI_REFRESH_INTERVAL_MILLIS,
+                            disabled=(not config.AUTO_REFRESH_SLI),
+                            interval=config.CLIENT_SLI_REFRESH_INTERVAL_MILLIS,
                         ),
                         dbc.Col(children=get_virtual_node_control_components()),
                         dbc.Col(children=get_batch_apply_tag_components()),
