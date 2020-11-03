@@ -1,0 +1,1282 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ujt package &#8212; User Journey Tool  documentation</title>
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script src="_static/language_data.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="ujt.callbacks package" href="ujt.callbacks.html" />
+    <link rel="prev" title="ujt" href="modules.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="ujt-package">
+<h1>ujt package<a class="headerlink" href="#ujt-package" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="subpackages">
+<h2>Subpackages<a class="headerlink" href="#subpackages" title="Permalink to this headline">¶</a></h2>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="ujt.callbacks.html">ujt.callbacks package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="ujt.callbacks.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ujt.callbacks.html#module-ujt.callbacks.apply_tag_callbacks">ujt.callbacks.apply_tag_callbacks module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ujt.callbacks.html#module-ujt.callbacks.change_over_time_callbacks">ujt.callbacks.change_over_time_callbacks module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ujt.callbacks.html#module-ujt.callbacks.comment_callbacks">ujt.callbacks.comment_callbacks module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ujt.callbacks.html#module-ujt.callbacks.create_tag_callbacks">ujt.callbacks.create_tag_callbacks module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ujt.callbacks.html#module-ujt.callbacks.graph_callbacks">ujt.callbacks.graph_callbacks module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ujt.callbacks.html#module-ujt.callbacks.panel_callbacks">ujt.callbacks.panel_callbacks module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ujt.callbacks.html#module-ujt.callbacks.signal_callbacks">ujt.callbacks.signal_callbacks module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ujt.callbacks.html#module-ujt.callbacks.sli_refresh_callbacks">ujt.callbacks.sli_refresh_callbacks module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ujt.callbacks.html#module-ujt.callbacks.style_callbacks">ujt.callbacks.style_callbacks module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ujt.callbacks.html#module-ujt.callbacks.view_callbacks">ujt.callbacks.view_callbacks module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ujt.callbacks.html#module-ujt.callbacks.virtual_node_callbacks">ujt.callbacks.virtual_node_callbacks module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ujt.callbacks.html#module-ujt.callbacks">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="ujt.server.html">ujt.server package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="ujt.server.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ujt.server.html#module-ujt.server.client">ujt.server.client module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ujt.server.html#module-ujt.server.generate_data">ujt.server.generate_data module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ujt.server.html#module-ujt.server.server">ujt.server.server module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ujt.server.html#module-ujt.server.server_utils">ujt.server.server_utils module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ujt.server.html#module-ujt.server">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+<div class="section" id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="module-ujt.components">
+<span id="ujt-components-module"></span><h2>ujt.components module<a class="headerlink" href="#module-ujt.components" title="Permalink to this headline">¶</a></h2>
+<p>Generates components for use in the frontend.</p>
+<dl class="simple">
+<dt>In general, these functions usually produce a list of components (e.g. selected panel),</dt><dd><p>or a single toplevel component (e.g. the cytoscape graph).</p>
+</dd>
+</dl>
+<p>This is in contrast to converters, which generally produce
+a single component to be nested within an wrapping component,
+or an intermediate data structure (e.g. a list of dropdown options).</p>
+<p>Admittedly, this line is blurry, but it’s nice to have a separate module to contain some higher
+level functions to generate components, rather than placing them in ujt or callbacks.</p>
+<dl class="py function">
+<dt id="ujt.components.get_apply_tag_components">
+<code class="sig-prename descclassname">ujt.components.</code><code class="sig-name descname">get_apply_tag_components</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">ujt_id</span></em><span class="sig-paren">)</span><a class="headerlink" href="#ujt.components.get_apply_tag_components" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt id="ujt.components.get_batch_apply_tag_components">
+<code class="sig-prename descclassname">ujt.components.</code><code class="sig-name descname">get_batch_apply_tag_components</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ujt.components.get_batch_apply_tag_components" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt id="ujt.components.get_bottom_panel_components">
+<code class="sig-prename descclassname">ujt.components.</code><code class="sig-name descname">get_bottom_panel_components</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ujt.components.get_bottom_panel_components" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt id="ujt.components.get_change_over_time_components">
+<code class="sig-prename descclassname">ujt.components.</code><code class="sig-name descname">get_change_over_time_components</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ujt.components.get_change_over_time_components" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt id="ujt.components.get_comment_components">
+<code class="sig-prename descclassname">ujt.components.</code><code class="sig-name descname">get_comment_components</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">initial_value</span><span class="o">=</span><span class="default_value">''</span></em><span class="sig-paren">)</span><a class="headerlink" href="#ujt.components.get_comment_components" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generates a list of components for use in comment related interactions.</p>
+<p>We let the id fields be dictionaries here, to prevent Dash errors
+when registering callbacks to dynamically created components.
+Although we can directly assign an id and register a callback,
+an error appears in the Dash app saying that no such ID exists.
+The callback still works despite the error.
+It can be supressed, but only at a global granularity (for all callbacks),
+which seems too heavy handed.</p>
+<p>Instead, we use the pattern matching callback feature to
+match the dictionary fields in the id.
+This is the same approach taken in update_graph_elements to
+register the callback from the client datatable.</p>
+<p>Notice that the value of the dictionary doesn’t matter,
+since we keep the key unique and match the value with ALL.
+Unfortunately, we can’t do something like id={“id”: “component-unique-id”},
+and match with Output/Input/State({“id”: “component-unique-id”})
+since the callback requires a wildcard (ALL/MATCH) to match.
+We have to add an unused field, such as
+id={“id”: “component-unique-id”, “index”: 0} and match with
+Output/Input/State({“id”: “component-unique-id”, “index”: ALL/MATCH})
+Neither solution is ideal, but have to work with it.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>A list of Dash components.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="ujt.components.get_create_style_components">
+<code class="sig-prename descclassname">ujt.components.</code><code class="sig-name descname">get_create_style_components</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ujt.components.get_create_style_components" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt id="ujt.components.get_create_tag_components">
+<code class="sig-prename descclassname">ujt.components.</code><code class="sig-name descname">get_create_tag_components</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ujt.components.get_create_tag_components" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt id="ujt.components.get_cytoscape_graph">
+<code class="sig-prename descclassname">ujt.components.</code><code class="sig-name descname">get_cytoscape_graph</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ujt.components.get_cytoscape_graph" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt id="ujt.components.get_layout">
+<code class="sig-prename descclassname">ujt.components.</code><code class="sig-name descname">get_layout</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ujt.components.get_layout" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generate the top-level layout for the Dash app.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>a Dash HTML Div component containing the top-level layout for the app.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="ujt.components.get_node_info_panel_components">
+<code class="sig-prename descclassname">ujt.components.</code><code class="sig-name descname">get_node_info_panel_components</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">node_name</span></em><span class="sig-paren">)</span><a class="headerlink" href="#ujt.components.get_node_info_panel_components" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt id="ujt.components.get_signals">
+<code class="sig-prename descclassname">ujt.components.</code><code class="sig-name descname">get_signals</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ujt.components.get_signals" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt id="ujt.components.get_stores">
+<code class="sig-prename descclassname">ujt.components.</code><code class="sig-name descname">get_stores</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ujt.components.get_stores" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt id="ujt.components.get_top_row_components">
+<code class="sig-prename descclassname">ujt.components.</code><code class="sig-name descname">get_top_row_components</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ujt.components.get_top_row_components" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt id="ujt.components.get_view_components">
+<code class="sig-prename descclassname">ujt.components.</code><code class="sig-name descname">get_view_components</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">view_list</span><span class="p">:</span> <span class="n">List<span class="p">[</span>Tuple<span class="p">[</span>str<span class="p">, </span>str<span class="p">]</span><span class="p">]</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ujt.components.get_view_components" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt id="ujt.components.get_virtual_node_control_components">
+<code class="sig-prename descclassname">ujt.components.</code><code class="sig-name descname">get_virtual_node_control_components</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ujt.components.get_virtual_node_control_components" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="module-ujt.compute_status">
+<span id="ujt-compute-status-module"></span><h2>ujt.compute_status module<a class="headerlink" href="#module-ujt.compute_status" title="Permalink to this headline">¶</a></h2>
+<dl class="py function">
+<dt id="ujt.compute_status.compute_single_node_status">
+<code class="sig-prename descclassname">ujt.compute_status.</code><code class="sig-name descname">compute_single_node_status</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">node_name_message_map</span><span class="p">:</span> <span class="n">Dict<span class="p">[</span>str<span class="p">, </span>graph_structures_pb2.Node<span class="p">]</span></span></em>, <em class="sig-param"><span class="n">node_name</span><span class="p">:</span> <span class="n">str</span></em><span class="sig-paren">)</span> &#x2192; StatusValue<a class="headerlink" href="#ujt.compute_status.compute_single_node_status" title="Permalink to this definition">¶</a></dt>
+<dd><p>Annotates and returns the status of a single Node based on its dependencies.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>node_name_message_map</strong> – A dictionary mapping Node names to their corresponding Node protobuf message.</p></li>
+<li><p><strong>node_name</strong> – The name of the node to annotate.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>The status of the annotated node.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="ujt.compute_status.compute_sli_status">
+<code class="sig-prename descclassname">ujt.compute_status.</code><code class="sig-name descname">compute_sli_status</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">sli</span><span class="p">:</span> <span class="n">graph_structures_pb2.SLI</span></em><span class="sig-paren">)</span> &#x2192; StatusValue<a class="headerlink" href="#ujt.compute_status.compute_sli_status" title="Permalink to this definition">¶</a></dt>
+<dd><p>Annotates and returns the status of a SLI based on its values.</p>
+<p>If the sli value is in the range (warn_lower_bound, warn_upper_bound), the its status is healthy.
+If the sli value is in the range (error_lower_bound, error_upper_bound), the its status is warn.
+Otherwise, its status is error.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>sli</strong> – A SLI message.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>The status of the annotated SLI.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="ujt.compute_status.compute_status_from_count_map">
+<code class="sig-prename descclassname">ujt.compute_status.</code><code class="sig-name descname">compute_status_from_count_map</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">status_count_map</span></em><span class="sig-paren">)</span><a class="headerlink" href="#ujt.compute_status.compute_status_from_count_map" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt id="ujt.compute_status.compute_statuses">
+<code class="sig-prename descclassname">ujt.compute_status.</code><code class="sig-name descname">compute_statuses</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">node_name_message_map</span><span class="p">:</span> <span class="n">Dict<span class="p">[</span>str<span class="p">, </span>graph_structures_pb2.Node<span class="p">]</span></span></em>, <em class="sig-param"><span class="n">client_name_message_map</span><span class="p">:</span> <span class="n">Dict<span class="p">[</span>str<span class="p">, </span>graph_structures_pb2.Client<span class="p">]</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ujt.compute_status.compute_statuses" title="Permalink to this definition">¶</a></dt>
+<dd><p>Annotates Node status based on their dependencies.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>node_name_message_map</strong> – A dictionary mapping Node names to their corresponding Node protobuf message.</p></li>
+<li><p><strong>client_name_message_map</strong> – A dictionary mapping Client names to the corresponding Client protobuf message.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="ujt.compute_status.reset_client_statuses">
+<code class="sig-prename descclassname">ujt.compute_status.</code><code class="sig-name descname">reset_client_statuses</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">client_name_message_map</span></em><span class="sig-paren">)</span><a class="headerlink" href="#ujt.compute_status.reset_client_statuses" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt id="ujt.compute_status.reset_node_statuses">
+<code class="sig-prename descclassname">ujt.compute_status.</code><code class="sig-name descname">reset_node_statuses</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">node_name_message_map</span></em><span class="sig-paren">)</span><a class="headerlink" href="#ujt.compute_status.reset_node_statuses" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="module-ujt.config">
+<span id="ujt-config-module"></span><h2>ujt.config module<a class="headerlink" href="#module-ujt.config" title="Permalink to this headline">¶</a></h2>
+<dl class="py function">
+<dt id="ujt.config.load_config">
+<code class="sig-prename descclassname">ujt.config.</code><code class="sig-name descname">load_config</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">config_path</span></em><span class="sig-paren">)</span><a class="headerlink" href="#ujt.config.load_config" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="module-ujt.constants">
+<span id="ujt-constants-module"></span><h2>ujt.constants module<a class="headerlink" href="#module-ujt.constants" title="Permalink to this headline">¶</a></h2>
+<p>Constants for UJT.</p>
+<p>Generally contains constants for styling.</p>
+</div>
+<div class="section" id="module-ujt.converters">
+<span id="ujt-converters-module"></span><h2>ujt.converters module<a class="headerlink" href="#module-ujt.converters" title="Permalink to this headline">¶</a></h2>
+<p>Module holding converter functions.</p>
+<p>In general, we consider converters to modify some UJT-specific data structure
+(e.g. a protobuf, or List/Dict of protobufs) into a Dash-specific data structure
+(e.g. cytoscape elements, dropdown options.)</p>
+<dl class="py function">
+<dt id="ujt.converters.change_over_time_datatable_from_composite_slis">
+<code class="sig-prename descclassname">ujt.converters.</code><code class="sig-name descname">change_over_time_datatable_from_composite_slis</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">composite_slis</span><span class="p">:</span> <span class="n">List<span class="p">[</span>Tuple<span class="p">[</span>Optional<span class="p">[</span>graph_structures_pb2.SLI<span class="p">]</span><span class="p">, </span>Optional<span class="p">[</span>graph_structures_pb2.SLI<span class="p">]</span><span class="p">]</span><span class="p">]</span></span></em>, <em class="sig-param"><span class="n">table_id</span><span class="p">:</span> <span class="n">str</span></em><span class="sig-paren">)</span><a class="headerlink" href="#ujt.converters.change_over_time_datatable_from_composite_slis" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a datatable formed from a list of composite sli pairs.</p>
+<p>Each tuple in composite_slis represents a before_composite_sli and an after_composite_sli.
+At most one SLI in each pair may be None.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>composite_slis</strong> – A list of tuples of composite slis.</p></li>
+<li><p><strong>table_id</strong> – The id to assign to the datatable,</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A dash datatable displaying the SLI information.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="ujt.converters.cytoscape_element_from_client">
+<code class="sig-prename descclassname">ujt.converters.</code><code class="sig-name descname">cytoscape_element_from_client</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">client</span></em><span class="sig-paren">)</span><a class="headerlink" href="#ujt.converters.cytoscape_element_from_client" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generates a cytoscape element from a Client proto.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>client</strong> – A Client proto.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A cytoscape element dictionary with values derived from the proto.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="ujt.converters.cytoscape_element_from_dependency">
+<code class="sig-prename descclassname">ujt.converters.</code><code class="sig-name descname">cytoscape_element_from_dependency</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">dependency</span></em><span class="sig-paren">)</span><a class="headerlink" href="#ujt.converters.cytoscape_element_from_dependency" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generates a cytoscape element from a Dependency proto.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>dependency</strong> – A Dependency proto.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A cytoscape element dictionary with values derived from the proto.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="ujt.converters.cytoscape_element_from_node">
+<code class="sig-prename descclassname">ujt.converters.</code><code class="sig-name descname">cytoscape_element_from_node</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">node</span></em><span class="sig-paren">)</span><a class="headerlink" href="#ujt.converters.cytoscape_element_from_node" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generates a cytoscape element from a Node proto.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>node</strong> – A Node proto.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A cytoscape element dictionary with values derived from the proto.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="ujt.converters.cytoscape_elements_from_client_map">
+<code class="sig-prename descclassname">ujt.converters.</code><code class="sig-name descname">cytoscape_elements_from_client_map</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">client_name_message_map</span><span class="p">:</span> <span class="n">Dict<span class="p">[</span>str<span class="p">, </span>graph_structures_pb2.Client<span class="p">]</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ujt.converters.cytoscape_elements_from_client_map" title="Permalink to this definition">¶</a></dt>
+<dd><p>Converts a dictionary of Client protobufs to a cytoscape graph format.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>client_name_message_map</strong> – A dictionary mapping Client names to the corresponding Client protobuf message.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A list of dictionary objects, each containing information regarding a single node (Client) or edge (Dependency).</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="ujt.converters.cytoscape_elements_from_maps">
+<code class="sig-prename descclassname">ujt.converters.</code><code class="sig-name descname">cytoscape_elements_from_maps</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">node_name_message_map</span><span class="p">:</span> <span class="n">Dict<span class="p">[</span>str<span class="p">, </span>graph_structures_pb2.Node<span class="p">]</span></span></em>, <em class="sig-param"><span class="n">client_name_message_map</span><span class="p">:</span> <span class="n">Dict<span class="p">[</span>str<span class="p">, </span>graph_structures_pb2.Client<span class="p">]</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ujt.converters.cytoscape_elements_from_maps" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generates a cytoscape elements dictionary from Service, SLI, and Client protobufs.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>node_name_message_map</strong> – A dictionary mapping Node names to their corresponding Node protobuf message.</p></li>
+<li><p><strong>client_name_message_map</strong> – A dictionary mapping Client names to the corresponding Client protobuf message.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A list of dictionary objects, each containing information regarding a single node (Service or Client) or edge (Dependency).</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="ujt.converters.cytoscape_elements_from_node_map">
+<code class="sig-prename descclassname">ujt.converters.</code><code class="sig-name descname">cytoscape_elements_from_node_map</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">node_name_message_map</span><span class="p">:</span> <span class="n">Dict<span class="p">[</span>str<span class="p">, </span>graph_structures_pb2.Node<span class="p">]</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ujt.converters.cytoscape_elements_from_node_map" title="Permalink to this definition">¶</a></dt>
+<dd><p>Converts a dictionary of Node protobufs to a cytoscape graph format.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>node_name_message_map</strong> – A dictionary mapping Node names to their corresponding Node protobuf message.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A list of dictionary objects, each containing information regarding a single node (Service) or edge (Dependency).</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="ujt.converters.cytoscape_stylesheet_from_style_map">
+<code class="sig-prename descclassname">ujt.converters.</code><code class="sig-name descname">cytoscape_stylesheet_from_style_map</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">style_map</span></em><span class="sig-paren">)</span><a class="headerlink" href="#ujt.converters.cytoscape_stylesheet_from_style_map" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt id="ujt.converters.datatable_from_nodes">
+<code class="sig-prename descclassname">ujt.converters.</code><code class="sig-name descname">datatable_from_nodes</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">nodes</span></em>, <em class="sig-param"><span class="n">use_relative_names</span></em>, <em class="sig-param"><span class="n">table_id</span></em><span class="sig-paren">)</span><a class="headerlink" href="#ujt.converters.datatable_from_nodes" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt id="ujt.converters.datatable_from_slis">
+<code class="sig-prename descclassname">ujt.converters.</code><code class="sig-name descname">datatable_from_slis</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">slis</span></em>, <em class="sig-param"><span class="n">table_id</span></em><span class="sig-paren">)</span><a class="headerlink" href="#ujt.converters.datatable_from_slis" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt id="ujt.converters.override_dropdown_options_from_node">
+<code class="sig-prename descclassname">ujt.converters.</code><code class="sig-name descname">override_dropdown_options_from_node</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">node</span></em><span class="sig-paren">)</span><a class="headerlink" href="#ujt.converters.override_dropdown_options_from_node" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt id="ujt.converters.sli_type_dropdown_options">
+<code class="sig-prename descclassname">ujt.converters.</code><code class="sig-name descname">sli_type_dropdown_options</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ujt.converters.sli_type_dropdown_options" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt id="ujt.converters.style_dropdown_options_from_style_names">
+<code class="sig-prename descclassname">ujt.converters.</code><code class="sig-name descname">style_dropdown_options_from_style_names</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">style_names</span></em><span class="sig-paren">)</span><a class="headerlink" href="#ujt.converters.style_dropdown_options_from_style_names" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt id="ujt.converters.tag_dropdown_options_from_tags">
+<code class="sig-prename descclassname">ujt.converters.</code><code class="sig-name descname">tag_dropdown_options_from_tags</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">tags</span></em><span class="sig-paren">)</span><a class="headerlink" href="#ujt.converters.tag_dropdown_options_from_tags" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt id="ujt.converters.timestamped_tag_dropdown_options_from_tags">
+<code class="sig-prename descclassname">ujt.converters.</code><code class="sig-name descname">timestamped_tag_dropdown_options_from_tags</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">tags</span></em><span class="sig-paren">)</span><a class="headerlink" href="#ujt.converters.timestamped_tag_dropdown_options_from_tags" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt id="ujt.converters.user_journey_datatable_from_user_journeys">
+<code class="sig-prename descclassname">ujt.converters.</code><code class="sig-name descname">user_journey_datatable_from_user_journeys</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">user_journeys</span></em>, <em class="sig-param"><span class="n">table_id</span></em><span class="sig-paren">)</span><a class="headerlink" href="#ujt.converters.user_journey_datatable_from_user_journeys" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt id="ujt.converters.user_journey_dropdown_options_from_maps">
+<code class="sig-prename descclassname">ujt.converters.</code><code class="sig-name descname">user_journey_dropdown_options_from_maps</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">node_name_message_map</span><span class="p">:</span> <span class="n">Dict<span class="p">[</span>str<span class="p">, </span>graph_structures_pb2.Node<span class="p">]</span></span></em>, <em class="sig-param"><span class="n">client_name_message_map</span><span class="p">:</span> <span class="n">Dict<span class="p">[</span>str<span class="p">, </span>graph_structures_pb2.Client<span class="p">]</span></span></em>, <em class="sig-param"><span class="n">virtual_node_map</span><span class="p">:</span> <span class="n">Dict<span class="p">[</span>str<span class="p">, </span>graph_structures_pb2.VirtualNode<span class="p">]</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ujt.converters.user_journey_dropdown_options_from_maps" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="module-ujt.dash_app">
+<span id="ujt-dash-app-module"></span><h2>ujt.dash_app module<a class="headerlink" href="#module-ujt.dash_app" title="Permalink to this headline">¶</a></h2>
+<p>Configuration for Dash app.</p>
+<p>Exposes app and cache to enable other files (namely callbacks) to register callbacks and update cache.
+App is actually started by ujt.py</p>
+</div>
+<div class="section" id="module-ujt.id_constants">
+<span id="ujt-id-constants-module"></span><h2>ujt.id_constants module<a class="headerlink" href="#module-ujt.id_constants" title="Permalink to this headline">¶</a></h2>
+<p>Module holding constants for Dash components.</p>
+<p>Let’s improve the naming convention.
+For signals, it makes sense to me to place the type first (i.e. “SIGNAL_*”),
+since we want to quickly identify that it’s a signal and we often group signals together.</p>
+<p>For other types of components, it’s unclear if this is better.
+For instance, with panels, it’s good to be able to quickly see that the component is a panel,
+which tells us that the callback should probably return a group of components.
+However, with buttons or other components, it might be more useful to see
+the type of action that the component is associated with first.</p>
+<p>It also seems more natural/readable in most instances to place the component type last.
+It’s a bit unwieldly to use the component type first convention
+if we have only a single component of a single type (e.g. ModalHeader, etc).</p>
+<p>For now, signals use the component type first convention, and all other
+component ids place the component type at the end.</p>
+</div>
+<div class="section" id="module-ujt.rpc_client">
+<span id="ujt-rpc-client-module"></span><h2>ujt.rpc_client module<a class="headerlink" href="#module-ujt.rpc_client" title="Permalink to this headline">¶</a></h2>
+<p>Module providing access points for RPCs to the reporting server.</p>
+<p>Although we can directly expose the reporting_service_stub, seems like
+a better design to provide an abstraction layer on top of it.
+These functions are 1:1 passthroughs right now, but we may need to do
+some additional data processing as the application grows.</p>
+<dl class="py function">
+<dt id="ujt.rpc_client.connect">
+<code class="sig-prename descclassname">ujt.rpc_client.</code><code class="sig-name descname">connect</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ujt.rpc_client.connect" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt id="ujt.rpc_client.get_clients">
+<code class="sig-prename descclassname">ujt.rpc_client.</code><code class="sig-name descname">get_clients</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ujt.rpc_client.get_clients" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reads a list of Clients from the remote Reporting Service.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="ujt.rpc_client.get_nodes">
+<code class="sig-prename descclassname">ujt.rpc_client.</code><code class="sig-name descname">get_nodes</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ujt.rpc_client.get_nodes" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reads a list of Nodes from the remote Reporting Service.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="ujt.rpc_client.get_slis">
+<code class="sig-prename descclassname">ujt.rpc_client.</code><code class="sig-name descname">get_slis</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">node_names</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span>List<span class="p">[</span>str<span class="p">]</span><span class="p">]</span></span> <span class="o">=</span> <span class="default_value">None</span></em>, <em class="sig-param"><span class="n">start_time</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span>datetime.datetime<span class="p">]</span></span> <span class="o">=</span> <span class="default_value">None</span></em>, <em class="sig-param"><span class="n">end_time</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span>datetime.datetime<span class="p">]</span></span> <span class="o">=</span> <span class="default_value">None</span></em>, <em class="sig-param"><span class="n">sli_types</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span>List<span class="p">[</span>SLITypeValue<span class="p">]</span><span class="p">]</span></span> <span class="o">=</span> <span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#ujt.rpc_client.get_slis" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reads a list of SLIs from the remote Reporting Service.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-ujt.state">
+<span id="ujt-state-module"></span><h2>ujt.state module<a class="headerlink" href="#module-ujt.state" title="Permalink to this headline">¶</a></h2>
+<dl class="py function">
+<dt id="ujt.state.add_tag_to_element">
+<code class="sig-prename descclassname">ujt.state.</code><code class="sig-name descname">add_tag_to_element</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">ujt_id</span></em>, <em class="sig-param"><span class="n">tag</span></em><span class="sig-paren">)</span><a class="headerlink" href="#ujt.state.add_tag_to_element" title="Permalink to this definition">¶</a></dt>
+<dd><p>Adds a tag to an element.</p>
+<p>We generally use “add” or “applies” to refer to this operation,
+(as opposed to create).
+This function is generally called with tag == “”, when adding a new apply tag UI row.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>ujt_id</strong> – the UJT specific id of the element (see converters.py)</p></li>
+<li><p><strong>tag</strong> – the tag to apply</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="ujt.state.add_virtual_node">
+<code class="sig-prename descclassname">ujt.state.</code><code class="sig-name descname">add_virtual_node</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">virtual_node_name</span><span class="p">:</span> <span class="n">str</span></em>, <em class="sig-param"><span class="n">selected_node_data</span><span class="p">:</span> <span class="n">List<span class="p">[</span>Dict<span class="p">[</span>str<span class="p">, </span>Any<span class="p">]</span><span class="p">]</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ujt.state.add_virtual_node" title="Permalink to this definition">¶</a></dt>
+<dd><p>Adds a virtual node.</p>
+<p>Updates the virtual node map with the newly created virtual node object.
+Updates the entries in the parent virtual node map corresponding to the virtual node’s children,
+to point to the new virtual node.</p>
+<p>The interface could be refactored to take node_names instead of selected_node_data to be cleaner.
+However, this function is currently only called in the callback to update the elements of the cytoscape graph.
+It would be an extraneous transformation that doesn’t offer any additional convenience or benefit, currently.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>virutal_node_name</strong> – The name of the virtual node to create.</p></li>
+<li><p><strong>selected_node_data</strong> – A list of node data dictionaries to include in the virtual node.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="ujt.state.clear_sli_cache">
+<code class="sig-prename descclassname">ujt.state.</code><code class="sig-name descname">clear_sli_cache</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ujt.state.clear_sli_cache" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt id="ujt.state.create_tag">
+<code class="sig-prename descclassname">ujt.state.</code><code class="sig-name descname">create_tag</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">new_tag</span></em><span class="sig-paren">)</span><a class="headerlink" href="#ujt.state.create_tag" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt id="ujt.state.delete_style">
+<code class="sig-prename descclassname">ujt.state.</code><code class="sig-name descname">delete_style</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">style_name</span><span class="p">:</span> <span class="n">str</span></em><span class="sig-paren">)</span><a class="headerlink" href="#ujt.state.delete_style" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt id="ujt.state.delete_tag">
+<code class="sig-prename descclassname">ujt.state.</code><code class="sig-name descname">delete_tag</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">tag_index</span></em><span class="sig-paren">)</span><a class="headerlink" href="#ujt.state.delete_tag" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt id="ujt.state.delete_virtual_node">
+<code class="sig-prename descclassname">ujt.state.</code><code class="sig-name descname">delete_virtual_node</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">virtual_node_name</span><span class="p">:</span> <span class="n">str</span></em><span class="sig-paren">)</span><a class="headerlink" href="#ujt.state.delete_virtual_node" title="Permalink to this definition">¶</a></dt>
+<dd><p>Deletes a virtual node.</p>
+<p>Updates the virtual node map to remove the corresponding virtual node object.
+Updates the entries in the parent virtual node map corresponding to the virtual node’s children,
+to no longer point to the new virtual node.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>virutal_node_name</strong> – The name of the virtual node to delete.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="ujt.state.get_client_name_message_map">
+<code class="sig-prename descclassname">ujt.state.</code><code class="sig-name descname">get_client_name_message_map</code><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; Dict<span class="p">[</span>str<span class="p">, </span>graph_structures_pb2.Client<span class="p">]</span><a class="headerlink" href="#ujt.state.get_client_name_message_map" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gets a dictionary mapping Client names to Client messages.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>A dictionary mapping Client names to Client messages.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="ujt.state.get_comment_map">
+<code class="sig-prename descclassname">ujt.state.</code><code class="sig-name descname">get_comment_map</code><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; Dict<span class="p">[</span>str<span class="p">, </span>str<span class="p">]</span><a class="headerlink" href="#ujt.state.get_comment_map" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gets a dictionary mapping node names to their comment.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>The mapping between node names and their comment.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="ujt.state.get_cytoscape_elements">
+<code class="sig-prename descclassname">ujt.state.</code><code class="sig-name descname">get_cytoscape_elements</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ujt.state.get_cytoscape_elements" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt id="ujt.state.get_message_maps">
+<code class="sig-prename descclassname">ujt.state.</code><code class="sig-name descname">get_message_maps</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">force_refresh</span><span class="p">:</span> <span class="n">bool</span> <span class="o">=</span> <span class="default_value">False</span></em><span class="sig-paren">)</span> &#x2192; Tuple<span class="p">[</span>Dict<span class="p">[</span>str<span class="p">, </span>graph_structures_pb2.Node<span class="p">]</span><span class="p">, </span>Dict<span class="p">[</span>str<span class="p">, </span>graph_structures_pb2.Client<span class="p">]</span><span class="p">]</span><a class="headerlink" href="#ujt.state.get_message_maps" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gets Node and Client protobufs, computes their internal statuses, and return their maps.</p>
+<p>If the cache doesn’t contain the message maps, this function reads the Nodes and Clients from the remote reporting server.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>force_refresh</strong> – boolean indicating whether the UJT should request a new topology from the server</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A tuple of two dictionaries.
+The first dictionary contains a mapping from Node name to the actual Node protobuf message.
+The second dictionary contains a mapping from Client name to the actual Client protobuf message.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="ujt.state.get_node_name_message_map">
+<code class="sig-prename descclassname">ujt.state.</code><code class="sig-name descname">get_node_name_message_map</code><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; Dict<span class="p">[</span>str<span class="p">, </span>graph_structures_pb2.Node<span class="p">]</span><a class="headerlink" href="#ujt.state.get_node_name_message_map" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gets a dictionary mapping Node names to Node messages.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>A dictionary mapping Node names to Node messages.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="ujt.state.get_node_to_user_journey_map">
+<code class="sig-prename descclassname">ujt.state.</code><code class="sig-name descname">get_node_to_user_journey_map</code><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; Dict<span class="p">[</span>str<span class="p">, </span>List<span class="p">[</span>graph_structures_pb2.UserJourney<span class="p">]</span><span class="p">]</span><a class="headerlink" href="#ujt.state.get_node_to_user_journey_map" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generates a map from node name to user journey that pass through the node.</p>
+<p>We place this function in module state, but it doesn’t really produce/modify state.
+It is, however, conceptually similar to the other maps that are exposed in this module.
+This one is just dynamically generated once.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>a dictionary associating node names and user journeys that pass through the node.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="ujt.state.get_override_status_map">
+<code class="sig-prename descclassname">ujt.state.</code><code class="sig-name descname">get_override_status_map</code><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; Dict<span class="p">[</span>str<span class="p">, </span>StatusValue<span class="p">]</span><a class="headerlink" href="#ujt.state.get_override_status_map" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gets a dictionary mapping node names to their override status.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>The mapping between node names and their override status.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="ujt.state.get_parent_virtual_node_map">
+<code class="sig-prename descclassname">ujt.state.</code><code class="sig-name descname">get_parent_virtual_node_map</code><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; Dict<span class="p">[</span>str<span class="p">, </span>str<span class="p">]</span><a class="headerlink" href="#ujt.state.get_parent_virtual_node_map" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gets a dictionary mapping node names to the name of their direct virtual node parent.</p>
+<p>The keys of the dictionary can be names of virtual and non-virtual nodes.
+The values are always virtual nodes.
+This dictionary can be used to re-construct the chain of the virtual nodes that contain a given node.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>A dictionary mapping node names to the name of their direct virtual node parent.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="ujt.state.get_slis">
+<code class="sig-prename descclassname">ujt.state.</code><code class="sig-name descname">get_slis</code><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; List<span class="p">[</span>graph_structures_pb2.SLI<span class="p">]</span><a class="headerlink" href="#ujt.state.get_slis" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gets a list of updated SLIs.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>A list of SLIs.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="ujt.state.get_style_map">
+<code class="sig-prename descclassname">ujt.state.</code><code class="sig-name descname">get_style_map</code><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; Dict<span class="p">[</span>str<span class="p">, </span>Dict<span class="p">[</span>str<span class="p">, </span>str<span class="p">]</span><span class="p">]</span><a class="headerlink" href="#ujt.state.get_style_map" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the map of styles.</p>
+<p>The style map associates the name of a style with the value of the “style” field in the cytoscape stylesheet.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="ujt.state.get_tag_list">
+<code class="sig-prename descclassname">ujt.state.</code><code class="sig-name descname">get_tag_list</code><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; List<span class="p">[</span>str<span class="p">]</span><a class="headerlink" href="#ujt.state.get_tag_list" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the list of tags.</p>
+<p>We use a list since the order matters when using pattern matching callbacks to remove tags.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>A list containing the created tags.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="ujt.state.get_tag_map">
+<code class="sig-prename descclassname">ujt.state.</code><code class="sig-name descname">get_tag_map</code><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; Dict<span class="p">[</span>str<span class="p">, </span>List<span class="p">[</span>str<span class="p">]</span><span class="p">]</span><a class="headerlink" href="#ujt.state.get_tag_map" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the map associating ujt_ids and applied tags.</p>
+<p>The tag map associates names of nodes/virtual nodes/clients with a list of the tags that they contain.
+Maybe we should break this map up into separate maps for nodes, virtual nodes, and clients, but their names should be unique,
+so I leave it as one map for now.
+We use lists as the value type of the dictionary since we need an ordering to use the pattern matching callbacks to add/remove tags.
+Moreover, this ensures a consistent ordering of applied tags in the UI.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>A dictionary associating ujt_ids and their applied tags.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="ujt.state.get_virtual_node_map">
+<code class="sig-prename descclassname">ujt.state.</code><code class="sig-name descname">get_virtual_node_map</code><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; Dict<span class="p">[</span>str<span class="p">, </span>graph_structures_pb2.VirtualNode<span class="p">]</span><a class="headerlink" href="#ujt.state.get_virtual_node_map" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gets a dictionary mapping virtual node names to virtual node messages.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>A dictionary mapping virtual node names to virtual node objects.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="ujt.state.remove_tag_from_element">
+<code class="sig-prename descclassname">ujt.state.</code><code class="sig-name descname">remove_tag_from_element</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">ujt_id</span></em>, <em class="sig-param"><span class="n">tag_idx</span></em><span class="sig-paren">)</span><a class="headerlink" href="#ujt.state.remove_tag_from_element" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt id="ujt.state.remove_tag_from_element_by_value">
+<code class="sig-prename descclassname">ujt.state.</code><code class="sig-name descname">remove_tag_from_element_by_value</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">ujt_id</span></em>, <em class="sig-param"><span class="n">tag_to_remove</span></em><span class="sig-paren">)</span><a class="headerlink" href="#ujt.state.remove_tag_from_element_by_value" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt id="ujt.state.set_client_name_message_map">
+<code class="sig-prename descclassname">ujt.state.</code><code class="sig-name descname">set_client_name_message_map</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">client_name_message_map</span></em><span class="sig-paren">)</span><a class="headerlink" href="#ujt.state.set_client_name_message_map" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt id="ujt.state.set_comment">
+<code class="sig-prename descclassname">ujt.state.</code><code class="sig-name descname">set_comment</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">name</span><span class="p">:</span> <span class="n">str</span></em>, <em class="sig-param"><span class="n">comment</span><span class="p">:</span> <span class="n">str</span></em>, <em class="sig-param"><span class="n">node_name_message_map</span><span class="p">:</span> <span class="n">Dict<span class="p">[</span>str<span class="p">, </span>graph_structures_pb2.Node<span class="p">]</span></span> <span class="o">=</span> <span class="default_value">None</span></em>, <em class="sig-param"><span class="n">client_name_message_map</span><span class="p">:</span> <span class="n">Dict<span class="p">[</span>str<span class="p">, </span>graph_structures_pb2.Client<span class="p">]</span></span> <span class="o">=</span> <span class="default_value">None</span></em>, <em class="sig-param"><span class="n">virtual_node_map</span><span class="p">:</span> <span class="n">Dict<span class="p">[</span>str<span class="p">, </span>graph_structures_pb2.VirtualNode<span class="p">]</span></span> <span class="o">=</span> <span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#ujt.state.set_comment" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sets the node comment in the appropriate node map.</p>
+<p>Addiionally adds the override status to an internal map.
+This internal map is combined with the graph topology when the topology is read from the reporting server.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>name</strong> – The name of the node or client to modify.</p></li>
+<li><p><strong>comment</strong> – The comment to write to the node or client</p></li>
+<li><p><strong>node_name_message_map</strong> – A dictionary mapping node names to Nodes. Used when we want to modify the state of an existing map without reading from cache.</p></li>
+<li><p><strong>client_name_message_map</strong> – A dictionary mapping client names to Clients. Used when we want to modify the state of an existing map without reading from cache.</p></li>
+<li><p><strong>virtual_node_map</strong> – A dictionary mapping virtual node names to VirtualNodes. Used when we want to modify the state of an existing map without reading from cache.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="ujt.state.set_comment_map">
+<code class="sig-prename descclassname">ujt.state.</code><code class="sig-name descname">set_comment_map</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">comment_map</span><span class="p">:</span> <span class="n">Dict<span class="p">[</span>str<span class="p">, </span>str<span class="p">]</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ujt.state.set_comment_map" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sets a dictionary mapping node names to their comment.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>override_status_map</strong> – a dictionary mapping node names to their comment.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="ujt.state.set_node_name_message_map">
+<code class="sig-prename descclassname">ujt.state.</code><code class="sig-name descname">set_node_name_message_map</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">node_name_message_map</span></em><span class="sig-paren">)</span><a class="headerlink" href="#ujt.state.set_node_name_message_map" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt id="ujt.state.set_node_override_status">
+<code class="sig-prename descclassname">ujt.state.</code><code class="sig-name descname">set_node_override_status</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">node_name</span><span class="p">:</span> <span class="n">str</span></em>, <em class="sig-param"><span class="n">override_status</span><span class="p">:</span> <span class="n">StatusValue</span></em>, <em class="sig-param"><span class="n">node_name_message_map</span><span class="p">:</span> <span class="n">Dict<span class="p">[</span>str<span class="p">, </span>graph_structures_pb2.Node<span class="p">]</span></span> <span class="o">=</span> <span class="default_value">None</span></em>, <em class="sig-param"><span class="n">virtual_node_map</span><span class="p">:</span> <span class="n">Dict<span class="p">[</span>str<span class="p">, </span>graph_structures_pb2.VirtualNode<span class="p">]</span></span> <span class="o">=</span> <span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#ujt.state.set_node_override_status" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sets the node override status in the appropriate node map.</p>
+<p>Addiionally adds the override status to an internal map.
+This internal map is combined with the graph topology when the topology is read from the reporting server.</p>
+<p>Notice that this function doesn’t read and write from the cache if maps were provided in the arguments.
+The maps should be provided when the caller is in the middle of a modification (a “transaction”) of the message maps.
+For instance,</p>
+<blockquote>
+<div><p>node_name_message_map = state.get_node_name_message_map()
+modify_map(node_name_message_map)
+set_node_override_status(node_name, override_status, node_name_message_map, virtual_node_map)
+state.set_node_name_message_map(node_name_message_map)</p>
+</div></blockquote>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>node_name</strong> – The name of the node to modify.</p></li>
+<li><p><strong>override_status</strong> – The override status to write to the node</p></li>
+<li><p><strong>node_name_message_map</strong> – A dictionary mapping node names to Nodes. Used when we want to modify the state of an existing map without reading from cache.</p></li>
+<li><p><strong>virtual_node_map</strong> – A dictionary mapping virtual node names to VirtualNodes. Used when we want to modify the state of an existing map without reading from cache.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="ujt.state.set_override_status_map">
+<code class="sig-prename descclassname">ujt.state.</code><code class="sig-name descname">set_override_status_map</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">override_status_map</span><span class="p">:</span> <span class="n">Dict<span class="p">[</span>str<span class="p">, </span>StatusValue<span class="p">]</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ujt.state.set_override_status_map" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sets a dictionary mapping node names to their override status.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>override_status_map</strong> – a dictionary mapping node names to their override status.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="ujt.state.set_parent_virtual_node_map">
+<code class="sig-prename descclassname">ujt.state.</code><code class="sig-name descname">set_parent_virtual_node_map</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">parent_virtual_node_map</span><span class="p">:</span> <span class="n">Dict<span class="p">[</span>str<span class="p">, </span>str<span class="p">]</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ujt.state.set_parent_virtual_node_map" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sets a dictionary mapping node names to the name of their direct virtual node parent.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>parent_virutal_node_map</strong> – The new parent virtual node map to be saved in the cache.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="ujt.state.set_style_map">
+<code class="sig-prename descclassname">ujt.state.</code><code class="sig-name descname">set_style_map</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">style_map</span></em><span class="sig-paren">)</span><a class="headerlink" href="#ujt.state.set_style_map" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt id="ujt.state.set_tag_list">
+<code class="sig-prename descclassname">ujt.state.</code><code class="sig-name descname">set_tag_list</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">tag_list</span></em><span class="sig-paren">)</span><a class="headerlink" href="#ujt.state.set_tag_list" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt id="ujt.state.set_tag_map">
+<code class="sig-prename descclassname">ujt.state.</code><code class="sig-name descname">set_tag_map</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">tag_map</span></em><span class="sig-paren">)</span><a class="headerlink" href="#ujt.state.set_tag_map" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt id="ujt.state.set_virtual_node_collapsed_state">
+<code class="sig-prename descclassname">ujt.state.</code><code class="sig-name descname">set_virtual_node_collapsed_state</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">virtual_node_name</span><span class="p">:</span> <span class="n">str</span></em>, <em class="sig-param"><span class="n">collapsed</span><span class="p">:</span> <span class="n">bool</span></em><span class="sig-paren">)</span><a class="headerlink" href="#ujt.state.set_virtual_node_collapsed_state" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sets the collapsed state of a virtual node.</p>
+<p>Updates the corresponding virtual node object within the virtual node map.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>virutal_node_name</strong> – The name of the virtual node to update.</p></li>
+<li><p><strong>collapsed</strong> – The new collapsed state</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="ujt.state.set_virtual_node_map">
+<code class="sig-prename descclassname">ujt.state.</code><code class="sig-name descname">set_virtual_node_map</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">virtual_node_map</span><span class="p">:</span> <span class="n">Dict<span class="p">[</span>str<span class="p">, </span>graph_structures_pb2.VirtualNode<span class="p">]</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ujt.state.set_virtual_node_map" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sets a dictionary mapping virtual node names to virtual node objects.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>virutal_node_map</strong> – The new virtual node map to be saved in the cache.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="ujt.state.update_applied_tag">
+<code class="sig-prename descclassname">ujt.state.</code><code class="sig-name descname">update_applied_tag</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">ujt_id</span></em>, <em class="sig-param"><span class="n">tag_idx</span></em>, <em class="sig-param"><span class="n">tag</span></em><span class="sig-paren">)</span><a class="headerlink" href="#ujt.state.update_applied_tag" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt id="ujt.state.update_style">
+<code class="sig-prename descclassname">ujt.state.</code><code class="sig-name descname">update_style</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">style_name</span><span class="p">:</span> <span class="n">str</span></em>, <em class="sig-param"><span class="n">style_dict</span><span class="p">:</span> <span class="n">Dict<span class="p">[</span>str<span class="p">, </span>str<span class="p">]</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ujt.state.update_style" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt id="ujt.state.update_tag">
+<code class="sig-prename descclassname">ujt.state.</code><code class="sig-name descname">update_tag</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">tag_index</span></em>, <em class="sig-param"><span class="n">new_tag</span></em><span class="sig-paren">)</span><a class="headerlink" href="#ujt.state.update_tag" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="module-ujt.transformers">
+<span id="ujt-transformers-module"></span><h2>ujt.transformers module<a class="headerlink" href="#module-ujt.transformers" title="Permalink to this headline">¶</a></h2>
+<p>Module holding transformer functions.</p>
+<p>Transformer functions take an input data structure, make a change, and return an output of the same type.
+They are commonly used to perform operations on cytoscape graph elements.</p>
+<dl class="py function">
+<dt id="ujt.transformers.apply_change_over_time_classes">
+<code class="sig-prename descclassname">ujt.transformers.</code><code class="sig-name descname">apply_change_over_time_classes</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">elements</span><span class="p">:</span> <span class="n">List<span class="p">[</span>Dict<span class="p">[</span>str<span class="p">, </span>Any<span class="p">]</span><span class="p">]</span></span></em>, <em class="sig-param"><span class="n">slis</span><span class="p">:</span> <span class="n">List<span class="p">[</span>graph_structures_pb2.SLI<span class="p">]</span></span></em>, <em class="sig-param"><span class="n">start_time</span><span class="p">:</span> <span class="n">datetime.datetime</span></em>, <em class="sig-param"><span class="n">end_time</span><span class="p">:</span> <span class="n">datetime.datetime</span></em><span class="sig-paren">)</span> &#x2192; List<span class="p">[</span>Dict<span class="p">[</span>str<span class="p">, </span>Any<span class="p">]</span><span class="p">]</span><a class="headerlink" href="#ujt.transformers.apply_change_over_time_classes" title="Permalink to this definition">¶</a></dt>
+<dd><p>Applies classes to elements based on the change in SLIs over the time range.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>elements</strong> – A list of cytoscape elements.</p></li>
+<li><p><strong>slis</strong> – A list of SLI protos.</p></li>
+<li><p><strong>start_time</strong> – The start time of the time range to compute aggregate status over.</p></li>
+<li><p><strong>end_time</strong> – The end time of the time range to compute aggregate status over.</p></li>
+<li><p><strong>sli_type</strong> – The SLI type of interest.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A new list of elements with the change over time classes applied.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="ujt.transformers.apply_highlighted_edge_class_to_elements">
+<code class="sig-prename descclassname">ujt.transformers.</code><code class="sig-name descname">apply_highlighted_edge_class_to_elements</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">elements</span></em>, <em class="sig-param"><span class="n">user_journey_name</span></em><span class="sig-paren">)</span><a class="headerlink" href="#ujt.transformers.apply_highlighted_edge_class_to_elements" title="Permalink to this definition">¶</a></dt>
+<dd><p>Applies the highlighted edge class to elements based on the selected user journey.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>elements</strong> – a list of cytoscape elements</p></li>
+<li><p><strong>user_journey_name</strong> – the user journey to highlight</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>a list of cytoscape elements with the highlighted class on the appropriate edges</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="ujt.transformers.apply_node_property_classes">
+<code class="sig-prename descclassname">ujt.transformers.</code><code class="sig-name descname">apply_node_property_classes</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">elements</span></em>, <em class="sig-param"><span class="n">node_name_message_map</span></em>, <em class="sig-param"><span class="n">client_name_message_map</span></em>, <em class="sig-param"><span class="n">virtual_node_map</span></em><span class="sig-paren">)</span><a class="headerlink" href="#ujt.transformers.apply_node_property_classes" title="Permalink to this definition">¶</a></dt>
+<dd><p>Adds classes to elements based on the properties of their corresponding nodes.</p>
+<dl class="simple">
+<dt>Currently, these properties include:</dt><dd><p>if the element corresponds to a client
+the overall status of a node or virtual node
+the override status of a node or virtual node</p>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>elements</strong> – A list of cytoscape elements</p></li>
+<li><p><strong>node_name_message_map</strong> – A dictionary mapping node names to Node protos.</p></li>
+<li><p><strong>client_name_message_map</strong> – A dictionary mapping client names to Client protos.</p></li>
+<li><p><strong>virtual_node_map</strong> – A dictionary mapping virtual node names to VirtualNode protos.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>a new list of elements with appropriate cytoscape classes.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="ujt.transformers.apply_slis_to_node_map">
+<code class="sig-prename descclassname">ujt.transformers.</code><code class="sig-name descname">apply_slis_to_node_map</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">sli_list</span></em>, <em class="sig-param"><span class="n">node_map</span></em><span class="sig-paren">)</span><a class="headerlink" href="#ujt.transformers.apply_slis_to_node_map" title="Permalink to this definition">¶</a></dt>
+<dd><p>Updates the nodes in the node map with the slis from the sli list.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>sli_list</strong> – A list of SLIs to add to the nodes</p></li>
+<li><p><strong>node_map</strong> – A dict mapping node names to nodes</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>a dict mapping node names to nodes, with updated SLIs</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="ujt.transformers.apply_uuid_to_elements">
+<code class="sig-prename descclassname">ujt.transformers.</code><code class="sig-name descname">apply_uuid_to_elements</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">elements</span></em>, <em class="sig-param"><span class="n">uuid_to_apply</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#ujt.transformers.apply_uuid_to_elements" title="Permalink to this definition">¶</a></dt>
+<dd><p>Append a new UUID to the id of each cytoscape element</p>
+<p>This is used as a workaround to update the source/target of edges, and the parent/child relatioship of nodes.
+In Cytoscape.js, these relationships are immutable, and a move() function has to
+be called on the element to update the aforementioned properties.
+However, Dash Cytoscape doesn’t expose this functionality.
+See <a class="reference external" href="https://github.com/plotly/dash-cytoscape/issues/106">https://github.com/plotly/dash-cytoscape/issues/106</a>.
+By providing a new ID, we can avoid this restriction.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>elements</strong> – a list of Cytoscape elements</p></li>
+<li><p><strong>uuid_to_apply</strong> – a UUID to append. Defaults to None.
+If None is provided, this function generates a new UUID.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A list of Cytoscape elements with an UUID appended to their ID fields.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="ujt.transformers.apply_view_classes">
+<code class="sig-prename descclassname">ujt.transformers.</code><code class="sig-name descname">apply_view_classes</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">elements</span></em>, <em class="sig-param"><span class="n">tag_map</span></em>, <em class="sig-param"><span class="n">view_list</span></em><span class="sig-paren">)</span><a class="headerlink" href="#ujt.transformers.apply_view_classes" title="Permalink to this definition">¶</a></dt>
+<dd><p>Applies classes to elements based on the user defined tags and views.</p>
+<p>The stylesheet is updated upon every style update.
+Given a view composed of a tag and style name, we change
+the actual appearance of elements, by appending the style name
+to all elements tagged with the tag.</p>
+<p>Notice that the tag name itself is not appended to the class list.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>elements</strong> – A list of cytoscape elements.</p></li>
+<li><p><strong>tag_map</strong> – A dictionary mapping element_ujt_ids to a list of applied tags</p></li>
+<li><p><strong>view_list</strong> – The list of user defined views.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>a list of cytoscape elements with view classes applied.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="ujt.transformers.apply_virtual_nodes_to_elements">
+<code class="sig-prename descclassname">ujt.transformers.</code><code class="sig-name descname">apply_virtual_nodes_to_elements</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">elements</span></em><span class="sig-paren">)</span><a class="headerlink" href="#ujt.transformers.apply_virtual_nodes_to_elements" title="Permalink to this definition">¶</a></dt>
+<dd><p>Applies the virtual node transformation to elements.</p>
+<dl class="simple">
+<dt>This is done in two steps:</dt><dd><ol class="arabic simple">
+<li><dl class="simple">
+<dt>modifying the existing elements by:</dt><dd><ol class="loweralpha simple">
+<li><p>removing the elements that should be hidden by a collapsed virtual node</p></li>
+<li><p>adding the parent property to elements that are in an expanded virtual node</p></li>
+<li><p>modifying edges to connect collapsed virtual nodes</p></li>
+</ol>
+</dd>
+</dl>
+</li>
+<li><p>adding in the expanded or top-level virtual nodes that should be visible</p></li>
+</ol>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>elements</strong> – a list of cytoscape elements</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="ujt.transformers.generate_before_after_composite_slis">
+<code class="sig-prename descclassname">ujt.transformers.</code><code class="sig-name descname">generate_before_after_composite_slis</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">slis</span><span class="p">:</span> <span class="n">List<span class="p">[</span>graph_structures_pb2.SLI<span class="p">]</span></span></em>, <em class="sig-param"><span class="n">start_time</span><span class="p">:</span> <span class="n">datetime.datetime</span></em>, <em class="sig-param"><span class="n">end_time</span><span class="p">:</span> <span class="n">datetime.datetime</span></em><span class="sig-paren">)</span> &#x2192; Tuple<span class="p">[</span>Optional<span class="p">[</span>graph_structures_pb2.SLI<span class="p">]</span><span class="p">, </span>Optional<span class="p">[</span>graph_structures_pb2.SLI<span class="p">]</span><span class="p">]</span><a class="headerlink" href="#ujt.transformers.generate_before_after_composite_slis" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generates two composite SLIs from the slis in each half of the specified time range.</p>
+<p>The composite SLI’s value is the average of the individual SLI values in the appropriate range.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>slis</strong> – A list of SLIs within the tine range</p></li>
+<li><p><strong>start_time</strong> – The start of the time range</p></li>
+<li><p><strong>end_time</strong> – The end of the time range</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A tuple of two composite SLIs. It will never return (None, None)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="ujt.transformers.sort_nodes_by_parent_relationship">
+<code class="sig-prename descclassname">ujt.transformers.</code><code class="sig-name descname">sort_nodes_by_parent_relationship</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">elements</span></em><span class="sig-paren">)</span><a class="headerlink" href="#ujt.transformers.sort_nodes_by_parent_relationship" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a list of elements where node parents always appear before node children.</p>
+<p>This method essentially performs a topological sort on the trees
+formed from parent-child relationships between nodes.</p>
+<p>For context, see <a class="reference external" href="https://github.com/plotly/dash-cytoscape/issues/112">https://github.com/plotly/dash-cytoscape/issues/112</a>
+and <a class="reference external" href="https://github.com/googleinterns/userjourneytool/issues/63">https://github.com/googleinterns/userjourneytool/issues/63</a></p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>elements</strong> – a list of cytoscape elements.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>a list of cytoscape where node parents always appear before node children.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+<div class="section" id="module-ujt.ujt">
+<span id="ujt-ujt-module"></span><h2>ujt.ujt module<a class="headerlink" href="#module-ujt.ujt" title="Permalink to this headline">¶</a></h2>
+<p>Main entry point for UJT.</p>
+<dl class="py function">
+<dt id="ujt.ujt.initialize_ujt">
+<code class="sig-prename descclassname">ujt.ujt.</code><code class="sig-name descname">initialize_ujt</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ujt.ujt.initialize_ujt" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt id="ujt.ujt.parse_args">
+<code class="sig-prename descclassname">ujt.ujt.</code><code class="sig-name descname">parse_args</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ujt.ujt.parse_args" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="module-ujt.utils">
+<span id="ujt-utils-module"></span><h2>ujt.utils module<a class="headerlink" href="#module-ujt.utils" title="Permalink to this headline">¶</a></h2>
+<p>Module providing various utility functions.</p>
+<p>Can be refactored into multiple files if necessary.</p>
+<dl class="py function">
+<dt id="ujt.utils.add_class_mutable">
+<code class="sig-prename descclassname">ujt.utils.</code><code class="sig-name descname">add_class_mutable</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">element</span><span class="p">:</span> <span class="n">Dict<span class="p">[</span>str<span class="p">, </span>Any<span class="p">]</span></span></em>, <em class="sig-param"><span class="n">class_names</span><span class="p">:</span> <span class="n">List<span class="p">[</span>str<span class="p">]</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ujt.utils.add_class_mutable" title="Permalink to this definition">¶</a></dt>
+<dd><p>Adds a class to a cytoscape element.</p>
+<p>This function mutates the input element.
+As such, it should be called only on a copy of the original element
+when used in a transformer.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>element</strong> – a cytoscape element</p></li>
+<li><p><strong>class_names</strong> – a list of class names to add to add</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="ujt.utils.ctx_triggered_info">
+<code class="sig-prename descclassname">ujt.utils.</code><code class="sig-name descname">ctx_triggered_info</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">ctx</span></em><span class="sig-paren">)</span> &#x2192; Tuple<span class="p">[</span>Optional<span class="p">[</span>str<span class="p">]</span><span class="p">, </span>Optional<span class="p">[</span>str<span class="p">]</span><span class="p">, </span>Optional<span class="p">[</span>Any<span class="p">]</span><span class="p">]</span><a class="headerlink" href="#ujt.utils.ctx_triggered_info" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt id="ujt.utils.dict_to_str">
+<code class="sig-prename descclassname">ujt.utils.</code><code class="sig-name descname">dict_to_str</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">input_dict</span></em>, <em class="sig-param"><span class="n">indent</span><span class="o">=</span><span class="default_value">4</span></em><span class="sig-paren">)</span><a class="headerlink" href="#ujt.utils.dict_to_str" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt id="ujt.utils.get_all_node_names_within_virtual_node">
+<code class="sig-prename descclassname">ujt.utils.</code><code class="sig-name descname">get_all_node_names_within_virtual_node</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">virtual_node_name</span></em>, <em class="sig-param"><span class="n">node_name_message_map</span></em>, <em class="sig-param"><span class="n">virtual_node_map</span></em><span class="sig-paren">)</span><a class="headerlink" href="#ujt.utils.get_all_node_names_within_virtual_node" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt id="ujt.utils.get_change_over_time_class_from_composite_slis">
+<code class="sig-prename descclassname">ujt.utils.</code><code class="sig-name descname">get_change_over_time_class_from_composite_slis</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">before_composite_sli</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span>graph_structures_pb2.SLI<span class="p">]</span></span></em>, <em class="sig-param"><span class="n">after_composite_sli</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span>graph_structures_pb2.SLI<span class="p">]</span></span></em><span class="sig-paren">)</span> &#x2192; str<a class="headerlink" href="#ujt.utils.get_change_over_time_class_from_composite_slis" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the appropriate coloring/gradient based on the composite SLIs.</p>
+<p>We denote parts of a full styling class as a subclass.
+These include STATUS_HEALTHY, IMPROVED, etc.
+We join the subclasses together with underscore as a delimiter to create a full class name,
+that has an assoiated style.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>before_composite_sli</strong> – A composite SLI holding the average value of the SLIs over the former half of a time interval.</p></li>
+<li><p><strong>after_composite_sli</strong> – A composite SLI holding the average value of the SLIs over the latter half of a time interval.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A class name to be added to the element.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="ujt.utils.get_existing_uuid">
+<code class="sig-prename descclassname">ujt.utils.</code><code class="sig-name descname">get_existing_uuid</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">elements</span></em><span class="sig-paren">)</span><a class="headerlink" href="#ujt.utils.get_existing_uuid" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt id="ujt.utils.get_highest_collapsed_virtual_node_name">
+<code class="sig-prename descclassname">ujt.utils.</code><code class="sig-name descname">get_highest_collapsed_virtual_node_name</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">node_name</span></em>, <em class="sig-param"><span class="n">virtual_node_map</span></em>, <em class="sig-param"><span class="n">parent_virtual_node_map</span></em><span class="sig-paren">)</span><a class="headerlink" href="#ujt.utils.get_highest_collapsed_virtual_node_name" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gets the name of the highest collapsed virtual node, given a node name.</p>
+<p>Node name can be virtual or non virtual.
+Highest refers to furthest ancestor.
+This function doesn’t feel like it should be in utils, but not sure where else to put it.
+Can refactor later.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>node_name</strong> – A name of a virtual or non-virtual node.</p></li>
+<li><p><strong>virtual_node_map</strong> – A dict mapping virtual node names to virtual node protos.</p></li>
+<li><p><strong>parent_virtual_node_map</strong> – A parent mapping node names (virtual or non-virtual) to the name of their virtual parent.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>The name of the highest collapsed virtual node above the given node.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="ujt.utils.get_latest_tapped_element">
+<code class="sig-prename descclassname">ujt.utils.</code><code class="sig-name descname">get_latest_tapped_element</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">tap_node</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span>Dict<span class="p">[</span>str<span class="p">, </span>Any<span class="p">]</span><span class="p">]</span></span></em>, <em class="sig-param"><span class="n">tap_edge</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span>Dict<span class="p">[</span>str<span class="p">, </span>Any<span class="p">]</span><span class="p">]</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ujt.utils.get_latest_tapped_element" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt id="ujt.utils.human_readable_enum_name">
+<code class="sig-prename descclassname">ujt.utils.</code><code class="sig-name descname">human_readable_enum_name</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">enum_value</span></em>, <em class="sig-param"><span class="n">enum_class</span></em><span class="sig-paren">)</span> &#x2192; str<a class="headerlink" href="#ujt.utils.human_readable_enum_name" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt id="ujt.utils.is_client_cytoscape_node">
+<code class="sig-prename descclassname">ujt.utils.</code><code class="sig-name descname">is_client_cytoscape_node</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">tap_node</span><span class="p">:</span> <span class="n">Dict<span class="p">[</span>str<span class="p">, </span>Any<span class="p">]</span></span></em><span class="sig-paren">)</span> &#x2192; bool<a class="headerlink" href="#ujt.utils.is_client_cytoscape_node" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt id="ujt.utils.is_node_element">
+<code class="sig-prename descclassname">ujt.utils.</code><code class="sig-name descname">is_node_element</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">element</span></em><span class="sig-paren">)</span> &#x2192; bool<a class="headerlink" href="#ujt.utils.is_node_element" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt id="ujt.utils.parent_full_name">
+<code class="sig-prename descclassname">ujt.utils.</code><code class="sig-name descname">parent_full_name</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">full_name</span></em><span class="sig-paren">)</span> &#x2192; str<a class="headerlink" href="#ujt.utils.parent_full_name" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt id="ujt.utils.proto_list_to_name_map">
+<code class="sig-prename descclassname">ujt.utils.</code><code class="sig-name descname">proto_list_to_name_map</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">proto_list</span></em><span class="sig-paren">)</span><a class="headerlink" href="#ujt.utils.proto_list_to_name_map" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt id="ujt.utils.relative_name">
+<code class="sig-prename descclassname">ujt.utils.</code><code class="sig-name descname">relative_name</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">full_name</span><span class="p">:</span> <span class="n">str</span></em><span class="sig-paren">)</span> &#x2192; str<a class="headerlink" href="#ujt.utils.relative_name" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt id="ujt.utils.string_to_dict">
+<code class="sig-prename descclassname">ujt.utils.</code><code class="sig-name descname">string_to_dict</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">stringified_dict</span></em><span class="sig-paren">)</span><a class="headerlink" href="#ujt.utils.string_to_dict" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="module-ujt">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-ujt" title="Permalink to this headline">¶</a></h2>
+</div>
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="index.html">User Journey Tool</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="modules.html">ujt</a><ul class="current">
+<li class="toctree-l2 current"><a class="current reference internal" href="#">ujt package</a></li>
+</ul>
+</li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+  <li><a href="modules.html">ujt</a><ul>
+      <li>Previous: <a href="modules.html" title="previous chapter">ujt</a></li>
+      <li>Next: <a href="ujt.callbacks.html" title="next chapter">ujt.callbacks package</a></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2020, Chuan Chen.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 3.2.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="_sources/ujt.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

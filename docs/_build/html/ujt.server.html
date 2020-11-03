@@ -1,0 +1,269 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ujt.server package &#8212; User Journey Tool  documentation</title>
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script src="_static/language_data.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="prev" title="ujt.callbacks package" href="ujt.callbacks.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="ujt-server-package">
+<h1>ujt.server package<a class="headerlink" href="#ujt-server-package" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="module-ujt.server.client">
+<span id="ujt-server-client-module"></span><h2>ujt.server.client module<a class="headerlink" href="#module-ujt.server.client" title="Permalink to this headline">¶</a></h2>
+<p>Client to directly access server endpoints.
+Not part of the UJT – only used to test the server without
+having to run or setup the UJT to call the server.</p>
+</div>
+<div class="section" id="module-ujt.server.generate_data">
+<span id="ujt-server-generate-data-module"></span><h2>ujt.server.generate_data module<a class="headerlink" href="#module-ujt.server.generate_data" title="Permalink to this headline">¶</a></h2>
+<p>Temp file to generate mock data.</p>
+<dl class="py function">
+<dt id="ujt.server.generate_data.generate_clients">
+<code class="sig-prename descclassname">ujt.server.generate_data.</code><code class="sig-name descname">generate_clients</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ujt.server.generate_data.generate_clients" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generates the mock client data used to test the UJT.</p>
+<p>Returns: A list of Client protobufs.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="ujt.server.generate_data.generate_nodes">
+<code class="sig-prename descclassname">ujt.server.generate_data.</code><code class="sig-name descname">generate_nodes</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ujt.server.generate_data.generate_nodes" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generates mock service data used to test the UJT.</p>
+<p>Returns: a list of Service protobufs.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="ujt.server.generate_data.save_mock_data">
+<code class="sig-prename descclassname">ujt.server.generate_data.</code><code class="sig-name descname">save_mock_data</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ujt.server.generate_data.save_mock_data" title="Permalink to this definition">¶</a></dt>
+<dd><p>Saves the mock data used to test the UJT to disk.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-ujt.server.server">
+<span id="ujt-server-server-module"></span><h2>ujt.server.server module<a class="headerlink" href="#module-ujt.server.server" title="Permalink to this headline">¶</a></h2>
+<p>Implementation of Reporting Server.</p>
+<dl class="py class">
+<dt id="ujt.server.server.ReportingServiceServicer">
+<em class="property">class </em><code class="sig-prename descclassname">ujt.server.server.</code><code class="sig-name descname">ReportingServiceServicer</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">node_map</span></em>, <em class="sig-param"><span class="n">client_map</span></em><span class="sig-paren">)</span><a class="headerlink" href="#ujt.server.server.ReportingServiceServicer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">server_pb2_grpc.ReportingServiceServicer</span></code></p>
+<p>Provides methods that implement functionality of Reporting Service.</p>
+<dl class="py method">
+<dt id="ujt.server.server.ReportingServiceServicer.GetClients">
+<code class="sig-name descname">GetClients</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">request</span></em>, <em class="sig-param"><span class="n">context</span></em><span class="sig-paren">)</span><a class="headerlink" href="#ujt.server.server.ReportingServiceServicer.GetClients" title="Permalink to this definition">¶</a></dt>
+<dd><p>for user journeys</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="ujt.server.server.ReportingServiceServicer.GetNodes">
+<code class="sig-name descname">GetNodes</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">request</span></em>, <em class="sig-param"><span class="n">context</span></em><span class="sig-paren">)</span><a class="headerlink" href="#ujt.server.server.ReportingServiceServicer.GetNodes" title="Permalink to this definition">¶</a></dt>
+<dd><p>for generating graph</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="ujt.server.server.ReportingServiceServicer.GetSLIs">
+<code class="sig-name descname">GetSLIs</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">request</span></em>, <em class="sig-param"><span class="n">context</span></em><span class="sig-paren">)</span><a class="headerlink" href="#ujt.server.server.ReportingServiceServicer.GetSLIs" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns updated SLI values to clients.</p>
+<p>In this mock example, we generate new values for SLIs dynamically.
+In a real server, this method should report real SLI values.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt id="ujt.server.server.generate_interval_slis">
+<code class="sig-prename descclassname">ujt.server.server.</code><code class="sig-name descname">generate_interval_slis</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">node_name</span><span class="p">:</span> <span class="n">str</span></em>, <em class="sig-param"><span class="n">start_time</span><span class="p">:</span> <span class="n">datetime.datetime</span></em>, <em class="sig-param"><span class="n">end_time</span><span class="p">:</span> <span class="n">datetime.datetime</span></em>, <em class="sig-param"><span class="n">sli_type</span><span class="p">:</span> <span class="n">SLITypeValue</span></em>, <em class="sig-param"><span class="n">reporting_interval</span><span class="p">:</span> <span class="n">datetime.timedelta</span></em>, <em class="sig-param"><span class="n">random_mode</span><span class="p">:</span> <span class="n">bool</span> <span class="o">=</span> <span class="default_value">True</span></em>, <em class="sig-param"><span class="n">start_value</span><span class="p">:</span> <span class="n">float</span> <span class="o">=</span> <span class="default_value">None</span></em>, <em class="sig-param"><span class="n">end_value</span><span class="p">:</span> <span class="n">float</span> <span class="o">=</span> <span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#ujt.server.server.generate_interval_slis" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generate SLIs for a given node and SLI type within a given interval.</p>
+<p>Uses random generation or linear interpolation for SLI value generation.
+In this implementation, the timestamps are deemed inclusive since we generate new SLIs.
+However, this is not inherently required by the proto request semantics.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>node_name</strong> – the name of the node to generate SLIs for</p></li>
+<li><p><strong>start_time</strong> – the start time of the interval</p></li>
+<li><p><strong>end_time</strong> – the end time of the interval</p></li>
+<li><p><strong>sli_type</strong> – the type of SLI to generate</p></li>
+<li><p><strong>reporting_interval</strong> – the interval between successive SLIs</p></li>
+<li><p><strong>random_mode</strong> – flag to use random value generation</p></li>
+<li><p><strong>start_value</strong> – starting value for linear interpolation of SLI values</p></li>
+<li><p><strong>end_value</strong> – end value for linear interpolation of SLI values</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="ujt.server.server.node_contains_sli_type">
+<code class="sig-prename descclassname">ujt.server.server.</code><code class="sig-name descname">node_contains_sli_type</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">node</span><span class="p">:</span> <span class="n">graph_structures_pb2.Node</span></em>, <em class="sig-param"><span class="n">sli_type</span><span class="p">:</span> <span class="n">SLITypeValue</span></em><span class="sig-paren">)</span><a class="headerlink" href="#ujt.server.server.node_contains_sli_type" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt id="ujt.server.server.read_local_data">
+<code class="sig-prename descclassname">ujt.server.server.</code><code class="sig-name descname">read_local_data</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ujt.server.server.read_local_data" title="Permalink to this definition">¶</a></dt>
+<dd><p>Read and return protos from values in data directory.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="ujt.server.server.serve">
+<code class="sig-prename descclassname">ujt.server.server.</code><code class="sig-name descname">serve</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ujt.server.server.serve" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="module-ujt.server.server_utils">
+<span id="ujt-server-server-utils-module"></span><h2>ujt.server.server_utils module<a class="headerlink" href="#module-ujt.server.server_utils" title="Permalink to this headline">¶</a></h2>
+<dl class="py function">
+<dt id="ujt.server.server_utils.named_proto_file_name">
+<code class="sig-prename descclassname">ujt.server.server_utils.</code><code class="sig-name descname">named_proto_file_name</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">name</span><span class="p">:</span> <span class="n">str</span></em>, <em class="sig-param"><span class="n">proto_type</span><span class="p">:</span> <span class="n">Type<span class="p">[</span>google.protobuf.message.Message<span class="p">]</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ujt.server.server_utils.named_proto_file_name" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generates the default file name for messages with a name field.</p>
+<p>Such messages include: Services, Endpoints, Clients, UserJourneys.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>name</strong> – A protobuf message name.</p></li>
+<li><p><strong>proto_type</strong> – The type of the protobuf message</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A string of the default file name for the given message.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="ujt.server.server_utils.read_proto_from_file">
+<code class="sig-prename descclassname">ujt.server.server_utils.</code><code class="sig-name descname">read_proto_from_file</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">path</span><span class="p">:</span> <span class="n">pathlib.Path</span></em>, <em class="sig-param"><span class="n">proto_type</span><span class="p">:</span> <span class="n">Type<span class="p">[</span>google.protobuf.message.Message<span class="p">]</span></span></em><span class="sig-paren">)</span> &#x2192; google.protobuf.message.Message<a class="headerlink" href="#ujt.server.server_utils.read_proto_from_file" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reads a protobuf message from a file.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>path</strong> – The desired path for the file to be read.</p></li>
+<li><p><strong>proto_type</strong> – The type of the protobuf message.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="ujt.server.server_utils.write_proto_to_file">
+<code class="sig-prename descclassname">ujt.server.server_utils.</code><code class="sig-name descname">write_proto_to_file</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">path</span><span class="p">:</span> <span class="n">pathlib.Path</span></em>, <em class="sig-param"><span class="n">message</span><span class="p">:</span> <span class="n">google.protobuf.message.Message</span></em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#ujt.server.server_utils.write_proto_to_file" title="Permalink to this definition">¶</a></dt>
+<dd><p>Writes a protobuf to disk in a human-readable format.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>path</strong> – The desired path for the file to be written.</p></li>
+<li><p><strong>message</strong> – A protobuf message.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+<div class="section" id="module-ujt.server">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-ujt.server" title="Permalink to this headline">¶</a></h2>
+</div>
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="index.html">User Journey Tool</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="modules.html">ujt</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="ujt.html">ujt package</a></li>
+</ul>
+</li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+  <li><a href="modules.html">ujt</a><ul>
+  <li><a href="ujt.html">ujt package</a><ul>
+      <li>Previous: <a href="ujt.callbacks.html" title="previous chapter">ujt.callbacks package</a></li>
+  </ul></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2020, Chuan Chen.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 3.2.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="_sources/ujt.server.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>
