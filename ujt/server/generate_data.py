@@ -1,10 +1,10 @@
 """ Temp file to generate mock data. """
 
+import argparse
 import pathlib
 import random
 from collections import defaultdict
 from typing import DefaultDict, Dict, List
-import argparse
 
 from graph_structures_pb2 import (
     SLI,
@@ -202,8 +202,8 @@ def generate_clients():
 
 
 def save_mock_data(data_path_str: str = None):
-    """ Saves the mock data used to test the UJT to disk. 
-    
+    """Saves the mock data used to test the UJT to disk.
+
     Args:
         data_path_str: path to directory where mock data should be saved.
 
@@ -218,7 +218,6 @@ def save_mock_data(data_path_str: str = None):
         data_path = pathlib.Path(__file__).parent / "data"
     else:
         data_path = pathlib.Path(data_path_str)
-
 
     for proto_type, messages in proto_type_message_map.items():
         for message in messages:

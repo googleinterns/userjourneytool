@@ -1,11 +1,11 @@
 """Implementation of Reporting Server."""
 
+import argparse
 import datetime as dt
 import pathlib
 import random
 from concurrent import futures
-from typing import TYPE_CHECKING, Dict
-import argparse
+from typing import TYPE_CHECKING, Dict, List
 
 import grpc
 import server_pb2
@@ -29,8 +29,12 @@ def read_local_data(data_path_str: str = None):
     client_paths = data_path.glob("Client_*.ujtdata")
     node_paths = data_path.glob("Node_*.ujtdata")
 
-    clients = [server_utils.read_proto_from_file(path, Client) for path in client_paths]
-    nodes = [server_utils.read_proto_from_file(path, Node) for path in node_paths]
+    clients: List[Client] = [
+        server_utils.read_proto_from_file(path, Client) for path in client_paths  # type: ignore
+    ]
+    nodes: List[Node] = [
+        server_utils.read_proto_from_file(path, Node) for path in node_paths  # type: ignore
+    ]
 
     client_map = {client.name: client for client in clients}
     node_map = {node.name: node for node in nodes}
@@ -229,9 +233,9 @@ def serve(port: str = None, data_path_str: str = None):
         reporting_service_servicer, server
     )
     server.add_insecure_port(f"[::]:{port}")
-    
+
     server.start()
-    print("starting server!")
+    print(f"starting server on port {port}!")
     server.wait_for_termination()
 
 

@@ -59,10 +59,14 @@ def parse_args():
     return arguments
 
 
-if __name__ == "__main__":
+def main():
     args = parse_args()
     config.load_config(args.config_path)
     rpc_client.connect()
     initialize_ujt()
     app.layout = components.get_layout()
     app.run_server(debug=True)
+
+
+if __name__ == "__main__":
+    main()

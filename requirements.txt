@@ -3,7 +3,7 @@ yapf==0.30.0
 pytest==6.0.1
 pytest-cov==2.10.1
 mypy==0.782
-dash==1.16.0
+dash[testing]==1.16.0
 dash-cytoscape==0.2.0
 sphinx==3.2.1
 protobuf==3.13.0
