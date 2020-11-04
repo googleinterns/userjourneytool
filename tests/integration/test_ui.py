@@ -12,15 +12,19 @@ import ujt.server.server
 
 def test_main_ui(dash_duo):
     # Start the reporting server
+    ready_event = threading.Event()
     server_thread = threading.Thread(
         target=ujt.server.server.serve,
         args=(
             "50052",
             pathlib.Path(__file__).parent.absolute() / "data",
+            ready_event,
         ),
-        daemon=True,  # kill the thread when the test stops
+        # stop process when only server thread exists (after test completed)
+        daemon=True,
     )
     server_thread.start()
+    ready_event.wait()
 
     # initialize the ujt
     ujt.config.REPORTING_SERVER_ADDRESS = "localhost:50052"

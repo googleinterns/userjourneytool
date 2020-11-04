@@ -1,0 +1,18 @@
+node_type: NODETYPE_ENDPOINT
+name: "WebServer.BuyCurrency"
+parent_name: "WebServer"
+dependencies {
+  target_name: "StoreService.VerifyPayment"
+  source_name: "WebServer.BuyCurrency"
+}
+slis {
+  node_name: "WebServer.BuyCurrency"
+  sli_type: SLITYPE_LATENCY
+  sli_value: 0.30985937811496567
+  slo_error_upper_bound: 0.9
+  slo_error_lower_bound: 0.1
+  slo_warn_upper_bound: 0.8
+  slo_warn_lower_bound: 0.2
+  slo_target: 0.5
+  intra_status_change_threshold: 0.03
+}

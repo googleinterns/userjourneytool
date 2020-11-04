@@ -4,6 +4,7 @@ import argparse
 import datetime as dt
 import pathlib
 import random
+import threading
 from concurrent import futures
 from typing import TYPE_CHECKING, Dict, List
 
@@ -220,7 +221,11 @@ class ReportingServiceServicer(server_pb2_grpc.ReportingServiceServicer):
         return server_pb2.GetSLIsResponse(slis=output_slis)
 
 
-def serve(port: str = None, data_path_str: str = None):
+def serve(
+    port: str = None,
+    data_path_str: str = None,
+    ready_event: threading.Event = None,
+):
     if port is None:
         port = "50052"
 
@@ -236,6 +241,8 @@ def serve(port: str = None, data_path_str: str = None):
 
     server.start()
     print(f"starting server on port {port}!")
+    if ready_event is not None:
+        ready_event.set()
     server.wait_for_termination()
 
 
