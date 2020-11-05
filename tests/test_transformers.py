@@ -331,6 +331,7 @@ def test_sort_nodes_by_parent_relationship():
             "data": {
                 "source": node_names[0],
                 "target": node_names[1],
+                "id": f"{node_names[0]}/{node_names[1]}",
             },
         },
     ]
@@ -339,15 +340,19 @@ def test_sort_nodes_by_parent_relationship():
         reversed_node_elements + edge_elements
     )
 
-    assert returned_elements.index(node_elements[0]) < returned_elements.index(
-        node_elements[1]
-    )
-    assert returned_elements.index(node_elements[0]) < returned_elements.index(
-        node_elements[2]
-    )
-    assert returned_elements.index(node_elements[1]) < returned_elements.index(
-        node_elements[3]
-    )
-    assert returned_elements.index(node_elements[2]) < returned_elements.index(
-        node_elements[4]
-    )
+    expected_elements = [
+        {
+            "data": {
+                "source": f"{node_names[0]}",
+                "target": f"{node_names[1]}",
+                "id": f"{node_names[0]}/{node_names[1]}",
+            }
+        },
+        {"data": {"id": f"{node_names[0]}"}},
+        {"data": {"id": f"{node_names[1]}", "parent": f"{node_names[0]}"}},
+        {"data": {"id": f"{node_names[2]}", "parent": f"{node_names[0]}"}},
+        {"data": {"id": f"{node_names[3]}", "parent": f"{node_names[1]}"}},
+        {"data": {"id": f"{node_names[4]}", "parent": f"{node_names[2]}"}},
+    ]
+
+    assert returned_elements == expected_elements
