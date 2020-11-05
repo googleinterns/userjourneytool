@@ -10,7 +10,7 @@ import ujt.main
 import ujt.server.server
 
 
-def test_main_ui(dash_duo):
+def test_main_ui(dash_duo, local):
     # Start the reporting server
     ready_event = threading.Event()
     server_thread = threading.Thread(
@@ -58,4 +58,5 @@ def test_main_ui(dash_duo):
     )
     dash_duo.driver.execute_script(replace_canvas_with_image_script, node_canvas)
 
-    dash_duo.percy_snapshot("main_ui", wait_for_callbacks=True)
+    if not local:
+        dash_duo.percy_snapshot("main_ui", wait_for_callbacks=True)

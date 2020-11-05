@@ -1,2 +1,8 @@
 #!/bin/bash
-pytest --cov-report term-missing  --cov=ujt -vv
+if [ -z "$CI" ]
+then
+    pytest --cov-report term-missing --cov=ujt -vv -s --local
+else
+    pytest --cov-report term-missing --cov=ujt -vv
+fi
+
