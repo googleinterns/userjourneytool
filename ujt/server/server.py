@@ -225,6 +225,8 @@ def serve(
     port: str = None,
     data_path_str: str = None,
     ready_event: threading.Event = None,
+    stop_event: threading.Event = None,
+    stop_completed_event: threading.Event = None
 ):
     if port is None:
         port = "50052"
@@ -243,7 +245,12 @@ def serve(
     print(f"starting server on port {port}!")
     if ready_event is not None:
         ready_event.set()
-    server.wait_for_termination()
+    if stop_event is not None:
+        stop_event.wait()
+        server.stop(None)
+        stop_completed_event.set()
+    else:
+        server.wait_for_termination()
 
 
 if __name__ == "__main__":
