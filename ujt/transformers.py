@@ -373,3 +373,53 @@ def apply_slis_to_node_map(sli_list, node_map):
         node.slis.extend(new_node_slis)
 
     return node_map
+
+
+def sort_nodes_by_parent_relationship(elements):
+    """Returns a list of elements where node parents always appear before node children.
+
+    This method essentially performs a topological sort on the trees
+    formed from parent-child relationships between nodes.
+
+    For context, see https://github.com/plotly/dash-cytoscape/issues/112
+    and https://github.com/googleinterns/userjourneytool/issues/63
+
+    Args:
+        elements: a list of cytoscape elements.
+
+    Returns:
+        a list of cytoscape where node parents always appear before node children.
+    """
+
+    edges = []
+    node_id_element_map = {}
+    for element in elements:
+        if utils.is_node_element(element):
+            node_id_element_map[element["data"]["id"]] = element
+        else:
+            edges.append(element)
+
+    parent_child_map = defaultdict(list)
+    bfs_queue = deque()
+    # build a tree from parents to children
+    # (reversing the edge direction of cytoscape format)
+    for node in node_id_element_map.values():
+        node_id = node["data"]["id"]
+        if "parent" in node["data"]:
+            parent_id = node["data"]["parent"]
+            parent_child_map[parent_id].append(node_id)
+        else:
+            bfs_queue.append(node_id)
+
+    topologically_sorted_nodes = []
+    visited_node_ids = set()
+    while bfs_queue:
+        node_id = bfs_queue.popleft()
+        if node_id in visited_node_ids:
+            raise ValueError("Circular parent/child relationship detected!")
+        else:
+            visited_node_ids.add(node_id)
+        bfs_queue.extend(parent_child_map[node_id])
+        topologically_sorted_nodes.append(node_id_element_map[node_id])
+
+    return edges + topologically_sorted_nodes
