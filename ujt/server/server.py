@@ -4,12 +4,11 @@ import datetime as dt
 import pathlib
 import random
 from concurrent import futures
-from typing import TYPE_CHECKING, Dict, List
+from typing import Dict, TYPE_CHECKING
 
 import grpc
 import server_pb2
 import server_pb2_grpc
-from google.protobuf.timestamp_pb2 import Timestamp
 from graph_structures_pb2 import SLI, Client, Node, SLIType
 
 from . import generate_data, server_utils
@@ -42,26 +41,64 @@ def node_contains_sli_type(node: Node, sli_type: "SLITypeValue"):
     return False
 
 
-def generate_new_random_slis(
-    node_map: Dict[str, Node],
-    node_names: List[str],
-    timestamp: dt.datetime,
-    sli_types: List["SLITypeValue"],
+def generate_interval_slis(
+    node_name: str,
+    start_time: dt.datetime,
+    end_time: dt.datetime,
+    sli_type: "SLITypeValue",
+    reporting_interval: dt.timedelta,
+    random_mode: bool = True,
+    start_value: float = None,
+    end_value: float = None,
 ):
-    slis = []
-    for node_name in node_names:
-        for sli_type in sli_types:
-            if node_contains_sli_type(node_map[node_name], sli_type):
-                sli = SLI(
-                    node_name=node_name,
-                    sli_value=random.random(),
-                    slo_target=generate_data.SLO_TARGET,
-                    sli_type=sli_type,
-                    **generate_data.SLO_BOUNDS,  # type: ignore
-                )
-                sli.timestamp.FromDatetime(timestamp)
+    """Generate SLIs for a given node and SLI type within a given interval.
 
-                slis.append(sli)
+    Uses random generation or linear interpolation for SLI value generation.
+    In this implementation, the timestamps are deemed inclusive since we generate new SLIs.
+    However, this is not inherently required by the proto request semantics.
+
+    Args:
+        node_name: the name of the node to generate SLIs for
+        start_time: the start time of the interval
+        end_time: the end time of the interval
+        sli_type: the type of SLI to generate
+        reporting_interval: the interval between successive SLIs
+
+        random_mode: flag to use random value generation
+        start_value: starting value for linear interpolation of SLI values
+        end_value: end value for linear interpolation of SLI values
+    """
+    slis = []
+    current_time = start_time
+
+    if not random_mode:
+        if start_value is None or end_value is None:
+            raise ValueError
+
+        time_range_seconds = (end_time - start_time).total_seconds()
+        increment = (
+            (end_value - start_value)
+            * reporting_interval.total_seconds()
+            / time_range_seconds
+        )
+        current_value = start_value
+
+    while current_time <= end_time:
+        if random_mode:
+            sli_value = random.random()
+        else:
+            sli_value = current_value
+            current_value += increment
+        sli = SLI(
+            node_name=node_name,
+            sli_value=sli_value,
+            slo_target=generate_data.SLO_TARGET,
+            sli_type=sli_type,
+            **generate_data.SLO_BOUNDS,  # type: ignore
+        )
+        sli.timestamp.FromDatetime(current_time)
+        slis.append(sli)
+        current_time += reporting_interval
 
     return slis
 
@@ -73,7 +110,20 @@ class ReportingServiceServicer(server_pb2_grpc.ReportingServiceServicer):
         self.node_map: Dict[str, Node] = node_map
         self.client_map: Dict[str, Client] = client_map
         self.last_reported_timestamp: dt.datetime = dt.datetime.now()
-        self.reporting_interval: int = 5
+        self.reporting_interval: dt.timedelta = dt.timedelta(seconds=5)
+        self.start_end_values = [
+            (0, 0.05),  # ERROR IMPROVING
+            (0.05, 0.15),  # ERROR to WARN
+            (0.125, 0.175),  # WARN IMPROVING
+            (0.15, 0.25),  # WARN to HEALTHY
+            (0.3, 0.4),  # HEALTHY IMPROVING
+            (0.6, 0.7),  # HEALTHY WORSENING
+            (0.75, 0.85),  # HEALTHY to WARN,
+            (0.825, 0.875),  # WARN WORSENING
+            (0.85, 0.95),  # WARN to ERROR
+            (0.95, 1),  # ERROR WORSENING
+        ]
+        self.start_end_idx = 0
 
     def GetNodes(self, request, context):
         return server_pb2.GetNodesResponse(nodes=self.node_map.values())
@@ -84,24 +134,25 @@ class ReportingServiceServicer(server_pb2_grpc.ReportingServiceServicer):
     def GetSLIs(self, request, context):
         """Returns updated SLI values to clients.
 
-        In this mock example, we generate new random values for SLIs dynamically.
+        In this mock example, we generate new values for SLIs dynamically.
         In a real server, this method should report real SLI values.
         """
-        current_timestamp = Timestamp()
-        current_timestamp.GetCurrentTime()
+
+        current_timestamp = dt.datetime.now()
+
         # Set the start and end time to the current time if they are unset in the request
         start_dt = (
             request.start_time.ToDatetime()
             if request.start_time.IsInitialized()
-            else current_timestamp.ToDatetime()
+            else current_timestamp
         )
         end_dt = (
             request.end_time.ToDatetime()
             if request.end_time.IsInitialized()
-            else current_timestamp.ToDatetime()
+            else current_timestamp
         )
 
-        if end_dt > start_dt:
+        if end_dt < start_dt:
             context.abort(
                 grpc.StatusCode.INVALID_ARGUMENT,
                 "End time must not be later than start time!",
@@ -121,28 +172,43 @@ class ReportingServiceServicer(server_pb2_grpc.ReportingServiceServicer):
             ]
         )
 
-        slis_output = []
-        slis_at_timestamp = []
-        # In this implementation, the timestamps are inclusive since we generate new SLIs
-        # However, this is not inherent to the proto semantics
-        while start_dt <= end_dt:
-            slis_at_timestamp = generate_new_random_slis(
-                self.node_map, requested_node_names, start_dt, requested_sli_types
-            )
-            slis_output += slis_at_timestamp
-            start_dt += dt.timedelta(seconds=self.reporting_interval)
+        # if an instant was requested, use random values
+        # otherwise, use linear interpolation to test change over time feature
+        random_mode = start_dt == end_dt
 
-        # Can we improve this logic? Doesn't seem very elegant.
-        this_last_reported_timestamp = slis_at_timestamp[0].timestamp.ToDatetime()
-        if this_last_reported_timestamp > self.last_reported_timestamp:
-            self.last_reported_timestamp = this_last_reported_timestamp
-            # Update the server's internal Node state
-            sli_name_map = {sli.node_name: sli for sli in slis_at_timestamp}
-            for node_name, node in self.node_map:
-                del node.slis[:]
-                node.slis.extend([sli_name_map[node.name]])
+        output_slis = []
+        for node_name in requested_node_names:
+            for sli_type in requested_sli_types:
+                if node_contains_sli_type(self.node_map[node_name], sli_type):
+                    node_slis = generate_interval_slis(
+                        node_name,
+                        start_dt,
+                        end_dt,
+                        sli_type,
+                        self.reporting_interval,
+                        random_mode=random_mode,
+                        start_value=self.start_end_values[self.start_end_idx][0],
+                        end_value=self.start_end_values[self.start_end_idx][1],
+                    )
 
-        return server_pb2.GetSLIsResponse(slis=slis_output)
+                    if node_slis == []:
+                        continue
+
+                    output_slis += node_slis
+
+                    # update the server's internal store of the nodes
+                    this_last_reported_timestamp = node_slis[-1].timestamp.ToDatetime()
+                    if this_last_reported_timestamp > self.last_reported_timestamp:
+                        self.last_reported_timestamp = this_last_reported_timestamp
+                        for sli in self.node_map[node_name].slis:
+                            if sli.sli_type == node_slis[-1].sli_type:
+                                sli.CopyFrom(node_slis[-1])
+
+        if not random_mode:
+            # cycle through a new case
+            self.start_end_idx = (self.start_end_idx + 1) % len(self.start_end_values)
+
+        return server_pb2.GetSLIsResponse(slis=output_slis)
 
 
 def serve():

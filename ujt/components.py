@@ -55,12 +55,7 @@ def get_layout():
                 id=id_constants.COLLAPSE_ERROR_MODAL,
             ),
             get_signals(),
-            # place this store here for now -- if we need to add more stores we can refactor this
-            dcc.Store(
-                id=id_constants.VIEW_STORE,
-                data=[],
-                storage_type="local",
-            ),
+            get_stores(),
         ],
     )
 
@@ -99,6 +94,25 @@ def get_signals():
     ]
 
     return html.Div(id=id_constants.SIGNAL_WRAPPER_DIV, children=signals)
+
+
+def get_stores():
+    # manually declare these for now,
+    # if we increase the number of stores we can dynamically generate them
+    return html.Div(
+        children=[
+            dcc.Store(
+                id=id_constants.VIEW_STORE,
+                data=[],
+                storage_type="local",
+            ),
+            dcc.Store(
+                id=id_constants.CHANGE_OVER_TIME_SLI_STORE,
+                data={},
+                storage_type="memory",
+            ),
+        ]
+    )
 
 
 def get_top_row_components():
@@ -638,11 +652,15 @@ def get_change_over_time_components():
         ),
         dcc.Dropdown(
             id=id_constants.CHANGE_OVER_TIME_TAG_DROPDOWN,
-            placeholder="Timestamped Tag",
+            placeholder="Timestamped Tag or Custom Range",
             className="m-1",
         ),
         html.Div(
             id=id_constants.TIME_SELECT_PANEL,
+        ),
+        dbc.Button(
+            id=id_constants.CHANGE_OVER_TIME_RESET_BUTTON,
+            children="Reset Change Over Time View",
         ),
         dbc.Button(
             id=id_constants.CHANGE_OVER_TIME_QUERY_BUTTON,
@@ -652,6 +670,17 @@ def get_change_over_time_components():
             # It's a bit excessive and inconvenient to create an entire bootstrap table just to align
             # this one button.
             style={"float": "right"},
+        ),
+        dbc.Toast(
+            id=id_constants.CHANGE_OVER_TIME_ERROR_TOAST,
+            duration=3000,
+            dismissable=True,
+            body_style={"display": "none"},
+            is_open=False,
+            icon="danger",
+        ),
+        html.Div(
+            id=id_constants.CHANGE_OVER_TIME_TEXT_OUTPUT_PANEL,
         ),
     ]
     return components
