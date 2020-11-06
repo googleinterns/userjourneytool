@@ -6,15 +6,17 @@ These functions are 1:1 passthroughs right now, but we may need to do
 some additional data processing as the application grows.
 """
 
-from typing import TYPE_CHECKING
+import datetime as dt
+from typing import TYPE_CHECKING, List, Optional
 
 import grpc
 import server_pb2
 import server_pb2_grpc
 
 if TYPE_CHECKING:
-    from graph_structures_pb2 import (
-        StatusValue,  # pylint: disable=no-name-in-module  # pragma: no cover
+    from graph_structures_pb2 import (  # pylint: disable=no-name-in-module  # pragma: no cover
+        SLITypeValue,
+        StatusValue,
     )
 
 # Let's hardcode this for now... later can move into cfg file. Doesn't really fit in constants file
@@ -33,6 +35,21 @@ def get_clients():
     return reporting_service_stub.GetClients(server_pb2.GetClientsRequest())
 
 
-def get_slis():
+def get_slis(
+    node_names: Optional[List[str]] = None,
+    start_time: Optional[dt.datetime] = None,
+    end_time: Optional[dt.datetime] = None,
+    sli_types: Optional[List["SLITypeValue"]] = None,
+):
     """ Reads a list of SLIs from the remote Reporting Service. """
-    return reporting_service_stub.GetSLIs(server_pb2.GetSLIsRequest())
+    get_slis_request = server_pb2.GetSLIsRequest()
+    if node_names is not None:
+        get_slis_request.node_names.extend(node_names)
+    if start_time is not None:
+        get_slis_request.start_time.FromDatetime(start_time)
+    if end_time is not None:
+        get_slis_request.end_time.FromDatetime(end_time)
+    if sli_types is not None:
+        get_slis_request.sli_types.extend(sli_types)
+
+    return reporting_service_stub.GetSLIs(get_slis_request)

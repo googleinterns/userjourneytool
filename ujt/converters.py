@@ -5,10 +5,10 @@ In general, we consider converters to modify some UJT-specific data structure
 (e.g. cytoscape elements, dropdown options.)
 """
 
-from typing import Any, Collection, Dict, List
+from typing import Any, Collection, Dict, List, Optional, Tuple
 
 import dash_table
-from graph_structures_pb2 import Client, Node, SLIType, Status, VirtualNode
+from graph_structures_pb2 import SLI, Client, Node, SLIType, Status, VirtualNode
 
 from . import constants, utils
 
@@ -233,6 +233,79 @@ def user_journey_datatable_from_user_journeys(user_journeys, table_id):
         columns=columns,
         data=data,
         row_selectable="single",
+        style_data_conditional=constants.DATATABLE_CONDITIONAL_STYLE,
+    )
+
+
+def change_over_time_datatable_from_composite_slis(
+    composite_slis: List[Tuple[Optional[SLI], Optional[SLI]]], table_id: str
+):
+    """Returns a datatable formed from a list of composite sli pairs.
+
+    Each tuple in composite_slis represents a before_composite_sli and an after_composite_sli.
+    At most one SLI in each pair may be None.
+
+    Args:
+        composite_slis: A list of tuples of composite slis.
+        table_id: The id to assign to the datatable,
+
+    Returns:
+        A dash datatable displaying the SLI information.
+    """
+    columns = [
+        {
+            "name": name,
+            "id": name,
+        }
+        for name in [
+            "Node",
+            "SLI Type",
+            "Before Value",
+            "After Value",
+            "Target",
+            "Before Status",
+            "After Status",
+        ]
+    ]
+    data = []
+    for (before_composite_sli, after_composite_sli) in composite_slis:
+        shared_fields_sli = (
+            before_composite_sli
+            if before_composite_sli is not None
+            else after_composite_sli
+        )
+        assert shared_fields_sli is not None  # make mypy happy
+        data.append(
+            {
+                "Node": utils.relative_name(shared_fields_sli.node_name),
+                "SLI Type": utils.human_readable_enum_name(
+                    shared_fields_sli.sli_type, SLIType
+                ),
+                "Before Value": round(before_composite_sli.sli_value, 2)
+                if before_composite_sli is not None
+                else "N/A",
+                "After Value": round(after_composite_sli.sli_value, 2)
+                if after_composite_sli is not None
+                else "N/A",
+                "Target": round(shared_fields_sli.slo_target, 2),
+                "Before Status": utils.human_readable_enum_name(
+                    before_composite_sli.status, Status
+                )
+                if before_composite_sli is not None
+                else "N/A",
+                "After Status": utils.human_readable_enum_name(
+                    after_composite_sli.status, Status
+                )
+                if after_composite_sli is not None
+                else "N/A",
+            }
+        )
+    return dash_table.DataTable(
+        # We provide a dict as an id here to utilize the callback
+        # pattern matching functionality, since no datatable exists on startup
+        id={table_id: table_id},
+        columns=columns,
+        data=data,
         style_data_conditional=constants.DATATABLE_CONDITIONAL_STYLE,
     )
 
