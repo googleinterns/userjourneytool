@@ -6,5 +6,5 @@ then
 else
     pytest tests/integration/ --cov=ujt -vv -s --cov-append
 fi
-coverage report
+#coverage report
 

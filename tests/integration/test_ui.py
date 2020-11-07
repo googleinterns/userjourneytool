@@ -115,6 +115,8 @@ def started_dash_duo(dash_duo, reporting_server_thread, ready_event):
     ujt.main.initialize_ujt()
     ujt.dash_app.app.layout = ujt.components.get_layout()
 
+    dash_duo.driver.set_window_size(1024, 768)
+
     dash_duo.start_server(ujt.dash_app.app)
     yield dash_duo
     # can perform additional teardown actions here
@@ -128,12 +130,13 @@ def test_initial_ui(started_dash_duo, local):
 
 def test_click_node(started_dash_duo, local):
     time.sleep(2)
+    # started_dash_duo.driver.set_window_size(1024, 768)
     node_canvas = started_dash_duo.driver.find_element_by_css_selector(
         "[data-id=layer2-node]"
     )
     canvas_width, canvas_height = node_canvas.size["width"], node_canvas.size["height"]
     ActionChains(started_dash_duo.driver).move_to_element_with_offset(
-        node_canvas, canvas_width * 0.55, canvas_height * 0.45
+        node_canvas, canvas_width * 0.55, canvas_height * 0.5
     ).click().perform()
     if not local:
         replace_canvas_percy_snapshot(started_dash_duo, "click_web_server")
