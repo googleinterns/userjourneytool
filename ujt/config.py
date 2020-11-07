@@ -2,7 +2,7 @@ import configparser
 
 # default values
 CLEAR_CACHE_ON_STARTUP = True
-REFRESH_TOPOLOGY_ON_STARTUP = "asdf" #True
+REFRESH_TOPOLOGY_ON_STARTUP = "asdf"  # True
 
 AUTO_REFRESH_SLI = True
 CLIENT_SLI_REFRESH_INTERVAL_MILLIS = 30 * 1000  # ms

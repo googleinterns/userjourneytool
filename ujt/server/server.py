@@ -226,7 +226,7 @@ def serve(
     data_path_str: str = None,
     ready_event: threading.Event = None,
     stop_event: threading.Event = None,
-    stop_completed_event: threading.Event = None
+    stop_completed_event: threading.Event = None,
 ):
     if port is None:
         port = "50052"
@@ -246,6 +246,7 @@ def serve(
     if ready_event is not None:
         ready_event.set()
     if stop_event is not None:
+        assert stop_completed_event
         stop_event.wait()
         server.stop(None)
         stop_completed_event.set()
