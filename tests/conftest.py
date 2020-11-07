@@ -4,17 +4,6 @@ import pytest
 from graph_structures_pb2 import SLI, Client, Dependency, Node, NodeType, UserJourney
 
 
-def pytest_addoption(parser):
-    parser.addoption(
-        "--local", action="store_true", default=False, help="run tests locally"
-    )
-
-
-@pytest.fixture
-def local(request):
-    return request.config.getoption("--local")
-
-
 @pytest.fixture
 def assert_same_elements():
     def inner_assert_same_elements(list1, list2):

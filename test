@@ -1,8 +1,10 @@
 #!/bin/bash
+pytest --ignore=tests/integration/ --cov=ujt --cov-report= -vv -s
 if [ -z "$CI" ]
 then
-    pytest --cov-report term-missing --cov=ujt -vv -s --local
+    pytest tests/integration/ --cov=ujt -vv -s --cov-append --local
 else
-    pytest --cov-report term-missing --cov=ujt -vv
+    pytest tests/integration/ --cov=ujt -vv -s --cov-append
 fi
+coverage report
 
