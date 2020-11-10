@@ -1,10 +1,7 @@
 import dash
 from dash.dependencies import Input, Output
 
-from .. import (
-    id_constants,
-    utils,
-)
+from .. import id_constants, utils
 from ..dash_app import app
 
 

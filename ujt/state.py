@@ -26,7 +26,7 @@ def clear_sli_cache():
 
 # This memoization prevents multiple UJT frontends from requesting
 # the reporting server for new data within the same interval.
-@cache.memoize(timeout=constants.SERVER_SLI_REFRESH_INTERVAL_SECONDS)
+@cache.memoize(timeout=constants.SLI_CACHE_TIMEOUT_SECONDS)
 def get_slis() -> List[SLI]:
     """Gets a list of updated SLIs.
 

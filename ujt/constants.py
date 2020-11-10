@@ -9,14 +9,9 @@ from graph_structures_pb2 import NodeType, Status
 
 from . import id_constants
 
-# configurable constants -- move this to a config file
-CLEAR_CACHE_ON_STARTUP = True
-REFRESH_TOPOLOGY_ON_STARTUP = True
-REFRESH_SLI_ON_INTERVAL = True
-CLIENT_SLI_REFRESH_INTERVAL_MILLIS = 30 * 1000  # ms
-SERVER_SLI_REFRESH_INTERVAL_SECONDS = 30
-
 # functional constants
+SLI_CACHE_TIMEOUT_SECONDS = 30
+
 CLIENT_CLASS = "CLIENT"
 HIGHLIGHTED_UJ_EDGE_CLASS = "HIGHLIGHTED_UJ_EDGE"
 OVERRIDE_CLASS = "OVERRIDE"

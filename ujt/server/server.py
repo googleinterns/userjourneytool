@@ -221,7 +221,7 @@ def serve():
     server_pb2_grpc.add_ReportingServiceServicer_to_server(
         reporting_service_servicer, server
     )
-    server.add_insecure_port("[::]:50051")
+    server.add_insecure_port("[::]:50052")
     server.start()
     print("starting server!")
     server.wait_for_termination()
