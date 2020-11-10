@@ -169,14 +169,21 @@ def get_change_over_time_class_from_composite_slis(
         assert before_composite_sli is not None
         assert after_composite_sli is not None
 
-        slo_target = (
-            before_composite_sli.slo_target
-        )  # this should be the same for both the before and after sli
-        if abs(slo_target - before_composite_sli.sli_value) < abs(
-            slo_target - after_composite_sli.sli_value
+        # slo_target and threshold should be the
+        # same for both the before and after sli
+        slo_target = before_composite_sli.slo_target
+        intra_status_change_threshold = (
+            before_composite_sli.intra_status_change_threshold
+        )
+        if (
+            abs(before_composite_sli.sli_value - after_composite_sli.sli_value)
+            > intra_status_change_threshold
         ):
-            after_subclass += f"_{constants.WORSENED_SUBCLASS}"
-        else:
-            after_subclass += f"_{constants.IMPROVED_SUBCLASS}"
+            if abs(slo_target - before_composite_sli.sli_value) < abs(
+                slo_target - after_composite_sli.sli_value
+            ):
+                after_subclass += f"_{constants.WORSENED_SUBCLASS}"
+            else:
+                after_subclass += f"_{constants.IMPROVED_SUBCLASS}"
 
     return f"{before_subclass}_{after_subclass}"
