@@ -265,6 +265,6 @@ def update_user_journey_dropdown_options(
     node_name_message_map, client_name_message_map = state.get_message_maps()
     virtual_node_map = state.get_virtual_node_map()
 
-    return converters.dropdown_options_from_maps(
+    return converters.user_journey_dropdown_options_from_maps(
         node_name_message_map, client_name_message_map, virtual_node_map
     )
