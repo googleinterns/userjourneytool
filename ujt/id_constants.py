@@ -20,6 +20,10 @@ component ids place the component type at the end.
 
 
 # region signals
+SIGNAL_VIRTUAL_NODE_ADD = "add-virtual-node-signal"
+SIGNAL_VIRTUAL_NODE_DELETE = "delete-virtual-node-signal"
+SIGNAL_VIRTUAL_NODE_COLLAPSE = "collapse-virtual-node-signal"
+SIGNAL_VIRTUAL_NODE_EXPAND = "expand-virtual-node-signal"
 SIGNAL_VIRTUAL_NODE_UPDATE = "virtual-node-update-signal"
 
 SIGNAL_TAG_CREATE = "create-tag-signal"
@@ -41,8 +45,37 @@ SIGNAL_STYLE_DELETE = "delete-style-signal"
 SIGNAL_STYLE_UPDATE = "style-update-signal"
 
 SIGNAL_COMPOSITE_TAGGING_UPDATE = "composite-tagging-update-signal"
+
 # ---
+
 SIGNAL_WRAPPER_DIV = "signal-wrapper-div"
+SIGNALS = [
+    SIGNAL_VIRTUAL_NODE_ADD,
+    SIGNAL_VIRTUAL_NODE_DELETE,
+    SIGNAL_VIRTUAL_NODE_COLLAPSE,
+    SIGNAL_VIRTUAL_NODE_EXPAND,
+    SIGNAL_VIRTUAL_NODE_UPDATE,
+    # ---
+    SIGNAL_TAG_CREATE,
+    SIGNAL_TAG_DELETE,
+    SIGNAL_TAG_SAVE,
+    SIGNAL_TAG_UPDATE,
+    # ---
+    SIGNAL_APPLIED_TAG_ADD,
+    SIGNAL_APPLIED_TAG_REMOVE,
+    SIGNAL_APPLIED_TAG_BATCH_ADD,
+    SIGNAL_APPLIED_TAG_BATCH_REMOVE,
+    SIGNAL_APPLIED_TAG_MODIFY,
+    SIGNAL_APPLIED_TAG_UPDATE,
+    # ---
+    SIGNAL_VIEW_UPDATE,
+    # ---
+    SIGNAL_STYLE_SAVE,
+    SIGNAL_STYLE_DELETE,
+    SIGNAL_STYLE_UPDATE,
+    # ---
+    SIGNAL_COMPOSITE_TAGGING_UPDATE,
+]
 # endregion
 
 # region error modal (virtual nodes)

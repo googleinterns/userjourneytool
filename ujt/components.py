@@ -61,36 +61,12 @@ def get_layout():
 
 
 def get_signals():
-    signal_ids = [
-        id_constants.SIGNAL_VIRTUAL_NODE_UPDATE,
-        # ---
-        id_constants.SIGNAL_TAG_CREATE,
-        id_constants.SIGNAL_TAG_DELETE,
-        id_constants.SIGNAL_TAG_SAVE,
-        id_constants.SIGNAL_TAG_UPDATE,
-        # ---
-        id_constants.SIGNAL_APPLIED_TAG_ADD,
-        id_constants.SIGNAL_APPLIED_TAG_REMOVE,
-        id_constants.SIGNAL_APPLIED_TAG_BATCH_ADD,
-        id_constants.SIGNAL_APPLIED_TAG_BATCH_REMOVE,
-        id_constants.SIGNAL_APPLIED_TAG_MODIFY,
-        id_constants.SIGNAL_APPLIED_TAG_UPDATE,
-        # ---
-        id_constants.SIGNAL_VIEW_UPDATE,
-        # ---
-        id_constants.SIGNAL_STYLE_SAVE,
-        id_constants.SIGNAL_STYLE_DELETE,
-        id_constants.SIGNAL_STYLE_UPDATE,
-        # ---
-        id_constants.SIGNAL_COMPOSITE_TAGGING_UPDATE,
-    ]
-
     signals = [
         html.Div(
             id=signal_id,
             style={"display": "none"},
         )
-        for signal_id in signal_ids
+        for signal_id in id_constants.SIGNALS
     ]
 
     return html.Div(id=id_constants.SIGNAL_WRAPPER_DIV, children=signals)
