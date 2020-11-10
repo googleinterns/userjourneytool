@@ -4,6 +4,7 @@ Transformer functions take an input data structure, make a change, and return an
 They are commonly used to perform operations on cytoscape graph elements.
 """
 
+import copy
 import datetime as dt
 import uuid
 from collections import defaultdict, deque
@@ -30,27 +31,36 @@ def apply_node_property_classes(
         client_name_message_map: A dictionary mapping client names to Client protos.
         virtual_node_map: A dictionary mapping virtual node names to VirtualNode protos.
 
+    Returns:
+        a new list of elements with appropriate cytoscape classes.
     """
+    out_elements = []
+
     for element in elements:
-        if not utils.is_node_element(element):
+        new_element = copy.deepcopy(element)
+
+        # edge element
+        if not utils.is_node_element(new_element):
+            out_elements.append(new_element)
             continue
 
-        element_ujt_id = element["data"]["ujt_id"]
+        element_ujt_id = new_element["data"]["ujt_id"]
 
-        # Should we refactor this into three separate functions -- one for each type of node?
-        # Seems like overkill, but would allow us to separate the logic, at the cost of
-        # performing iterations over the element list.
-
+        # client
         if element_ujt_id in client_name_message_map:
-            element["classes"] = constants.CLIENT_CLASS
+            utils.add_class_mutable(new_element, [constants.CLIENT_CLASS])
+            out_elements.append(new_element)
             continue
 
+        # nodes
         if element_ujt_id in node_name_message_map:
             node = node_name_message_map[element_ujt_id]
         elif element_ujt_id in virtual_node_map:
             node = virtual_node_map[element_ujt_id]
         else:
-            raise ValueError
+            raise ValueError(
+                "Cytoscape element not found in node maps -- some data is corrupt!"
+            )
 
         class_list = [NodeType.Name(node.node_type)]
         if node.override_status != Status.STATUS_UNSPECIFIED:
@@ -58,9 +68,10 @@ def apply_node_property_classes(
         else:
             class_list.append(Status.Name(node.status))
 
-        element["classes"] = " ".join(class_list)
+        utils.add_class_mutable(new_element, class_list)
+        out_elements.append(new_element)
 
-    # no return since we directly mutated elements
+    return out_elements
 
 
 def apply_view_classes(elements, tag_map, view_list):
@@ -77,9 +88,14 @@ def apply_view_classes(elements, tag_map, view_list):
         elements: A list of cytoscape elements.
         tag_map: A dictionary mapping element_ujt_ids to a list of applied tags
         view_list: The list of user defined views.
+
+    Returns:
+        a list of cytoscape elements with view classes applied.
     """
+    out_elements = []
     for element in elements:
-        element_ujt_id = element["data"]["ujt_id"]
+        new_element = copy.deepcopy(element)
+        element_ujt_id = new_element["data"]["ujt_id"]
         class_list = []
         if element_ujt_id in tag_map:
             tags = tag_map[element_ujt_id]
@@ -92,7 +108,10 @@ def apply_view_classes(elements, tag_map, view_list):
                 for view_tag, view_style_name in view_list:
                     if tag == view_tag and tag != "" and view_style_name != "":
                         class_list.append(view_style_name)
-        element["classes"] += f" {' '.join(class_list)}"
+        utils.add_class_mutable(new_element, class_list)
+        out_elements.append(new_element)
+
+    return out_elements
 
 
 def apply_change_over_time_classes(
@@ -118,13 +137,11 @@ def apply_change_over_time_classes(
     for sli in slis:
         node_name_sli_map[sli.node_name].append(sli)
 
-    output_elements = []
+    out_elements = []
     for element in elements:
-        ujt_id = element["data"]["ujt_id"]
-        if ujt_id not in node_name_sli_map:
-            output_elements.append(element.copy())
-        else:
-            element_copy = element.copy()
+        new_element = copy.deepcopy(element)
+        ujt_id = new_element["data"]["ujt_id"]
+        if ujt_id in node_name_sli_map:
             (
                 before_composite_sli,
                 after_composite_sli,
@@ -139,10 +156,11 @@ def apply_change_over_time_classes(
                     after_composite_sli,
                 )
             )
-            element_copy["classes"] += f" {change_over_time_class}"
-            output_elements.append(element_copy)
+            utils.add_class_mutable(new_element, [change_over_time_class])
 
-    return output_elements
+        out_elements.append(new_element)
+
+    return out_elements
 
 
 def generate_before_after_composite_slis(
@@ -191,88 +209,85 @@ def generate_before_after_composite_slis(
 
 
 def apply_highlighted_edge_class_to_elements(elements, user_journey_name):
-    # We may want to refactor the edge map creation for testability.
-    # No other function currently requires us to map edge source to edge element.
-    edges_map = defaultdict(list)
+    """Applies the highlighted edge class to elements based on the selected user journey.
+
+    Args:
+        elements: a list of cytoscape elements
+        user_journey_name: the user journey to highlight
+
+    Returns:
+        a list of cytoscape elements with the highlighted class on the appropriate edges
+    """
+
+    edges_map = defaultdict(list)  # map from edge source to edge elements
     nodes_list = []
-
     for element in elements:
-        if utils.is_node_element(element):
-            nodes_list.append(element)
+        new_element = copy.deepcopy(element)
+        if utils.is_node_element(new_element):
+            nodes_list.append(new_element)
         else:
-            # the edge originates from a client, but we want to know
-            # which user journey it is associated with
-            if "user_journey_name" in element["data"].keys():
-                edges_map[element["data"]["user_journey_name"]].append(element)
+            if "user_journey_name" in new_element["data"].keys():
+                # treat the user journey name as the edge source
+                edges_map[new_element["data"]["user_journey_name"]].append(new_element)
             else:
-                edges_map[element["data"]["source"]].append(element)
+                edges_map[new_element["data"]["source"]].append(new_element)
 
-    # notice that remove/apply highlighted class mutate the edges map
-    remove_highlighted_class_from_edges(edges_map)
-
-    if user_journey_name:
-        apply_highlighted_class_to_edges(edges_map, user_journey_name)
-
-    # Usually, we avoid multiple for clauses in a list comprehension,
-    # but this is the canonical way to flattern lists in Python.
-    flattened_edges = [edge for edge_list in edges_map.values() for edge in edge_list]
-
-    return flattened_edges + nodes_list
-
-
-def remove_highlighted_class_from_edges(edges_map):
-    """Removes the highlighted edge class to edges within a specific user journey.
-
-    Args:
-        edges_map: A dictionary mapping edge sources to a list of cytoscape elements describing edges originating from the source
-    """
-
-    for edge_list in edges_map.values():
-        for edge in edge_list:
-            # in the future, if we apply other classes to edges, need to change this to only remove highlighted class.
-            edge["classes"] = ""
-
-
-def apply_highlighted_class_to_edges(edges_map, user_journey_name):
-    """Applies the highlighted edge class to edges within a specific user journey.
-
-    Traverses the edges map (gneerated from the elements array) instead of the underlying
-    protobufs, in order to easily support virtual nodes.
-
-    Args:
-        edges_map: A dictionary mapping edge sources to a list of cytoscape elements describing edges originating from the source
-        user_journey_name: The fully qualified user journey name to highlight.
-    """
+    # do a bfs traversal and highlight the appropriate edges
     node_frontier_names = deque([user_journey_name])
     while node_frontier_names:
         source_name = node_frontier_names.popleft()
         for edge in edges_map[source_name]:
-            edge["classes"] = constants.HIGHLIGHTED_UJ_EDGE_CLASS
+            utils.add_class_mutable(edge, [constants.HIGHLIGHTED_UJ_EDGE_CLASS])
             node_frontier_names.append(edge["data"]["target"])
+
+    out_elements = nodes_list
+    for edges in edges_map.values():
+        out_elements += edges
+
+    return out_elements
 
 
 def apply_virtual_nodes_to_elements(elements):
+    """Applies the virtual node transformation to elements.
+
+    This is done in two steps:
+        1. modifying the existing elements by:
+            a. removing the elements that should be hidden by a collapsed virtual node
+            b. adding the parent property to elements that are in an expanded virtual node
+            c. modifying edges to connect collapsed virtual nodes
+        2. adding in the expanded or top-level virtual nodes that should be visible
+
+    Args:
+        elements: a list of cytoscape elements
+    """
     virtual_node_map = state.get_virtual_node_map()
     parent_virtual_node_map = state.get_parent_virtual_node_map()
 
-    new_elements = []
+    out_elements = []
+    # 1. modify existing elements
     for element in elements:
-        if utils.is_node_element(element):
+        new_element = copy.deepcopy(element)
+
+        if utils.is_node_element(new_element):
             highest_collapsed_virtual_node_name = (
                 utils.get_highest_collapsed_virtual_node_name(
-                    element["data"]["ujt_id"], virtual_node_map, parent_virtual_node_map
+                    new_element["data"]["ujt_id"],
+                    virtual_node_map,
+                    parent_virtual_node_map,
                 )
             )
+            # this condition checks if the node should be visible
             if highest_collapsed_virtual_node_name is None:
-                # not within collapsed node
+                # this condition checks if the current node is not within
+                # a compound node, but should be contained within a virutal node.
                 if (
-                    element["data"]["ujt_id"] in parent_virtual_node_map
-                    and "parent" not in element["data"]
+                    new_element["data"]["ujt_id"] in parent_virtual_node_map
+                    and "parent" not in new_element["data"]
                 ):
-                    element["data"]["parent"] = parent_virtual_node_map[
-                        element["data"]["ujt_id"]
+                    new_element["data"]["parent"] = parent_virtual_node_map[
+                        new_element["data"]["ujt_id"]
                     ]
-                new_elements.append(element)
+                out_elements.append(new_element)
 
         else:
             new_source = utils.get_highest_collapsed_virtual_node_name(
@@ -283,20 +298,24 @@ def apply_virtual_nodes_to_elements(elements):
             )
 
             if new_source is not None:
-                element["data"]["source"] = new_source
+                new_element["data"]["source"] = new_source
             if new_target is not None:
-                element["data"]["target"] = new_target
+                new_element["data"]["target"] = new_target
 
-            element["data"][
+            new_element["data"][
                 "id"
-            ] = f"{element['data']['source']}/{element['data']['target']}"
+            ] = f"{new_element['data']['source']}/{new_element['data']['target']}"
 
+            # avoid adding:
+            #   edges between nodes within the same virtual nodes
+            #   duplicate edges
             if (
-                element["data"]["source"] != element["data"]["target"]
-                and element not in new_elements
+                new_element["data"]["source"] != new_element["data"]["target"]
+                and new_element not in out_elements
             ):
-                new_elements.append(element)
+                out_elements.append(new_element)
 
+    # 2. add visible virtual nodes
     for virtual_node_name in virtual_node_map:
         highest_collapsed_virtual_node_name = (
             utils.get_highest_collapsed_virtual_node_name(
@@ -307,24 +326,27 @@ def apply_virtual_nodes_to_elements(elements):
             highest_collapsed_virtual_node_name is None
             or highest_collapsed_virtual_node_name == virtual_node_name
         ):
-            # This if statement determines if the virtual node should be visible
+            # This condition determines if the virtual node should be visible
             # first condition: entire stack of virtual nodes is expanded
             # second condition: the virtual node itself is the toplevel, collapsed node
-            element = {
+            new_element = {
                 "data": {
                     "label": virtual_node_name,
                     "id": virtual_node_name,
                     "ujt_id": virtual_node_name,
                 },
+                "classes": "",
             }
             if virtual_node_name in parent_virtual_node_map:
-                element["data"]["parent"] = parent_virtual_node_map[virtual_node_name]
-            new_elements.append(element)
+                new_element["data"]["parent"] = parent_virtual_node_map[
+                    virtual_node_name
+                ]
+            out_elements.append(new_element)
 
-    return new_elements
+    return out_elements
 
 
-def apply_uuid_to_elements(elements, this_uuid=None):
+def apply_uuid_to_elements(elements, uuid_to_apply=None):
     """Append a new UUID to the id of each cytoscape element
 
     This is used as a workaround to update the source/target of edges, and the parent/child relatioship of nodes.
@@ -336,29 +358,45 @@ def apply_uuid_to_elements(elements, this_uuid=None):
 
     Args:
         elements: a list of Cytoscape elements
-        uuid: a UUID to append. Defaults to None. If None is provided, this function generates a new UUID.
+        uuid_to_apply: a UUID to append. Defaults to None.
+            If None is provided, this function generates a new UUID.
 
     Returns:
         A list of Cytoscape elements with an UUID appended to their ID fields.
     """
-    if this_uuid is None:
-        this_uuid = uuid.uuid4()
+    if uuid_to_apply is None:
+        uuid_to_apply = uuid.uuid4()
 
-    for e in elements:
-        e["data"]["id"] += f"#{this_uuid}"
-        if "source" in e["data"].keys():
-            e["data"]["source"] += f"#{this_uuid}"
-        if "target" in e["data"].keys():
-            e["data"]["target"] += f"#{this_uuid}"
-        if "parent" in e["data"].keys():
-            e["data"]["parent"] += f"#{this_uuid}"
+    out_elements = []
 
-    return elements
+    # the properties of the element that need to have a UUID
+    # appended
+    UUID_KEYS = ["id", "source", "target", "parent"]
+    for element in elements:
+        new_element = copy.deepcopy(element)
+        for key in UUID_KEYS:
+            if key in new_element["data"]:
+                new_element["data"][key] += f"#{uuid_to_apply}"
+        out_elements.append(new_element)
+
+    return out_elements
 
 
 def apply_slis_to_node_map(sli_list, node_map):
+    """Updates the nodes in the node map with the slis from the sli list.
+
+    Args:
+        sli_list: A list of SLIs to add to the nodes
+        node_map: A dict mapping node names to nodes
+
+    Returns:
+        a dict mapping node names to nodes, with updated SLIs
+    """
+
+    out_node_map = copy.deepcopy(node_map)
+
     for sli in sli_list:
-        node = node_map[sli.node_name]
+        node = out_node_map[sli.node_name]
         # find the index of the node's SLI with the same SLI type as the SLI from sli_list
 
         new_node_slis = []
@@ -372,7 +410,7 @@ def apply_slis_to_node_map(sli_list, node_map):
         del node.slis[:]
         node.slis.extend(new_node_slis)
 
-    return node_map
+    return out_node_map
 
 
 def sort_nodes_by_parent_relationship(elements):
@@ -394,10 +432,11 @@ def sort_nodes_by_parent_relationship(elements):
     edges = []
     node_id_element_map = {}
     for element in elements:
-        if utils.is_node_element(element):
-            node_id_element_map[element["data"]["id"]] = element
+        new_element = copy.deepcopy(element)
+        if utils.is_node_element(new_element):
+            node_id_element_map[element["data"]["id"]] = new_element
         else:
-            edges.append(element)
+            edges.append(new_element)
 
     parent_child_map = defaultdict(list)
     bfs_queue = deque()

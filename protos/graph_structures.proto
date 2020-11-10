@@ -49,6 +49,7 @@ message SLI {
 }
 
 message UserJourney {
+    // all names are fully qualified
     optional string name = 1;
     optional string client_name = 2;
     // ---
@@ -59,6 +60,7 @@ message UserJourney {
 }
 
 message Client {
+    // all names are fully qualified
     optional string name = 1;
     repeated UserJourney user_journeys = 2;
     // ---
@@ -67,6 +69,7 @@ message Client {
 }
 
 message VirtualNode {
+    // all names are fully qualified
     optional string name = 1;
     repeated string child_names = 2;
     optional bool collapsed = 3;
