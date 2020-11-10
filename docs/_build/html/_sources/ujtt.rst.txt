@@ -1,0 +1,21 @@
+ujtt package
+============
+
+Submodules
+----------
+
+ujtt.main module
+----------------
+
+.. automodule:: ujtt.main
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Module contents
+---------------
+
+.. automodule:: ujtt
+   :members:
+   :undoc-members:
+   :show-inheritance:

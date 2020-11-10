@@ -1,0 +1,993 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ujt.callbacks package &#8212; User Journey Tool  documentation</title>
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script src="_static/language_data.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="ujt.server package" href="ujt.server.html" />
+    <link rel="prev" title="ujt package" href="ujt.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="ujt-callbacks-package">
+<h1>ujt.callbacks package<a class="headerlink" href="#ujt-callbacks-package" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="module-ujt.callbacks.apply_tag_callbacks">
+<span id="ujt-callbacks-apply-tag-callbacks-module"></span><h2>ujt.callbacks.apply_tag_callbacks module<a class="headerlink" href="#module-ujt.callbacks.apply_tag_callbacks" title="Permalink to this headline">¶</a></h2>
+<p>Callbacks that handle tag application/removal functionality.</p>
+<dl class="py function">
+<dt id="ujt.callbacks.apply_tag_callbacks.apply_new_empty_tag">
+<code class="sig-prename descclassname">ujt.callbacks.apply_tag_callbacks.</code><code class="sig-name descname">apply_new_empty_tag</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">add_timestamps</span></em>, <em class="sig-param"><span class="n">tap_node</span></em>, <em class="sig-param"><span class="n">tap_edge</span></em><span class="sig-paren">)</span><a class="headerlink" href="#ujt.callbacks.apply_tag_callbacks.apply_new_empty_tag" title="Permalink to this definition">¶</a></dt>
+<dd><p>Handles applying a new empty tag to the tag map.</p>
+<dl class="simple">
+<dt>This function is called:</dt><dd><p>when the add applied tag button is clicked.</p>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>add_timestamps</strong> – List of the timestamps of the ADD_APPLIED_TAG_BUTTON buttons was called.
+Value unused, input only provided to register callback.
+Should only contain one value.</p></li>
+<li><p><strong>tap_node</strong> – The cytoscape element of the latest tapped node.</p></li>
+<li><p><strong>tap_edge</strong> – The cytoscape element of the latest tapped edge.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A signal to add to the SIGNAL_APPLIED_TAG_ADD hidden div.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="ujt.callbacks.apply_tag_callbacks.batch_add_applied_tag">
+<code class="sig-prename descclassname">ujt.callbacks.apply_tag_callbacks.</code><code class="sig-name descname">batch_add_applied_tag</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">add_timestamp</span></em>, <em class="sig-param"><span class="n">tag</span></em>, <em class="sig-param"><span class="n">selected_node_data</span></em>, <em class="sig-param"><span class="n">selected_edge_data</span></em><span class="sig-paren">)</span><a class="headerlink" href="#ujt.callbacks.apply_tag_callbacks.batch_add_applied_tag" title="Permalink to this definition">¶</a></dt>
+<dd><p>Handles adding an applied tag to all selected elements.</p>
+<dl class="simple">
+<dt>This function is called:</dt><dd><p>when the BATCH_ADD_APPLIED_TAG_BUTTON is clicked</p>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>add_timestamp</strong> – The timestamp of when the BATCH_ADD_APPLIED_TAG_BUTTON was clicked</p></li>
+<li><p><strong>tag</strong> – The tag to apply</p></li>
+<li><p><strong>selected_node_data</strong> – The data dictionaries of the selected nodes.</p></li>
+<li><p><strong>selected_edge_data</strong> – The data dictionaries of the selected edges.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>a signal to place into the SIGNAL_APPLIED_TAG_BATCH_ADD signal</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="ujt.callbacks.apply_tag_callbacks.batch_remove_applied_tag">
+<code class="sig-prename descclassname">ujt.callbacks.apply_tag_callbacks.</code><code class="sig-name descname">batch_remove_applied_tag</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">remove_timestamp</span></em>, <em class="sig-param"><span class="n">tag</span></em>, <em class="sig-param"><span class="n">selected_node_data</span></em>, <em class="sig-param"><span class="n">selected_edge_data</span></em><span class="sig-paren">)</span><a class="headerlink" href="#ujt.callbacks.apply_tag_callbacks.batch_remove_applied_tag" title="Permalink to this definition">¶</a></dt>
+<dd><p>Handles removing an applied tag to all selected elements.</p>
+<dl class="simple">
+<dt>This function is called:</dt><dd><p>when the BATCH_REMOVE_APPLIED_TAG_BUTTON is clicked</p>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>remove_timestamp</strong> – The timestamp of when the BATCH_REMOVE_APPLIED_TAG_BUTTON was clicked</p></li>
+<li><p><strong>tag</strong> – The tag to apply</p></li>
+<li><p><strong>selected_node_data</strong> – The data dictionaries of the selected nodes.</p></li>
+<li><p><strong>selected_edge_data</strong> – The data dictionaries of the selected edges.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>a signal to place into the SIGNAL_APPLIED_TAG_BATCH_REMOVE signal</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="ujt.callbacks.apply_tag_callbacks.modify_applied_tag">
+<code class="sig-prename descclassname">ujt.callbacks.apply_tag_callbacks.</code><code class="sig-name descname">modify_applied_tag</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">dropdown_values</span></em>, <em class="sig-param"><span class="n">tap_node</span></em>, <em class="sig-param"><span class="n">tap_edge</span></em><span class="sig-paren">)</span><a class="headerlink" href="#ujt.callbacks.apply_tag_callbacks.modify_applied_tag" title="Permalink to this definition">¶</a></dt>
+<dd><p>Updates the corresponding applied tag in the tag map.</p>
+<dl class="simple">
+<dt>This function is called:</dt><dd><p>when an APPLIED_TAG_DROPDOWN value is updated</p>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>dropdown_values</strong> – the values of the APPLIED_TAG_DROPDOWN dropdown menus.</p></li>
+<li><p><strong>tap_node</strong> – Cytoscape element of the tapped/clicked node.</p></li>
+<li><p><strong>tap_edge</strong> – Cytoscape element of the tapped/clicked edge.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A signal to be placed in the SIGNAL_APPLIED_TAG_MODIFY hidden div.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="ujt.callbacks.apply_tag_callbacks.remove_applied_tag">
+<code class="sig-prename descclassname">ujt.callbacks.apply_tag_callbacks.</code><code class="sig-name descname">remove_applied_tag</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">remove_timestamps</span></em>, <em class="sig-param"><span class="n">tap_node</span></em>, <em class="sig-param"><span class="n">tap_edge</span></em><span class="sig-paren">)</span><a class="headerlink" href="#ujt.callbacks.apply_tag_callbacks.remove_applied_tag" title="Permalink to this definition">¶</a></dt>
+<dd><p>Handles removing tags from the tag map.</p>
+<dl class="simple">
+<dt>This function is called:</dt><dd><p>when a REMOVE_APPLIED_TAG_BUTTON is clicked</p>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>remove_timestamps</strong> – List of the timestamps of when REMOVE_APPLIED_TAG_BUTTON buttons were called.
+Value unused, input only provided to register callback.
+Should only contain one value.</p></li>
+<li><p><strong>tap_node</strong> – The cytoscape element of the latest tapped node.</p></li>
+<li><p><strong>tap_edge</strong> – The cytoscape element of the latest tapped edge.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A signal to add to the SIGNAL_APPLIED_TAG_REMOVE hidden div.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+<div class="section" id="module-ujt.callbacks.change_over_time_callbacks">
+<span id="ujt-callbacks-change-over-time-callbacks-module"></span><h2>ujt.callbacks.change_over_time_callbacks module<a class="headerlink" href="#module-ujt.callbacks.change_over_time_callbacks" title="Permalink to this headline">¶</a></h2>
+<dl class="py function">
+<dt id="ujt.callbacks.change_over_time_callbacks.update_change_over_time_sli_store">
+<code class="sig-prename descclassname">ujt.callbacks.change_over_time_callbacks.</code><code class="sig-name descname">update_change_over_time_sli_store</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">query_n_clicks_timestamp</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span>int<span class="p">]</span></span></em>, <em class="sig-param"><span class="n">reset_n_clicks_timestamp</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span>int<span class="p">]</span></span></em>, <em class="sig-param"><span class="n">start_time_input_values</span><span class="p">:</span> <span class="n">List<span class="p">[</span>str<span class="p">]</span></span></em>, <em class="sig-param"><span class="n">end_time_input_values</span><span class="p">:</span> <span class="n">List<span class="p">[</span>str<span class="p">]</span></span></em>, <em class="sig-param"><span class="n">window_size_input_values</span><span class="p">:</span> <span class="n">List<span class="p">[</span>str<span class="p">]</span></span></em>, <em class="sig-param"><span class="n">tag_selection</span><span class="p">:</span> <span class="n">str</span></em>, <em class="sig-param"><span class="n">sli_type</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span>SLITypeValue<span class="p">]</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ujt.callbacks.change_over_time_callbacks.update_change_over_time_sli_store" title="Permalink to this definition">¶</a></dt>
+<dd><p>Updates the CHANGE_OVER_TIME_SLI_STORE with the selected time range.</p>
+<p>The CHANGE_OVER_TIME_SLI_STORE acts like a signal, updating whenever the Query or Reset button is clicked.
+We choose to store the time range in this store in order to isolate the input parsing functionality here.
+This allows users of the store (namely, update_graph_elements) to avoid having to deal with the
+separate cases of custom time range and window size input.</p>
+<p>Notice we also validate the SLI type dropdown here as well.</p>
+<p>Finally, this callback makes the RPC to the reporting server to get SLIs for the time range.
+This approach avoids making repeated RPC calls if multiple components need to update based on the SLI data,
+namely, the cytoscape graph and the CHANGE_OVER_TIME_TEXT_OUTPUT_PANEL.</p>
+<dl class="simple">
+<dt>This function is called:</dt><dd><p>when the CHANGE_OVER_TIME_QUERY_BUTTON is clicked
+when the CHANGE_OVER_TIME_RESET_BUTTON is clicked</p>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>query_n_clicks_timestamp</strong> – Timestamp of when the CHANGE_OVER_TIME_QUERY_BUTTON was clicked</p></li>
+<li><p><strong>reset_n_clicks_timestamp</strong> – Timestamp of when the CHANGE_OVER_TIME_RESET_BUTTON was clicked</p></li>
+<li><p><strong>start_time_input_values</strong> – List of values from the START_TIME_INPUT box. Should contain only one value.</p></li>
+<li><p><strong>end_time_input_values</strong> – List of values from the END_TIME_INPUT box. Should contain only one value.</p></li>
+<li><p><strong>window_size_input_values</strong> – List of values from the WINDOW_SIZE_INPUT box. Should contain only one value.</p></li>
+<li><p><strong>tag_selection</strong> – The value from the CHANGE_OVER_TIME_TAG_DROPDOWN. Should be CUSTOM_TIME_RANGE_DROPDOWN_VALUE or a timestamped tag.</p></li>
+<li><p><strong>The value from the CHANGE_OVER_TIME_SLI_TYPE_DROPDOWN. Used for input validation.</strong> (<em>sli_type;</em>) – </p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A dictionary to be placed in the CHANGE_OVER_TIME_SLI_STORE.
+The dictionary has keys “start_timestamp” and “end_timestamp”, which map
+to the POSIX timestamps of their respective times.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="ujt.callbacks.change_over_time_callbacks.update_change_over_time_text_output_panel">
+<code class="sig-prename descclassname">ujt.callbacks.change_over_time_callbacks.</code><code class="sig-name descname">update_change_over_time_text_output_panel</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">change_over_time_data</span></em><span class="sig-paren">)</span><a class="headerlink" href="#ujt.callbacks.change_over_time_callbacks.update_change_over_time_text_output_panel" title="Permalink to this definition">¶</a></dt>
+<dd><p>Renders the datatable that displays SLI changes over time.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>change_over_time_data</strong> – Either an empty dictionary, or a dictionary with keys
+“start_timestamp” mapped to a float POSIX timestamp,
+“end_timestamp” mapped to a float POSIX timestamp, and
+“dict_slis” mapped to a list of SLIs represented as dictionaries.
+The SLIs as dictionaries need to be parsed by the json_format module.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A component to be placed in the CHANGE_OVER_TIME_TEXT_OUTPUT_PANEL</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="ujt.callbacks.change_over_time_callbacks.update_time_select_panel">
+<code class="sig-prename descclassname">ujt.callbacks.change_over_time_callbacks.</code><code class="sig-name descname">update_time_select_panel</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">tag</span></em><span class="sig-paren">)</span><a class="headerlink" href="#ujt.callbacks.change_over_time_callbacks.update_time_select_panel" title="Permalink to this definition">¶</a></dt>
+<dd><p>Updates the time select panel.</p>
+<p>The time select panel displays two input boxes to input start
+and end time if custom range is selected.
+Otherwise (a timestamped tag is selected), it displays one input
+to input the window size before and after the timestamp.</p>
+<p>Alternatively, we could declare all three input boxes in components,
+and use this callback to change their visibility.
+This allows us to avoid pattern matching, but is inconsistent with
+other parts of our application.</p>
+<dl class="simple">
+<dt>This function is called:</dt><dd><p>when the CHANGE_OVER_TIME_TAG_DROPDOWN value is updated</p>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>tag</strong> – Dropdown value in the CHANGE_OVER_TIME_TAG_DROPDOWN.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A list of components for the TIME_SELECT_PANEL.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+<div class="section" id="module-ujt.callbacks.comment_callbacks">
+<span id="ujt-callbacks-comment-callbacks-module"></span><h2>ujt.callbacks.comment_callbacks module<a class="headerlink" href="#module-ujt.callbacks.comment_callbacks" title="Permalink to this headline">¶</a></h2>
+<p>Callbacks that handle comment functionality.</p>
+<dl class="py function">
+<dt id="ujt.callbacks.comment_callbacks.discard_comment">
+<code class="sig-prename descclassname">ujt.callbacks.comment_callbacks.</code><code class="sig-name descname">discard_comment</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">discard_n_clicks_timestamp</span></em>, <em class="sig-param"><span class="n">tap_node</span></em><span class="sig-paren">)</span><a class="headerlink" href="#ujt.callbacks.comment_callbacks.discard_comment" title="Permalink to this definition">¶</a></dt>
+<dd><p>Handles the functionality for discarding comments.
+.</p>
+<blockquote>
+<div><dl>
+<dt>This function is called:</dt><dd><p>when the discard comment is clicked.</p>
+</dd>
+<dt>Args:</dt><dd><dl class="simple">
+<dt>discard_n_clicks_timestamp: List of the timestamps of when components matching the close id were clicked.</dt><dd><p>Should only contain one element if the key is unique.
+Value unused, input only provided to register callback.</p>
+</dd>
+</dl>
+<p>tap_node: Cytoscape element of the tapped/clicked node.</p>
+</dd>
+<dt>Returns:</dt><dd><p>The updated value of the textarea.</p>
+</dd>
+</dl>
+</div></blockquote>
+</dd></dl>
+
+<dl class="py function">
+<dt id="ujt.callbacks.comment_callbacks.save_comment">
+<code class="sig-prename descclassname">ujt.callbacks.comment_callbacks.</code><code class="sig-name descname">save_comment</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">save_n_clicks_timestamp</span></em>, <em class="sig-param"><span class="n">tap_node</span></em>, <em class="sig-param"><span class="n">new_comment</span></em><span class="sig-paren">)</span><a class="headerlink" href="#ujt.callbacks.comment_callbacks.save_comment" title="Permalink to this definition">¶</a></dt>
+<dd><p>Handles the functionality for saving comments
+.</p>
+<blockquote>
+<div><dl>
+<dt>This function is called:</dt><dd><p>when the save comment button is clicked.</p>
+</dd>
+<dt>Args:</dt><dd><dl class="simple">
+<dt>save_n_clicks_timestamp: List of the timestamps of when components matching the save id were clicked.</dt><dd><p>Should only contain one element if the key is unique.
+Value unused, input only provided to register callback.</p>
+</dd>
+</dl>
+<p>tap_node: Cytoscape element of the tapped/clicked node.
+new_comment: List of values of components matching the textarea id.</p>
+<blockquote>
+<div><p>Should only contain one element if the key is unique.</p>
+</div></blockquote>
+</dd>
+<dt>Returns:</dt><dd><p>The updated value of the textarea.</p>
+</dd>
+</dl>
+</div></blockquote>
+</dd></dl>
+
+</div>
+<div class="section" id="module-ujt.callbacks.create_tag_callbacks">
+<span id="ujt-callbacks-create-tag-callbacks-module"></span><h2>ujt.callbacks.create_tag_callbacks module<a class="headerlink" href="#module-ujt.callbacks.create_tag_callbacks" title="Permalink to this headline">¶</a></h2>
+<p>Callbacks that handle tag creation/deletion functionality.</p>
+<dl class="py function">
+<dt id="ujt.callbacks.create_tag_callbacks.create_tag">
+<code class="sig-prename descclassname">ujt.callbacks.create_tag_callbacks.</code><code class="sig-name descname">create_tag</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">create_timestamps</span></em><span class="sig-paren">)</span><a class="headerlink" href="#ujt.callbacks.create_tag_callbacks.create_tag" title="Permalink to this definition">¶</a></dt>
+<dd><p>Handles creating tags from the tag list.</p>
+<dl class="simple">
+<dt>This function is called:</dt><dd><p>when the create tag button is clicked.</p>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>create_timestamps</strong> – List of the timestamps of the CREATE_TAG_BUTTON buttons was called.
+Value unused, input only provided to register callback.
+Should only contain one value.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A signal to add to the SIGNAL_TAG_CREATE hidden div.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="ujt.callbacks.create_tag_callbacks.delete_tag">
+<code class="sig-prename descclassname">ujt.callbacks.create_tag_callbacks.</code><code class="sig-name descname">delete_tag</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">delete_timestamps</span></em><span class="sig-paren">)</span><a class="headerlink" href="#ujt.callbacks.create_tag_callbacks.delete_tag" title="Permalink to this definition">¶</a></dt>
+<dd><p>Handles deleting tags from the tag list.</p>
+<dl class="simple">
+<dt>This function is called:</dt><dd><p>when a delete tag button is clicked</p>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>delete_timestamps</strong> – List of the timestamps of when DELETE_TAG_BUTTON buttons were called.
+Value unused, input only provided to register callback.
+Should contain only one value.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A signal to add to the SIGNAL_TAG_DELETE hidden div.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="ujt.callbacks.create_tag_callbacks.save_tag">
+<code class="sig-prename descclassname">ujt.callbacks.create_tag_callbacks.</code><code class="sig-name descname">save_tag</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">n_clicks_timestamp</span></em>, <em class="sig-param"><span class="n">input_values</span></em><span class="sig-paren">)</span><a class="headerlink" href="#ujt.callbacks.create_tag_callbacks.save_tag" title="Permalink to this definition">¶</a></dt>
+<dd><p>Saves the corresponding tag from the input field to the tag list.</p>
+<p>Ideally, we would like to use the MATCH function to determine which button was clicked.
+However, since we only have one save tag toast for all the tags, we can’t use MATCH in the Output field.
+To use MATCH, Dash requires the Output field to match the same properties as the input field.
+Refer to: <a class="reference external" href="https://dash.plotly.com/pattern-matching-callbacks">https://dash.plotly.com/pattern-matching-callbacks</a></p>
+<dl class="simple">
+<dt>This function is called:</dt><dd><p>when the save tag button is clicked.</p>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>n_clicks_timestamp</strong> – List of the timestamps of when SAVE_TAG_BUTTON buttons were called.
+Value unused, input only provided to register callback.</p></li>
+<li><p><strong>input_values</strong> – List of the input values in TAG_INPUT inputs.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A boolean indicating whether the save tag successful toast should open.
+A signal to save in the SIGNAL_TAG_SAVE component.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="ujt.callbacks.create_tag_callbacks.update_batch_applied_tag_dropdown_options">
+<code class="sig-prename descclassname">ujt.callbacks.create_tag_callbacks.</code><code class="sig-name descname">update_batch_applied_tag_dropdown_options</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">tag_update_signal</span></em><span class="sig-paren">)</span><a class="headerlink" href="#ujt.callbacks.create_tag_callbacks.update_batch_applied_tag_dropdown_options" title="Permalink to this definition">¶</a></dt>
+<dd><p>Updates the options in the batch applied tag dropdown on tag changes.</p>
+<p>Notice that we don’t need to have a similar callback to update the options of the
+non-batch applied tag dropdowns.
+This is because the whole selected info panel is dynamically generated.</p>
+<dl class="simple">
+<dt>This function is called:</dt><dd><p>when a tag node is updated.</p>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>tag_update_signal</strong> – Signal indicating a virtual node was modified.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A list of options for the batch applied tag dropdown journey dropdown.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="ujt.callbacks.create_tag_callbacks.update_change_over_time_tag_dropdown_options">
+<code class="sig-prename descclassname">ujt.callbacks.create_tag_callbacks.</code><code class="sig-name descname">update_change_over_time_tag_dropdown_options</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">tag_update_signal</span></em><span class="sig-paren">)</span><a class="headerlink" href="#ujt.callbacks.create_tag_callbacks.update_change_over_time_tag_dropdown_options" title="Permalink to this definition">¶</a></dt>
+<dd><p>Updates the options in the change over time tag dropdown on tag changes.</p>
+<dl class="simple">
+<dt>This function is called:</dt><dd><p>when a tag node is updated.</p>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>tag_update_signal</strong> – Signal indicating a virtual node was modified.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A list of options for the change over time tag dropdown journey dropdown.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+<div class="section" id="module-ujt.callbacks.graph_callbacks">
+<span id="ujt-callbacks-graph-callbacks-module"></span><h2>ujt.callbacks.graph_callbacks module<a class="headerlink" href="#module-ujt.callbacks.graph_callbacks" title="Permalink to this headline">¶</a></h2>
+<p>Callbacks that modify properties of the cytoscape graph.</p>
+<dl class="py function">
+<dt id="ujt.callbacks.graph_callbacks.update_cytoscape_stylesheet">
+<code class="sig-prename descclassname">ujt.callbacks.graph_callbacks.</code><code class="sig-name descname">update_cytoscape_stylesheet</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">style_update_signal</span></em><span class="sig-paren">)</span><a class="headerlink" href="#ujt.callbacks.graph_callbacks.update_cytoscape_stylesheet" title="Permalink to this definition">¶</a></dt>
+<dd><p>Updates the cytoscape stylesheet.</p>
+<dl class="simple">
+<dt>This function is called:</dt><dd><p>when a style is updated.</p>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>style_update_signal</strong> – Signal indicating a style was updated.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A dictionary encoding a cytoscape format stylesheet.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="ujt.callbacks.graph_callbacks.update_graph_elements">
+<code class="sig-prename descclassname">ujt.callbacks.graph_callbacks.</code><code class="sig-name descname">update_graph_elements</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">sli_refresh_signal</span><span class="p">:</span> <span class="n">str</span></em>, <em class="sig-param"><span class="n">user_journey_table_selected_row_ids</span><span class="p">:</span> <span class="n">List<span class="p">[</span>str<span class="p">]</span></span></em>, <em class="sig-param"><span class="n">virtual_node_update_signal</span><span class="p">:</span> <span class="n">str</span></em>, <em class="sig-param"><span class="n">override_dropdown_value</span><span class="p">:</span> <span class="n">int</span></em>, <em class="sig-param"><span class="n">composite_tagging_update_signal</span><span class="p">:</span> <span class="n">str</span></em>, <em class="sig-param"><span class="n">change_over_time_data</span><span class="p">:</span> <span class="n">Dict<span class="p">[</span>str<span class="p">, </span>Any<span class="p">]</span></span></em>, <em class="sig-param"><span class="n">state_elements</span><span class="p">:</span> <span class="n">List<span class="p">[</span>Dict<span class="p">[</span>str<span class="p">, </span>Any<span class="p">]</span><span class="p">]</span></span></em>, <em class="sig-param"><span class="n">selected_node_data</span><span class="p">:</span> <span class="n">List<span class="p">[</span>Dict<span class="p">[</span>str<span class="p">, </span>Any<span class="p">]</span><span class="p">]</span></span></em>, <em class="sig-param"><span class="n">tap_node</span><span class="p">:</span> <span class="n">Dict<span class="p">[</span>str<span class="p">, </span>Any<span class="p">]</span></span></em>, <em class="sig-param"><span class="n">view_list</span><span class="p">:</span> <span class="n">List<span class="p">[</span>Tuple<span class="p">[</span>str<span class="p">, </span>str<span class="p">]</span><span class="p">]</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ujt.callbacks.graph_callbacks.update_graph_elements" title="Permalink to this definition">¶</a></dt>
+<dd><p>Update the elements of the cytoscape graph.</p>
+<dl class="simple">
+<dt>This function is called:</dt><dd><p>on startup to generate the graph
+when the refresh button is clicked to regenerate the graph
+when row is selected in the User Journey Datatable to highlight the User Journey edges through the path
+when a virtual node is updated (via the SIGNAL_VIRTUAL_NODE_UPDATE)
+when a tag, style, or view is updated.</p>
+</dd>
+</dl>
+<p>We need this callback to handle these (generally unrelated) situations because Dash only supports assigning
+a single callback to a given output element.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>sli_refresh_signal</strong> – Signal indicating SLIs should be refreshed.
+Value holds the trigger source id (REFRESH_SLI_BUTTON or REFRESH_SLI_INTERVAL)</p></li>
+<li><p><strong>user_journey_table_selected_row_ids</strong> – List of selected row ids from the user journey datatable.
+Should contain only one element. Used for highlighting a path through the graph.</p></li>
+<li><p><strong>virtual_node_update_signal</strong> – String used as a signal to indicate that the virtual node addition/deletion was valid.</p></li>
+<li><p><strong>override_dropdown_value</strong> – Status enum value of the status to override for the node.</p></li>
+<li><p><strong>change_over_time_data</strong> – Either an empty dictionary, or a dictionary with keys
+“start_timestamp” mapped to a float POSIX timestamp,
+“end_timestamp” mapped to a float POSIX timestamp, and
+“dict_slis” mapped to a list of SLIs represented as dictionaries.
+The SLIs as dictionaries need to be parsed by the json_format module.
+Used to apply styles for the Change Over Time feature.</p></li>
+<li><p><strong>state_elements</strong> – The list of current cytoscape graph elements.</p></li>
+<li><p><strong>selected_node_data</strong> – The list of data dictionaries for selected nodes.
+Used to create virtual nodes.</p></li>
+<li><p><strong>tap_node</strong> – The cytoscape element of the latest tapped node.
+Used to check which node to override the status of.</p></li>
+<li><p><strong>view_list</strong> – The current list of views (specific to each browser).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A dictionary of cytoscape elements describing the nodes and edges of the graph.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+<div class="section" id="module-ujt.callbacks.panel_callbacks">
+<span id="ujt-callbacks-panel-callbacks-module"></span><h2>ujt.callbacks.panel_callbacks module<a class="headerlink" href="#module-ujt.callbacks.panel_callbacks" title="Permalink to this headline">¶</a></h2>
+<p>Callbacks that generate the panels below the cytoscape graph.</p>
+<dl class="py function">
+<dt id="ujt.callbacks.panel_callbacks.generate_create_tag_panel">
+<code class="sig-prename descclassname">ujt.callbacks.panel_callbacks.</code><code class="sig-name descname">generate_create_tag_panel</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">create_tag_signal</span></em>, <em class="sig-param"><span class="n">delete_tag_signal</span></em><span class="sig-paren">)</span><a class="headerlink" href="#ujt.callbacks.panel_callbacks.generate_create_tag_panel" title="Permalink to this definition">¶</a></dt>
+<dd><p>Handles generating the tag creation and deletion panel.</p>
+<dl class="simple">
+<dt>This function is called:</dt><dd><p>when a new tag is created.
+when a tag is deleted.</p>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>create_tag_signal</strong> – Signal indicating that a tag was created.
+Value unused, input only provided to register callback.</p></li>
+<li><p><strong>delete_tag_signal</strong> – Signal indicating that a tag was deleted.
+Value unused, input only provided to register callback.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A list of components to be placed in the CREATE_TAG_PANEL.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="ujt.callbacks.panel_callbacks.generate_selected_info_panel">
+<code class="sig-prename descclassname">ujt.callbacks.panel_callbacks.</code><code class="sig-name descname">generate_selected_info_panel</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">tap_node</span></em>, <em class="sig-param"><span class="n">tap_edge</span></em>, <em class="sig-param"><span class="n">tag_update_signal</span></em>, <em class="sig-param"><span class="n">applied_tag_update_signal</span></em><span class="sig-paren">)</span> &#x2192; List<span class="p">[</span>Any<span class="p">]</span><a class="headerlink" href="#ujt.callbacks.panel_callbacks.generate_selected_info_panel" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generate the node info panel.</p>
+<dl class="simple">
+<dt>This function is called:</dt><dd><p>when a node is clicked
+when an edge is clicked</p>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>tap_node</strong> – Cytoscape element of the tapped/clicked node.</p></li>
+<li><p><strong>tap_edge</strong> – Cytoscape element of the tapped/clicked edge.</p></li>
+<li><p><strong>tag_update_signal</strong> – The signal indicating a tag was created or deleted. Used to update dropdown options.</p></li>
+<li><p><strong>applied_tag_update_signal</strong> – The signal indicating that a tag was added or removed to the selected element.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>a List of Dash components.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="ujt.callbacks.panel_callbacks.generate_user_journey_info_panel">
+<code class="sig-prename descclassname">ujt.callbacks.panel_callbacks.</code><code class="sig-name descname">generate_user_journey_info_panel</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">dropdown_value</span><span class="p">:</span> <span class="n">str</span></em><span class="sig-paren">)</span> &#x2192; List<span class="p">[</span>Any<span class="p">]</span><a class="headerlink" href="#ujt.callbacks.panel_callbacks.generate_user_journey_info_panel" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generate the client info panel.</p>
+<dl class="simple">
+<dt>This function is called:</dt><dd><p>when the user journey dropdown value is modified (i.e. a user selects a dropdown option)</p>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>dropdown_value</strong> – The value of the client dropdown</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>a List of Dash components.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="ujt.callbacks.panel_callbacks.generate_view_panel">
+<code class="sig-prename descclassname">ujt.callbacks.panel_callbacks.</code><code class="sig-name descname">generate_view_panel</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">view_update_signal</span></em>, <em class="sig-param"><span class="n">tag_update_signal</span></em>, <em class="sig-param"><span class="n">style_update_signal</span></em>, <em class="sig-param"><span class="n">view_list</span><span class="p">:</span> <span class="n">List<span class="p">[</span>Tuple<span class="p">[</span>str<span class="p">, </span>str<span class="p">]</span><span class="p">]</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ujt.callbacks.panel_callbacks.generate_view_panel" title="Permalink to this definition">¶</a></dt>
+<dd><p>Handles generating the view creation and deletion panel.</p>
+<dl class="simple">
+<dt>This function is called:</dt><dd><p>when a view is updated.
+when a tag is updated.
+when a style is updated</p>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>view_update_signal</strong> – Signal indicating that a view was updated.
+Value unused, input only provided to register callback.</p></li>
+<li><p><strong>tag_update_signal</strong> – Signal indicating that a tag was updated.
+Value unused, input only provided to register callback.</p></li>
+<li><p><strong>style_update_signal</strong> – Signal indicating that a style was updated.
+Value unused, input only provided to register callback.</p></li>
+<li><p><strong>view_list</strong> – The current list of views.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A list of components to be placed in the VIEW_PANEL.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+<div class="section" id="module-ujt.callbacks.signal_callbacks">
+<span id="ujt-callbacks-signal-callbacks-module"></span><h2>ujt.callbacks.signal_callbacks module<a class="headerlink" href="#module-ujt.callbacks.signal_callbacks" title="Permalink to this headline">¶</a></h2>
+<p>Provides a function to register callbacks connecting the relevant signals.</p>
+<dl class="py function">
+<dt id="ujt.callbacks.signal_callbacks.generate_composite_signals">
+<code class="sig-prename descclassname">ujt.callbacks.signal_callbacks.</code><code class="sig-name descname">generate_composite_signals</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ujt.callbacks.signal_callbacks.generate_composite_signals" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt id="ujt.callbacks.signal_callbacks.generate_generic_update_signal">
+<code class="sig-prename descclassname">ujt.callbacks.signal_callbacks.</code><code class="sig-name descname">generate_generic_update_signal</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">*</span><span class="n">args</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#ujt.callbacks.signal_callbacks.generate_generic_update_signal" title="Permalink to this definition">¶</a></dt>
+<dd><p>Combines individual signals into a composite update signal.</p>
+<p>This allows other callbacks to avoid having to register each individual type of signal
+(create, remove, etc…) when they are interested in any change to the underlying data structure.
+However, callbacks have the flexibility to only listen to the signals that correspond to
+specific types of operations.</p>
+<p>For example, consider the style functionality.
+The save style button callback needs to update the properties of the save toast,
+and saves the style as a side effect. This callback updates the SIGNAL_STYLE_SAVE signal.
+The load and delete callback needs to update the properties of the text fields,
+and deletes the style as a side effect. This callback updates the SIGNAL_STYLE_DELETE signal.</p>
+<p>The SIGNAL_STYLE_UPDATE is used to trigger the update_cytoscape_stylesheet callback.
+If we want to update the SIGNAL_STYLE_UPDATE directly from the save and delete buttons,
+we have to combine the two callbacks to saving and deleting (since Dash only supports assigning
+to an output with a single callback).
+In order to avoid combining the callbacks, we let them each produce their own update signals
+and combine them with this callback is a workaround.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>The value of the signal that caused the composite signal to update.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+<div class="section" id="module-ujt.callbacks.sli_refresh_callbacks">
+<span id="ujt-callbacks-sli-refresh-callbacks-module"></span><h2>ujt.callbacks.sli_refresh_callbacks module<a class="headerlink" href="#module-ujt.callbacks.sli_refresh_callbacks" title="Permalink to this headline">¶</a></h2>
+<dl class="py function">
+<dt id="ujt.callbacks.sli_refresh_callbacks.update_sli_refresh_signal">
+<code class="sig-prename descclassname">ujt.callbacks.sli_refresh_callbacks.</code><code class="sig-name descname">update_sli_refresh_signal</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">n_clicks_timestamp</span><span class="p">:</span> <span class="n">int</span></em>, <em class="sig-param"><span class="n">n_intervals</span><span class="p">:</span> <span class="n">int</span></em><span class="sig-paren">)</span><a class="headerlink" href="#ujt.callbacks.sli_refresh_callbacks.update_sli_refresh_signal" title="Permalink to this definition">¶</a></dt>
+<dd><p>Updates the SLI refresh signal.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>n_clicks_timestamp</strong> – the timestamp when the SLI refresh button was clicked</p></li>
+<li><p><strong>n_intervals</strong> – the amount of times the interval component was updated</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>a constant to be placed into the SLI refresh signal</p>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+<div class="section" id="module-ujt.callbacks.style_callbacks">
+<span id="ujt-callbacks-style-callbacks-module"></span><h2>ujt.callbacks.style_callbacks module<a class="headerlink" href="#module-ujt.callbacks.style_callbacks" title="Permalink to this headline">¶</a></h2>
+<p>Callbacks that handle style creation/deletion/modification functionality.</p>
+<dl class="py function">
+<dt id="ujt.callbacks.style_callbacks.save_style">
+<code class="sig-prename descclassname">ujt.callbacks.style_callbacks.</code><code class="sig-name descname">save_style</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">save_n_clicks_timestamps</span></em>, <em class="sig-param"><span class="n">style_name</span></em>, <em class="sig-param"><span class="n">style_str</span></em><span class="sig-paren">)</span><a class="headerlink" href="#ujt.callbacks.style_callbacks.save_style" title="Permalink to this definition">¶</a></dt>
+<dd><p>Handles saving styles to the style map.</p>
+<dl class="simple">
+<dt>This function is called:</dt><dd><p>when the save style button is clicked</p>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>save_n_clicks_timestamps</strong> – List of the timestamps of when SAVE_STYLE_TEXTAREA_BUTTON buttons were called.
+Should contain only one value.
+Value unused, input only provided to register callback.</p></li>
+<li><p><strong>style_name_list</strong> – List of style names. Should contain only one value, from the STYLE_NAME_INPUT component.</p></li>
+<li><p><strong>style_str_list</strong> – List of strings encoding styles. Should contain only one value, from the STYLE_TEXTAREA component.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A boolean indicating whether the save tag successful toast should open.
+A message to be placed in the header of the toast.
+A string to determine the toast icon.
+An updated signal to be placed in the SIGNAL_STYLE_SAVE signal.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>A 4 tuple, containing</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="ujt.callbacks.style_callbacks.update_style_input_fields">
+<code class="sig-prename descclassname">ujt.callbacks.style_callbacks.</code><code class="sig-name descname">update_style_input_fields</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">load_n_clicks_timestamp</span></em>, <em class="sig-param"><span class="n">delete_n_clicks_timestamp</span></em>, <em class="sig-param"><span class="n">style_name</span></em><span class="sig-paren">)</span><a class="headerlink" href="#ujt.callbacks.style_callbacks.update_style_input_fields" title="Permalink to this definition">¶</a></dt>
+<dd><p>Handles loading and deleting styles from the style map.</p>
+<p>Notice this function handles both loading and deleting, since these operations both affect
+the state of the style name and style textarea.
+We don’t dynamically generate the style panel since there’s always one input and one textarea.
+This makes it more inconvenient to split these cases into two callbacks, each producing their own update signal,
+because we don’t use a callback (that reads from the composite update signal) to dynamically generate the style panel.</p>
+<p>This is slightly inconsistent with the tag creation and application callback organization, where each callback
+produces its own signal, and another callback rerenders the respective panel.
+Despite the inconsistency, I feel this method for static components makes more sense and reduces complexity.</p>
+<dl class="simple">
+<dt>This function is called:</dt><dd><p>when the load style button is clicked
+when the delete style button is clicked</p>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>load_n_clicks_timestamps</strong> – List of the timestamps of when LOAD_STYLE_TEXTAREA_BUTTON buttons were called.
+Should contain only one value.
+Value unused, input only provided to register callback.</p></li>
+<li><p><strong>delete_n_clicks_timestamp</strong> – List of the timestamps of when DELETE_STYLE_BUTTON buttons were called.
+Should contain only one value.
+Value unused, input only provided to register callback.</p></li>
+<li><p><strong>style_names</strong> – List of style names. Should contain only one value, from the STYLE_NAME_INPUT component.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>The updated string to be placed in the STYLE_NAME_INPUT component.
+The updated string to be placed in the STYLE_TEXTAREA component.
+The updated signal to be placed in the SIGNAL_STYLE_DELETE signal.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>A 3 tuple, containing</p>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+<div class="section" id="module-ujt.callbacks.view_callbacks">
+<span id="ujt-callbacks-view-callbacks-module"></span><h2>ujt.callbacks.view_callbacks module<a class="headerlink" href="#module-ujt.callbacks.view_callbacks" title="Permalink to this headline">¶</a></h2>
+<p>Callbacks that handle view creation/deletion/modification functionality.</p>
+<dl class="py function">
+<dt id="ujt.callbacks.view_callbacks.update_view_store">
+<code class="sig-prename descclassname">ujt.callbacks.view_callbacks.</code><code class="sig-name descname">update_view_store</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">tag_dropdown_values</span></em>, <em class="sig-param"><span class="n">style_dropdown_values</span></em>, <em class="sig-param"><span class="n">create_timestamps</span></em>, <em class="sig-param"><span class="n">delete_timestamps</span></em><span class="sig-paren">)</span> &#x2192; Tuple<span class="p">[</span>List<span class="p">[</span>Tuple<span class="p">[</span>str<span class="p">, </span>str<span class="p">]</span><span class="p">]</span><span class="p">, </span>str<span class="p">]</span><a class="headerlink" href="#ujt.callbacks.view_callbacks.update_view_store" title="Permalink to this definition">¶</a></dt>
+<dd><p>Saves the current list of views to the VIEW_STORE .</p>
+<p>Notice that the style of this callback is different from the apply tag or create tag callbacks,
+even though they both handle the same type of UI elements (dynamically creating rows).
+This callback updates the VIEW_STORE by reading the current state of the rows of dropdown menus.
+In turn, the generate_view_panel callback updates the dropdown menus based on the contents of the VIEW_STORE.</p>
+<p>Views are written to the VIEW_STORE in order to make them local for each user.
+Thus, we must combine all the functionality into a single callback to write to the component.
+This is in contrast to styles, tags, and applied tags, callbacks, which write
+their respective data structure to the Dash server via the state module as a side effect.</p>
+<p>We could theoretically refactor the tag creation panel and tag application panel to be in this style.
+It would probably be a little cleaner in the case of the tag creation panel, since the panel only
+changes in response to create or delete tag buttons.
+In contrast, the tag application panel changes based on any tag update, its own apply/remove buttons, and
+user interactions with the cytoscape graph.</p>
+<p>This style offers a more functional approach, so we can be a little more confident in the correctness of
+the state of our data structures.
+Moreover, it’s relatively clean.</p>
+<p>However, the complexity would probably increase dramatically in the apply tag callbacks case.
+We also lose the granularity of output signals. (In theory, we could assign different values to the output
+signal, but each callback that registers the signal would have to check the signal value.)</p>
+<p>I think we can just accept this inconsistency in the view case and leave the other callbacks as-is.</p>
+<dl class="simple">
+<dt>This function is called:</dt><dd><p>when a VIEW_TAG_DROPDOWN value is updated
+when a VIEW_STYLE_DROPDOWN value is updated
+when a view row is created
+when a view row is deleted</p>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>tag_dropdown_values</strong> – the values of the VIEW_TAG_DROPDOWN dropdown menus.</p></li>
+<li><p><strong>style_dropdown_values</strong> – the values of the VIEW_STYLE_DROPDOWN dropdown menus.</p></li>
+<li><p><strong>create_timestamps</strong> – the timestamp of when the CREATE_VIEW_BUTTON was clicked
+Should contain only one element.</p></li>
+<li><p><strong>delete_timestamps</strong> – the timestamp of when the DELETE_VIEW_BUTTON was clicked
+Should contain only one element.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A signal to be placed in the SIGNAL_VIEW_MODIFY.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+<div class="section" id="module-ujt.callbacks.virtual_node_callbacks">
+<span id="ujt-callbacks-virtual-node-callbacks-module"></span><h2>ujt.callbacks.virtual_node_callbacks module<a class="headerlink" href="#module-ujt.callbacks.virtual_node_callbacks" title="Permalink to this headline">¶</a></h2>
+<p>Callbacks that handle virtual node functionality.</p>
+<dl class="py function">
+<dt id="ujt.callbacks.virtual_node_callbacks.add_virtual_node">
+<code class="sig-prename descclassname">ujt.callbacks.virtual_node_callbacks.</code><code class="sig-name descname">add_virtual_node</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">add_n_clicks_timestamp</span></em>, <em class="sig-param"><span class="n">selected_node_data</span></em>, <em class="sig-param"><span class="n">virtual_node_name</span></em><span class="sig-paren">)</span><a class="headerlink" href="#ujt.callbacks.virtual_node_callbacks.add_virtual_node" title="Permalink to this definition">¶</a></dt>
+<dd><p>Validates and creates a virtual nodes with the the selected cytoscape nodes.</p>
+<p>Nodes with parents cannot be added directly (their parents must be added instead).
+Client nodes cannot be added to virtual nodes.
+A single node with no children cannot be collapsed.</p>
+<dl class="simple">
+<dt>This function is called:</dt><dd><p>when the add button is clicked</p>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>add_n_clicks_timestamp</strong> – Timestamp of when the add button was clicked. Value unused, input only provided to register callback.</p></li>
+<li><p><strong>selected_node_data</strong> – List of data dictionaries of selected cytoscape elements.</p></li>
+<li><p><strong>virtual_node_name</strong> – The name of the virtual node to add or delete.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A string to be placed in the children property of the SIGNAL_VIRTUAL_NODE_ADD hidden div.
+This hidden div is used to ensure the callbacks to update the error modal visibility and cytoscape graph
+are called in the correct order.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="ujt.callbacks.virtual_node_callbacks.collapse_virtual_node">
+<code class="sig-prename descclassname">ujt.callbacks.virtual_node_callbacks.</code><code class="sig-name descname">collapse_virtual_node</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">collapse_n_clicks_timestamp</span></em>, <em class="sig-param"><span class="n">tap_node</span></em><span class="sig-paren">)</span> &#x2192; str<a class="headerlink" href="#ujt.callbacks.virtual_node_callbacks.collapse_virtual_node" title="Permalink to this definition">¶</a></dt>
+<dd><p>Collapses a virtual node.</p>
+<dl class="simple">
+<dt>This function is called:</dt><dd><p>when the collapse virtual node button is clicked</p>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>expand_n_clicks_timestamp</strong> – Timestamp of when the virtual node button was clicked.
+Value unused, input only provided to register callback.</p></li>
+<li><p><strong>tap_node</strong> – The last clicked graph node.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>OK_SIGNAL or an error message to be placed in the error modal.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="ujt.callbacks.virtual_node_callbacks.delete_virtual_node">
+<code class="sig-prename descclassname">ujt.callbacks.virtual_node_callbacks.</code><code class="sig-name descname">delete_virtual_node</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">delete_n_clicks_timestamp</span></em>, <em class="sig-param"><span class="n">tap_node</span></em><span class="sig-paren">)</span><a class="headerlink" href="#ujt.callbacks.virtual_node_callbacks.delete_virtual_node" title="Permalink to this definition">¶</a></dt>
+<dd><p>Handles deleting virtual nodes.</p>
+<dl class="simple">
+<dt>This function is called:</dt><dd><p>when the delete button is clicked</p>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>delete_n_clicks_timestamp</strong> – Timestamp of when the delete button was clicked. Value unused, input only provided to register callback.</p></li>
+<li><p><strong>tap_node</strong> – The last clicked graph node.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A string to be placed in the children property of the SIGNAL_VIRTUAL_NODE_DELETE hidden div.
+This hidden div is used to ensure the callbacks to update the error modal visibility and cytoscape graph
+are called in the correct order.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="ujt.callbacks.virtual_node_callbacks.expand_virtual_node">
+<code class="sig-prename descclassname">ujt.callbacks.virtual_node_callbacks.</code><code class="sig-name descname">expand_virtual_node</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">expand_n_clicks_timestamp</span></em>, <em class="sig-param"><span class="n">tap_node</span></em><span class="sig-paren">)</span> &#x2192; str<a class="headerlink" href="#ujt.callbacks.virtual_node_callbacks.expand_virtual_node" title="Permalink to this definition">¶</a></dt>
+<dd><p>Expands a virtual node.</p>
+<dl class="simple">
+<dt>This function is called:</dt><dd><p>when the expand virtual node button is clicked</p>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>expand_n_clicks_timestamp</strong> – Timestamp of when the virtual node button was clicked.
+Value unused, input only provided to register callback.</p></li>
+<li><p><strong>tap_node</strong> – The last clicked graph node.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>OK_SIGNAL or an error message to be placed in the error modal.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="ujt.callbacks.virtual_node_callbacks.toggle_all_collapse_virtual_node">
+<code class="sig-prename descclassname">ujt.callbacks.virtual_node_callbacks.</code><code class="sig-name descname">toggle_all_collapse_virtual_node</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">toggle_all_n_clicks</span><span class="p">:</span> <span class="n">int</span></em><span class="sig-paren">)</span> &#x2192; str<a class="headerlink" href="#ujt.callbacks.virtual_node_callbacks.toggle_all_collapse_virtual_node" title="Permalink to this definition">¶</a></dt>
+<dd><p>Collapses and expands all virtual nodes.</p>
+<dl class="simple">
+<dt>This function is called:</dt><dd><p>when the toggle all virtual node button is clicked</p>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>toggle_all_n_clicks</strong> – Number of times the toggle all virtual node button was clicked.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>OK_SIGNAL.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="ujt.callbacks.virtual_node_callbacks.update_user_journey_dropdown_options">
+<code class="sig-prename descclassname">ujt.callbacks.virtual_node_callbacks.</code><code class="sig-name descname">update_user_journey_dropdown_options</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">virtual_node_add_signal</span></em>, <em class="sig-param"><span class="n">virtual_node_delete_signal</span></em><span class="sig-paren">)</span><a class="headerlink" href="#ujt.callbacks.virtual_node_callbacks.update_user_journey_dropdown_options" title="Permalink to this definition">¶</a></dt>
+<dd><p>Updates the options in the user journey dropdown on virtual node changes.</p>
+<dl class="simple">
+<dt>This function is called:</dt><dd><p>when a virtual node is created or deleted.</p>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>virtual_node_add_signal</strong> – Signal indicating a virtual node was added.</p></li>
+<li><p><strong>virtual_node_delete_signal</strong> – Signal indicating a virtual node was deleted.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A list of options for the user journey dropdown.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="ujt.callbacks.virtual_node_callbacks.update_virtual_node_error_modal">
+<code class="sig-prename descclassname">ujt.callbacks.virtual_node_callbacks.</code><code class="sig-name descname">update_virtual_node_error_modal</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">n_clicks_timestamp</span></em>, <em class="sig-param"><span class="n">signal_message</span></em><span class="sig-paren">)</span> &#x2192; Tuple<span class="p">[</span>bool<span class="p">, </span>Optional<span class="p">[</span>Any<span class="p">]</span><span class="p">]</span><a class="headerlink" href="#ujt.callbacks.virtual_node_callbacks.update_virtual_node_error_modal" title="Permalink to this definition">¶</a></dt>
+<dd><p>Updates the error modal message and open state.</p>
+<dl class="simple">
+<dt>This function is called:</dt><dd><p>when an error occurs during the validation of virtual node creation/deletion
+when the close button is clicked.</p>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>n_clicks_timestamp</strong> – Timestamp of when the close button was clicked. Value unused, input only provided to register callback.</p></li>
+<li><p><strong>signal_message</strong> – The value of the signal from the signal hidden div. Used to determine whether the modal should open.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A tuple containing a boolean and string.
+The boolean indicates whether the modal should open.
+The string is placed into the body of the modal.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+<div class="section" id="module-ujt.callbacks">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-ujt.callbacks" title="Permalink to this headline">¶</a></h2>
+</div>
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="index.html">User Journey Tool</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="modules.html">ujt</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="ujt.html">ujt package</a></li>
+</ul>
+</li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+  <li><a href="modules.html">ujt</a><ul>
+  <li><a href="ujt.html">ujt package</a><ul>
+      <li>Previous: <a href="ujt.html" title="previous chapter">ujt package</a></li>
+      <li>Next: <a href="ujt.server.html" title="next chapter">ujt.server package</a></li>
+  </ul></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2020, Chuan Chen.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 3.2.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="_sources/ujt.callbacks.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>
