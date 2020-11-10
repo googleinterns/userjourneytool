@@ -39,8 +39,7 @@ def add_virtual_node(add_n_clicks_timestamp, selected_node_data, virtual_node_na
         This hidden div is used to ensure the callbacks to update the error modal visibility and cytoscape graph
         are called in the correct order.
     """
-
-    if selected_node_data is None:
+    if selected_node_data is None or selected_node_data == []:
         return "Error: Must select at least one node to to add to virtual node."
 
     node_name_message_map, client_name_message_map = state.get_message_maps()
@@ -74,12 +73,12 @@ def add_virtual_node(add_n_clicks_timestamp, selected_node_data, virtual_node_na
 @app.callback(
     Output(id_constants.SIGNAL_VIRTUAL_NODE_DELETE, "children"),
     Input(id_constants.DELETE_VIRTUAL_NODE_BUTTON, "n_clicks_timestamp"),
-    State(id_constants.VIRTUAL_NODE_INPUT, "value"),
+    State(id_constants.CYTOSCAPE_GRAPH, "tapNode"),
     prevent_initial_call=True,
 )
 def delete_virtual_node(
     delete_n_clicks_timestamp,
-    virtual_node_name,
+    tap_node,
 ):
     """Handles deleting virtual nodes.
 
@@ -88,7 +87,7 @@ def delete_virtual_node(
 
     Args:
         delete_n_clicks_timestamp: Timestamp of when the delete button was clicked. Value unused, input only provided to register callback.
-        virtual_node_name: The name of the virtual node to delete.
+        tap_node: The last clicked graph node.
 
     Returns:
         A string to be placed in the children property of the SIGNAL_VIRTUAL_NODE_DELETE hidden div.
@@ -97,10 +96,11 @@ def delete_virtual_node(
     """
 
     virtual_node_map = state.get_virtual_node_map()
-    if virtual_node_name not in virtual_node_map:
-        return "Error: The entered name doesn't match any existing virtual nodes."
 
-    state.delete_virtual_node(virtual_node_name)
+    if tap_node is None or tap_node["data"]["ujt_id"] not in virtual_node_map:
+        return "Error: Please select a virtual node."
+
+    state.delete_virtual_node(tap_node["data"]["ujt_id"])
 
     return constants.OK_SIGNAL
 
@@ -108,12 +108,12 @@ def delete_virtual_node(
 @app.callback(
     Output(id_constants.SIGNAL_VIRTUAL_NODE_EXPAND, "children"),
     Input(id_constants.EXPAND_VIRTUAL_NODE_BUTTON, "n_clicks_timestamp"),
-    State(id_constants.VIRTUAL_NODE_INPUT, "value"),
+    State(id_constants.CYTOSCAPE_GRAPH, "tapNode"),
     prevent_initial_call=True,
 )
 def expand_virtual_node(
     expand_n_clicks_timestamp,
-    virtual_node_name,
+    tap_node,
 ) -> str:
     """Expands a virtual node.
 
@@ -123,17 +123,17 @@ def expand_virtual_node(
     Args:
         expand_n_clicks_timestamp: Timestamp of when the virtual node button was clicked.
             Value unused, input only provided to register callback.
-        virtual_node_name: The name of the virtual node to expand.
+        tap_node: The last clicked graph node.
 
     Returns:
         OK_SIGNAL or an error message to be placed in the error modal.
     """
     virtual_node_map = state.get_virtual_node_map()
 
-    if virtual_node_name not in virtual_node_map:
-        return "Error: Please enter a name of virtual node!"
+    if tap_node is None or tap_node["data"]["ujt_id"] not in virtual_node_map:
+        return "Error: Please select a virtual node."
 
-    state.set_virtual_node_collapsed_state(virtual_node_name, collapsed=False)
+    state.set_virtual_node_collapsed_state(tap_node["data"]["ujt_id"], collapsed=False)
 
     return constants.OK_SIGNAL
 
@@ -141,12 +141,12 @@ def expand_virtual_node(
 @app.callback(
     Output(id_constants.SIGNAL_VIRTUAL_NODE_COLLAPSE, "children"),
     Input(id_constants.COLLAPSE_VIRTUAL_NODE_BUTTON, "n_clicks_timestamp"),
-    State(id_constants.VIRTUAL_NODE_INPUT, "value"),
+    State(id_constants.CYTOSCAPE_GRAPH, "tapNode"),
     prevent_initial_call=True,
 )
 def collapse_virtual_node(
     collapse_n_clicks_timestamp,
-    virtual_node_name,
+    tap_node,
 ) -> str:
     """Collapses a virtual node.
 
@@ -156,17 +156,17 @@ def collapse_virtual_node(
     Args:
         expand_n_clicks_timestamp: Timestamp of when the virtual node button was clicked.
             Value unused, input only provided to register callback.
-        virtual_node_name: The name of the virtual node to expand.
+        tap_node: The last clicked graph node.
 
     Returns:
         OK_SIGNAL or an error message to be placed in the error modal.
     """
     virtual_node_map = state.get_virtual_node_map()
 
-    if virtual_node_name not in virtual_node_map:
-        return "Error: Please enter a name of virtual node!"
+    if tap_node is None or tap_node["data"]["ujt_id"] not in virtual_node_map:
+        return "Error: Please select a virtual node."
 
-    state.set_virtual_node_collapsed_state(virtual_node_name, collapsed=True)
+    state.set_virtual_node_collapsed_state(tap_node["data"]["ujt_id"], collapsed=True)
 
     return constants.OK_SIGNAL
 
