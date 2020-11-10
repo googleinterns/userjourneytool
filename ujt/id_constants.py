@@ -38,6 +38,7 @@ SIGNAL_VIRTUAL_NODE_ADD = "add-virtual-node-signal"
 SIGNAL_VIRTUAL_NODE_DELETE = "delete-virtual-node-signal"
 SIGNAL_VIRTUAL_NODE_COLLAPSE = "collapse-virtual-node-signal"
 SIGNAL_VIRTUAL_NODE_EXPAND = "expand-virtual-node-signal"
+SIGNAL_VIRTUAL_NODE_TOGGLE_ALL = "toggle-all-virtual-node-signal"
 SIGNAL_VIRTUAL_NODE_UPDATE = "virtual-node-update-signal"
 
 SIGNAL_TAG_CREATE = "create-tag-signal"
@@ -68,6 +69,7 @@ SIGNALS = [
     SIGNAL_VIRTUAL_NODE_DELETE,
     SIGNAL_VIRTUAL_NODE_COLLAPSE,
     SIGNAL_VIRTUAL_NODE_EXPAND,
+    SIGNAL_VIRTUAL_NODE_TOGGLE_ALL,
     SIGNAL_VIRTUAL_NODE_UPDATE,
     # ---
     SIGNAL_TAG_CREATE,
@@ -106,6 +108,7 @@ ADD_VIRTUAL_NODE_BUTTON = "add-virtual-node-button"
 DELETE_VIRTUAL_NODE_BUTTON = "delete-virtual-node-button"
 COLLAPSE_VIRTUAL_NODE_BUTTON = "collapse-virtual-node-button"
 EXPAND_VIRTUAL_NODE_BUTTON = "expand-virtual-node-button"
+TOGGLE_ALL_VIRTUAL_NODE_BUTTON = "toggle-all-virtual-node-button"
 
 BATCH_APPLIED_TAG_DROPDOWN = "batch-applied-tag-dropdown"
 BATCH_ADD_APPLIED_TAG_BUTTON = "batch-add-applied-tag-button"

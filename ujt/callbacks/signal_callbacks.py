@@ -14,6 +14,7 @@ COMPOSITE_SIGNAL_MAP = {
         id_constants.SIGNAL_VIRTUAL_NODE_DELETE,
         id_constants.SIGNAL_VIRTUAL_NODE_EXPAND,
         id_constants.SIGNAL_VIRTUAL_NODE_COLLAPSE,
+        id_constants.SIGNAL_VIRTUAL_NODE_TOGGLE_ALL,
     ),
     id_constants.SIGNAL_TAG_UPDATE: (
         id_constants.SIGNAL_TAG_CREATE,
