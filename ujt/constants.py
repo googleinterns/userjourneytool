@@ -9,6 +9,13 @@ from graph_structures_pb2 import NodeType, Status
 
 from . import id_constants
 
+# configurable constants -- move this to a config file
+CLEAR_CACHE_ON_STARTUP = True
+REFRESH_TOPOLOGY_ON_STARTUP = True
+REFRESH_SLI_ON_INTERVAL = True
+CLIENT_SLI_REFRESH_INTERVAL_MILLIS = 30 * 1000  # ms
+SERVER_SLI_REFRESH_INTERVAL_SECONDS = 30
+
 # functional constants
 CLIENT_CLASS = "CLIENT"
 HIGHLIGHTED_UJ_EDGE_CLASS = "HIGHLIGHTED_UJ_EDGE"
@@ -215,7 +222,6 @@ DATATABLE_CSS = [
     },
 ]
 
-CLEAR_CACHE_ON_STARTUP = True  # DEBUG_REMOVE
 CACHE_DEFAULT_VALUES = {
     id_constants.VIRTUAL_NODE_MAP: {},  # Dict[str, VirtualNode]
     id_constants.PARENT_VIRTUAL_NODE_MAP: {},  # Dict[str, str]

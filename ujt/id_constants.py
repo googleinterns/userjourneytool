@@ -61,6 +61,7 @@ SIGNAL_STYLE_UPDATE = "style-update-signal"
 
 SIGNAL_COMPOSITE_TAGGING_UPDATE = "composite-tagging-update-signal"
 
+SIGNAL_SLI_REFRESH = "sli-refresh-signal"
 # ---
 
 SIGNAL_WRAPPER_DIV = "signal-wrapper-div"
@@ -91,6 +92,8 @@ SIGNALS = [
     SIGNAL_STYLE_UPDATE,
     # ---
     SIGNAL_COMPOSITE_TAGGING_UPDATE,
+    # ---
+    SIGNAL_SLI_REFRESH,
 ]
 # endregion
 
@@ -102,6 +105,7 @@ COLLAPSE_ERROR_MODAL_CLOSE = "collapse-error-modal-close"
 
 # region top bar
 REFRESH_SLI_BUTTON = "refresh-sli-button"
+REFRESH_SLI_INTERVAL = "refresh-sli-interval"
 
 VIRTUAL_NODE_INPUT = "virtual-node-input"
 ADD_VIRTUAL_NODE_BUTTON = "add-virtual-node-button"
