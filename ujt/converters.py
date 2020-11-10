@@ -178,6 +178,8 @@ def datatable_from_nodes(nodes, use_relative_names, table_id):
         columns=columns,
         data=data,
         style_data_conditional=constants.DATATABLE_CONDITIONAL_STYLE,
+        style_table=constants.DATATABLE_STYLE,
+        css=constants.DATATABLE_CSS,
     )
 
 
@@ -206,6 +208,8 @@ def datatable_from_slis(slis, table_id):
         columns=columns,
         data=data,
         style_data_conditional=constants.DATATABLE_CONDITIONAL_STYLE,
+        style_table=constants.DATATABLE_STYLE,
+        css=constants.DATATABLE_CSS,
     )
 
 
@@ -234,6 +238,8 @@ def user_journey_datatable_from_user_journeys(user_journeys, table_id):
         data=data,
         row_selectable="single",
         style_data_conditional=constants.DATATABLE_CONDITIONAL_STYLE,
+        style_table=constants.DATATABLE_STYLE,
+        css=constants.DATATABLE_CSS,
     )
 
 
@@ -307,6 +313,8 @@ def change_over_time_datatable_from_composite_slis(
         columns=columns,
         data=data,
         style_data_conditional=constants.DATATABLE_CONDITIONAL_STYLE,
+        style_table=constants.DATATABLE_STYLE,
+        css=constants.DATATABLE_CSS,
     )
 
 
