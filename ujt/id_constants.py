@@ -18,6 +18,20 @@ For now, signals use the component type first convention, and all other
 component ids place the component type at the end.
 """
 
+# region cache keys
+NODE_NAME_MESSAGE_MAP = "node_name_message_map"
+CLIENT_NAME_MESSAGE_MAP = "client_name_message_map"
+
+VIRTUAL_NODE_MAP = "virtual_node_map"
+PARENT_VIRTUAL_NODE_MAP = "parent_virtual_node_map"
+COMMENT_MAP = "comment_map"
+OVERRIDE_STATUS_MAP = "override_status_map"
+TAG_LIST = "tag_list"
+TAG_MAP = "tag_map"
+STYLE_MAP = "style_map"
+VIEW_LIST = "view_list"
+# endregion
+
 
 # region signals
 SIGNAL_VIRTUAL_NODE_ADD = "add-virtual-node-signal"
@@ -159,20 +173,6 @@ LOAD_STYLE_TEXTAREA_BUTTON = "load-style-textarea-button"
 SAVE_STYLE_TEXTAREA_BUTTON = "save-style-textarea-button"
 DELETE_STYLE_BUTTON = "delete-style-button"
 SAVE_STYLE_TOAST = "save-style-toast"
-# endregion
-
-# region cache keys
-NODE_NAME_MESSAGE_MAP = "node_name_message_map"
-CLIENT_NAME_MESSAGE_MAP = "client_name_message_map"
-
-VIRTUAL_NODE_MAP = "virtual_node_map"
-PARENT_VIRTUAL_NODE_MAP = "parent_virtual_node_map"
-COMMENT_MAP = "comment_map"
-OVERRIDE_STATUS_MAP = "override_status_map"
-TAG_LIST = "tag_list"
-TAG_MAP = "tag_map"
-STYLE_MAP = "style_map"
-VIEW_LIST = "view_list"
 # endregion
 
 # region change over time

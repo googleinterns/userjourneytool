@@ -42,10 +42,15 @@ def get_slis() -> List[SLI]:
     )  # convert to list to support memoization (via pickling)
 
 
-def get_message_maps() -> Tuple[Dict[str, Node], Dict[str, Client]]:
+def get_message_maps(
+    force_refresh: bool = False,
+) -> Tuple[Dict[str, Node], Dict[str, Client]]:
     """Gets Node and Client protobufs, computes their internal statuses, and return their maps.
 
     If the cache doesn't contain the message maps, this function reads the Nodes and Clients from the remote reporting server.
+
+    Args:
+        force_refresh: boolean indicating whether the UJT should request a new topology from the server
 
     Returns:
         A tuple of two dictionaries.
@@ -56,7 +61,11 @@ def get_message_maps() -> Tuple[Dict[str, Node], Dict[str, Client]]:
     client_name_message_map = cache.get(id_constants.CLIENT_NAME_MESSAGE_MAP)
 
     # If initial call (or cache was manually cleared) to get_message_maps, read from remote server.
-    if node_name_message_map is None or client_name_message_map is None:
+    if (
+        force_refresh
+        or node_name_message_map is None
+        or client_name_message_map is None
+    ):
         node_response, client_response = (
             rpc_client.get_nodes(),
             rpc_client.get_clients(),
@@ -64,6 +73,21 @@ def get_message_maps() -> Tuple[Dict[str, Node], Dict[str, Client]]:
 
         node_name_message_map = utils.proto_list_to_name_map(node_response.nodes)
         client_name_message_map = utils.proto_list_to_name_map(client_response.clients)
+
+        override_status_map = get_override_status_map()
+        comment_map = get_comment_map()
+
+        for node_name in override_status_map:
+            if (
+                node_name in node_name_message_map
+            ):  # if we had a saved value for non-virtual node
+                node_name_message_map[node_name].override_status = override_status_map[
+                    node_name
+                ]
+
+        for node_name in comment_map:
+            if node_name in node_name_message_map:
+                node_name_message_map[node_name].comment = comment_map[node_name]
 
         cache.set(id_constants.NODE_NAME_MESSAGE_MAP, node_name_message_map)
         cache.set(id_constants.CLIENT_NAME_MESSAGE_MAP, client_name_message_map)
@@ -213,6 +237,8 @@ def delete_virtual_node(virtual_node_name: str):
     """
     virtual_node_map = get_virtual_node_map()
     parent_virtual_node_map = get_parent_virtual_node_map()
+    override_status_map = get_override_status_map()
+    comment_map = get_comment_map()
 
     virtual_node = virtual_node_map[virtual_node_name]
     # child_names property is convenient but not strictly necessary.
@@ -221,8 +247,16 @@ def delete_virtual_node(virtual_node_name: str):
 
     del virtual_node_map[virtual_node_name]
 
+    if virtual_node_name in override_status_map:
+        del override_status_map[virtual_node_name]
+
+    if virtual_node_name in comment_map:
+        del comment_map[virtual_node_name]
+
     set_virtual_node_map(virtual_node_map)
     set_parent_virtual_node_map(parent_virtual_node_map)
+    set_override_status_map(override_status_map)
+    set_comment_map(comment_map)
 
 
 def set_virtual_node_collapsed_state(virtual_node_name: str, collapsed: bool):
@@ -241,6 +275,24 @@ def set_virtual_node_collapsed_state(virtual_node_name: str, collapsed: bool):
 
 
 # endregion
+
+
+def get_comment_map() -> Dict[str, str]:
+    """Gets a dictionary mapping node names to their comment.
+
+    Returns:
+        The mapping between node names and their comment.
+    """
+    return cache.get(id_constants.COMMENT_MAP)
+
+
+def set_comment_map(comment_map: Dict[str, str]):
+    """Sets a dictionary mapping node names to their comment.
+
+    Args:
+        override_status_map: a dictionary mapping node names to their comment.
+    """
+    cache.set(id_constants.COMMENT_MAP, comment_map)
 
 
 def set_comment(
@@ -286,7 +338,7 @@ def set_comment(
             if save_changes:
                 setters[idx](proto_map)
 
-    comment_map = cache.get(id_constants.COMMENT_MAP)
+    comment_map = get_comment_map()
     if comment == "":
         try:
             del comment_map[name]
@@ -294,7 +346,25 @@ def set_comment(
             pass
     else:
         comment_map[name] = comment
-    cache.set(id_constants.COMMENT_MAP, comment_map)
+    set_comment_map(comment_map)
+
+
+def get_override_status_map() -> Dict[str, "StatusValue"]:
+    """Gets a dictionary mapping node names to their override status.
+
+    Returns:
+        The mapping between node names and their override status.
+    """
+    return cache.get(id_constants.OVERRIDE_STATUS_MAP)
+
+
+def set_override_status_map(override_status_map: Dict[str, "StatusValue"]):
+    """Sets a dictionary mapping node names to their override status.
+
+    Args:
+        override_status_map: a dictionary mapping node names to their override status.
+    """
+    cache.set(id_constants.OVERRIDE_STATUS_MAP, override_status_map)
 
 
 def set_node_override_status(
@@ -339,7 +409,7 @@ def set_node_override_status(
             if save_changes:
                 setters[idx](proto_map)
 
-    override_status_map = cache.get(id_constants.OVERRIDE_STATUS_MAP)
+    override_status_map = get_override_status_map()
     if override_status == Status.STATUS_UNSPECIFIED:
         try:
             del override_status_map[node_name]
@@ -347,7 +417,7 @@ def set_node_override_status(
             pass
     else:
         override_status_map[node_name] = override_status
-    cache.set(id_constants.OVERRIDE_STATUS_MAP, override_status_map)
+    set_override_status_map(override_status_map)
 
 
 # @cache.memoize()  # this is commented out for consistent testing # DEBUG_REMOVE

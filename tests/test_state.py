@@ -43,7 +43,11 @@ def test_get_message_maps_no_cache(patch_path):
     ) as mock_rpc_client_get_clients, patch(
         f"{patch_path}.utils.proto_list_to_name_map",
         Mock(side_effect=[sentinel.node_map, sentinel.client_map]),
-    ) as mock_proto_list_to_name_map:
+    ) as mock_proto_list_to_name_map, patch(
+        f"{patch_path}.get_override_status_map", Mock(return_value={})
+    ), patch(
+        f"{patch_path}.get_comment_map", Mock(return_value={})
+    ):
 
         assert (sentinel.node_map, sentinel.client_map) == ujt.state.get_message_maps()
 
@@ -216,7 +220,11 @@ def test_delete_virtual_node(patch_path):
         f"{patch_path}.set_virtual_node_map"
     ) as mock_set_virtual_node_map, patch(
         f"{patch_path}.set_parent_virtual_node_map"
-    ) as mock_set_parent_virtual_node_map:
+    ) as mock_set_parent_virtual_node_map, patch(
+        f"{patch_path}.get_override_status_map", Mock(return_value={})
+    ), patch(
+        f"{patch_path}.get_comment_map", Mock(return_value={})
+    ):
 
         ujt.state.delete_virtual_node(virtual_node_name)
 
