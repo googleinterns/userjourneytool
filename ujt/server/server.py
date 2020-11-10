@@ -1,10 +1,11 @@
 """Implementation of Reporting Server."""
 
+import argparse
 import datetime as dt
 import pathlib
 import random
 from concurrent import futures
-from typing import TYPE_CHECKING, Dict
+from typing import TYPE_CHECKING, Dict, List
 
 import grpc
 import server_pb2
@@ -19,14 +20,21 @@ if TYPE_CHECKING:
     )
 
 
-def read_local_data():
+def read_local_data(data_path_str: str = None):
     """ Read and return protos from values in data directory. """
-    data_path = pathlib.Path(__file__).parent / "data"
+    if data_path_str is None:
+        data_path = pathlib.Path(__file__).parent / "data"
+    else:
+        data_path = pathlib.Path(data_path_str)
     client_paths = data_path.glob("Client_*.ujtdata")
     node_paths = data_path.glob("Node_*.ujtdata")
 
-    clients = [server_utils.read_proto_from_file(path, Client) for path in client_paths]
-    nodes = [server_utils.read_proto_from_file(path, Node) for path in node_paths]
+    clients: List[Client] = [
+        server_utils.read_proto_from_file(path, Client) for path in client_paths  # type: ignore
+    ]
+    nodes: List[Node] = [
+        server_utils.read_proto_from_file(path, Node) for path in node_paths  # type: ignore
+    ]
 
     client_map = {client.name: client for client in clients}
     node_map = {node.name: node for node in nodes}
@@ -212,20 +220,36 @@ class ReportingServiceServicer(server_pb2_grpc.ReportingServiceServicer):
         return server_pb2.GetSLIsResponse(slis=output_slis)
 
 
-def serve():
+def serve(port: str = None, data_path_str: str = None):
+    if port is None:
+        port = "50052"
+
     server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
 
-    node_map, client_map = read_local_data()
+    node_map, client_map = read_local_data(data_path_str)
     reporting_service_servicer = ReportingServiceServicer(node_map, client_map)
 
     server_pb2_grpc.add_ReportingServiceServicer_to_server(
         reporting_service_servicer, server
     )
-    server.add_insecure_port("[::]:50052")
+    server.add_insecure_port(f"[::]:{port}")
+
     server.start()
-    print("starting server!")
+    print(f"starting server on port {port}!")
     server.wait_for_termination()
 
 
 if __name__ == "__main__":
-    serve()
+    arg_parser = argparse.ArgumentParser()
+    arg_parser.add_argument(
+        "-d",
+        "--data-path",
+        help="Path to directory to read mock data from",
+    )
+    arg_parser.add_argument(
+        "-p",
+        "--port",
+        help="Port to run server on",
+    )
+    args = arg_parser.parse_args()
+    serve(port=args.port, data_path_str=args.data_path)

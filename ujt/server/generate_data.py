@@ -1,5 +1,6 @@
 """ Temp file to generate mock data. """
 
+import argparse
 import pathlib
 import random
 from collections import defaultdict
@@ -200,15 +201,23 @@ def generate_clients():
     return clients
 
 
-def save_mock_data():
-    """ Saves the mock data used to test the UJT to disk. """
+def save_mock_data(data_path_str: str = None):
+    """Saves the mock data used to test the UJT to disk.
+
+    Args:
+        data_path_str: path to directory where mock data should be saved.
+
+    """
 
     proto_type_message_map = {
         Node: generate_nodes(),
         Client: generate_clients(),
     }
 
-    data_path = pathlib.Path(__file__).parent / "data"
+    if data_path_str is None:
+        data_path = pathlib.Path(__file__).parent / "data"
+    else:
+        data_path = pathlib.Path(data_path_str)
 
     for proto_type, messages in proto_type_message_map.items():
         for message in messages:
@@ -219,4 +228,11 @@ def save_mock_data():
 
 
 if __name__ == "__main__":
-    save_mock_data()
+    arg_parser = argparse.ArgumentParser()
+    arg_parser.add_argument(
+        "-o",
+        "--output-directory",
+        help="Path to directory to store mock data",
+    )
+    args = arg_parser.parse_args()
+    save_mock_data(data_path_str=args.output_directory)
