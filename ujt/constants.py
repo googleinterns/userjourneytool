@@ -50,6 +50,7 @@ HIGHLIGHTED_UJ_EDGE_COLOR = "purple"
 
 COMPOUND_BACKGROUND_BLACKEN_FACTOR = -0.5
 VIRTUAL_BACKGROUND_BLACKEN_FACTOR = -0.8
+VIRTUAL_NODE_SHAPE = "triangle"
 SELECTED_NODE_BORDER_WIDTH = 1
 SELECTED_NODE_BORDER_COLOR = "black"
 
@@ -105,7 +106,7 @@ BASE_CYTO_STYLESHEET = [
         "selector": f".{NodeType.Name(NodeType.NODETYPE_VIRTUAL)}",
         "style": {
             "border-style": "dashed",
-            "shape": "octagon",
+            "shape": VIRTUAL_NODE_SHAPE,
             "background-blacken": VIRTUAL_BACKGROUND_BLACKEN_FACTOR,
         },
     },

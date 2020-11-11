@@ -61,21 +61,7 @@ def update_view_store(
     This is in contrast to styles, tags, and applied tags, callbacks, which write
     their respective data structure to the Dash server via the state module as a side effect.
 
-    We could theoretically refactor the tag creation panel and tag application panel to be in this style.
-    It would probably be a little cleaner in the case of the tag creation panel, since the panel only
-    changes in response to create or delete tag buttons.
-    In contrast, the tag application panel changes based on any tag update, its own apply/remove buttons, and
-    user interactions with the cytoscape graph.
-
-    This style offers a more functional approach, so we can be a little more confident in the correctness of
-    the state of our data structures.
-    Moreover, it's relatively clean.
-
-    However, the complexity would probably increase dramatically in the apply tag callbacks case.
-    We also lose the granularity of output signals. (In theory, we could assign different values to the output
-    signal, but each callback that registers the signal would have to check the signal value.)
-
-    I think we can just accept this inconsistency in the view case and leave the other callbacks as-is.
+    For more details, see https://github.com/googleinterns/userjourneytool/blob/aa78dc7a623e511b9463b9fedc9e3b161e53ce75/ujt/callbacks/view_callbacks.py#L64
 
     This function is called:
         when a VIEW_TAG_DROPDOWN value is updated

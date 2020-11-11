@@ -1,7 +1,7 @@
 import configparser
 
 # default values
-CLEAR_CACHE_ON_STARTUP = True
+CLEAR_CACHE_ON_STARTUP = False
 REFRESH_TOPOLOGY_ON_STARTUP = True
 
 AUTO_REFRESH_SLI = True
