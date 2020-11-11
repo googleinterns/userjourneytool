@@ -21,10 +21,11 @@ from ..dash_app import app
         Input(id_constants.SIGNAL_TAG_UPDATE, "children"),
         Input(id_constants.SIGNAL_APPLIED_TAG_UPDATE, "children"),
     ],
+    State(id_constants.CYTOSCAPE_GRAPH, "elements"),
     prevent_initial_call=True,
 )
 def generate_selected_info_panel(
-    tap_node, tap_edge, tag_update_signal, applied_tag_update_signal
+    tap_node, tap_edge, tag_update_signal, applied_tag_update_signal, elements
 ) -> List[Any]:
     """Generate the node info panel.
 
@@ -37,7 +38,7 @@ def generate_selected_info_panel(
         tap_edge: Cytoscape element of the tapped/clicked edge.
         tag_update_signal: The signal indicating a tag was created or deleted. Used to update dropdown options.
         applied_tag_update_signal: The signal indicating that a tag was added or removed to the selected element.
-
+        element: A list of cytoscape elements
 
     Returns:
         a List of Dash components.
@@ -48,6 +49,9 @@ def generate_selected_info_panel(
 
     latest_tapped_element = utils.get_latest_tapped_element(tap_node, tap_edge)
     ujt_id = latest_tapped_element["data"]["ujt_id"]
+    if ujt_id not in [element["data"]["ujt_id"] for element in elements]:
+        print('tried to generate for nonexistent element')
+        return []
 
     out = []
     includes_override_dropdown = False

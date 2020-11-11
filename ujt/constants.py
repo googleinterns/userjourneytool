@@ -186,9 +186,9 @@ DEFAULT_STYLE_MAP: Dict[str, Dict[str, Any]] = {
     },
     "HIGHLIGHTED": {
         "border-color": "deeppink",
-        "border-width": 5,
+        "border-width": 4,
         "line-color": "deeppink",
-        "width": 5,
+        "width": 4,
     },
 }
 

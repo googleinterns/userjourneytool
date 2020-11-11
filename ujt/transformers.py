@@ -106,7 +106,7 @@ def apply_view_classes(elements, tag_map, view_list):
             # Let's make that optimization later if this turns out to be excessively slow.
             for tag in tags:
                 for view_tag, view_style_name in view_list:
-                    if tag == view_tag and tag != "" and view_style_name != "":
+                    if tag == view_tag and tag not in ["", None] and view_style_name not in ["", None]:
                         class_list.append(view_style_name)
         utils.add_class_mutable(new_element, class_list)
         out_elements.append(new_element)
@@ -302,9 +302,7 @@ def apply_virtual_nodes_to_elements(elements):
             if new_target is not None:
                 new_element["data"]["target"] = new_target
 
-            new_element["data"][
-                "id"
-            ] = f"{new_element['data']['source']}/{new_element['data']['target']}"
+            new_element["data"]["id"] = new_element["data"]["ujt_id"] = f"{new_element['data']['source']}/{new_element['data']['target']}"
 
             # avoid adding:
             #   edges between nodes within the same virtual nodes

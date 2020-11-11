@@ -4,9 +4,12 @@ child_names: "ProfileDB.ReadFriendsList"
 child_names: "ProfileDB.WriteFriendsList"
 slis {
   node_name: "ProfileDB"
-  sli_value: 0.5542672069773664
+  sli_type: SLITYPE_AVAILABILITY
+  sli_value: 0.936711873147587
   slo_error_upper_bound: 0.9
   slo_error_lower_bound: 0.1
   slo_warn_upper_bound: 0.8
   slo_warn_lower_bound: 0.2
+  slo_target: 0.5
+  intra_status_change_threshold: 0.03
 }

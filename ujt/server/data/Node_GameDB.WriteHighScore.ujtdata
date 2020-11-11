@@ -3,9 +3,12 @@ name: "GameDB.WriteHighScore"
 parent_name: "GameDB"
 slis {
   node_name: "GameDB.WriteHighScore"
-  sli_value: 0.6787816494144171
+  sli_type: SLITYPE_LATENCY
+  sli_value: 0.02868780500201429
   slo_error_upper_bound: 0.9
   slo_error_lower_bound: 0.1
   slo_warn_upper_bound: 0.8
   slo_warn_lower_bound: 0.2
+  slo_target: 0.5
+  intra_status_change_threshold: 0.03
 }
