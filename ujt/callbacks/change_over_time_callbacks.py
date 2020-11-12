@@ -9,7 +9,15 @@ import google.protobuf.json_format as json_format
 from dash.dependencies import ALL, Input, Output, State
 from graph_structures_pb2 import SLI
 
-from .. import constants, converters, id_constants, rpc_client, transformers, utils, state
+from .. import (
+    constants,
+    converters,
+    id_constants,
+    rpc_client,
+    state,
+    transformers,
+    utils,
+)
 from ..dash_app import app
 
 if TYPE_CHECKING:
@@ -164,9 +172,15 @@ def update_change_over_time_sli_store(
             start_time = tag_timestamp - window_size_timedelta
             end_time = tag_timestamp + window_size_timedelta
             tag_map = state.get_tag_map()
-            node_names = [ujt_id for ujt_id, tags in tag_map.items() if tag_selection in tags]
+            node_names = [
+                ujt_id for ujt_id, tags in tag_map.items() if tag_selection in tags
+            ]
             if node_names == []:
-                return [dash.no_update, True, "Please assign the selected tag to a node."]
+                return [
+                    dash.no_update,
+                    True,
+                    "Please assign the selected tag to a node.",
+                ]
 
     except (ValueError, TypeError):
         # ValueError occurs when input format is incorrect
