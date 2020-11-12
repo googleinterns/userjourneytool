@@ -50,7 +50,6 @@ def generate_selected_info_panel(
     latest_tapped_element = utils.get_latest_tapped_element(tap_node, tap_edge)
     ujt_id = latest_tapped_element["data"]["ujt_id"]
     if ujt_id not in [element["data"]["ujt_id"] for element in elements]:
-        print("tried to generate for nonexistent element")
         return []
 
     out = []

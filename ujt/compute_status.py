@@ -68,7 +68,11 @@ def compute_single_node_status(
     if (
         node.status != Status.STATUS_UNSPECIFIED
     ):  # if the current node's status was already computed
-        return node.status
+        return (
+            node.status
+            if node.override_status == Status.STATUS_UNSPECIFIED
+            else node.override_status
+        )
 
     status_count_map: Dict["StatusValue", int] = defaultdict(int)
     for child_name in node.child_names:
