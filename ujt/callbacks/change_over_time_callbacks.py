@@ -9,7 +9,15 @@ import google.protobuf.json_format as json_format
 from dash.dependencies import ALL, Input, Output, State
 from graph_structures_pb2 import SLI
 
-from .. import constants, converters, id_constants, rpc_client, transformers, utils
+from .. import (
+    constants,
+    converters,
+    id_constants,
+    rpc_client,
+    state,
+    transformers,
+    utils,
+)
 from ..dash_app import app
 
 if TYPE_CHECKING:
@@ -146,6 +154,7 @@ def update_change_over_time_sli_store(
             end_time = dt.datetime.strptime(
                 end_time_input_values[0], constants.DATE_FORMAT_STRING
             )
+            node_names = None
         else:
             temp_datetime = dt.datetime.strptime(
                 window_size_input_values[0], constants.WINDOW_SIZE_FORMAT_STRING
@@ -162,12 +171,24 @@ def update_change_over_time_sli_store(
             )
             start_time = tag_timestamp - window_size_timedelta
             end_time = tag_timestamp + window_size_timedelta
+            tag_map = state.get_tag_map()
+            node_names = [
+                ujt_id for ujt_id, tags in tag_map.items() if tag_selection in tags
+            ]
+            if node_names == []:
+                return [
+                    dash.no_update,
+                    True,
+                    "Please assign the selected tag to a node.",
+                ]
+
     except (ValueError, TypeError):
         # ValueError occurs when input format is incorrect
         # TypeError occurs when input box is blank
         return dash.no_update, True, "Error parsing time input, please check format."
 
     sli_response = rpc_client.get_slis(
+        node_names=node_names,
         start_time=start_time,
         end_time=end_time,
         sli_types=[sli_type],

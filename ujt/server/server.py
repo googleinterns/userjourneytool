@@ -227,7 +227,7 @@ def serve(
     ready_event: threading.Event = None,
 ):
     if port is None:
-        port = "50052"
+        port = "50051"
 
     server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
 

@@ -202,6 +202,7 @@ def test_apply_virtual_nodes_to_elements(patch_path, assert_same_elements):
                 "source": virtual_node_names[0],
                 "target": node_names[2],
                 "id": f"{virtual_node_names[0]}/{node_names[2]}",
+                "ujt_id": f"{virtual_node_names[0]}/{node_names[2]}",
             },
             "classes": "",
         },

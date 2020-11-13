@@ -78,7 +78,7 @@ def generate_composite_signals():
         dash_inputs = [
             Input(input_signal_id, "children") for input_signal_id in input_signal_ids
         ]
-        # Usually we use app.callback as a decorator, which is syntatic sugar
+        # Usually we use app.callback as a decorator, which is syntatic sugar for
         # app.callback(outputs=..., inputs=..., state=..., prevent_initial_call=...)(decorated_function)
         # Here we call the decorator directly to programatically register the callbacks.
         app.callback(dash_output, dash_inputs, prevent_initial_call=True)(

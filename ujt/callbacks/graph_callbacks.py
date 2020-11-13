@@ -91,7 +91,7 @@ def update_graph_elements(
 
     ctx = dash.callback_context
     triggered_id, triggered_prop, triggered_value = utils.ctx_triggered_info(ctx)
-    # print("updating elements:", ctx.triggered)  # DEBUG_REMOVE
+
     if (
         triggered_id == id_constants.SIGNAL_VIRTUAL_NODE_UPDATE
         and triggered_value != constants.OK_SIGNAL
@@ -143,7 +143,6 @@ def update_graph_elements(
         compute_status.reset_node_statuses(virtual_node_map)
 
         # combine the two maps of nodes into one dictionary
-        # use duck typing -- is this pythonic or a hack?
         all_nodes_map = {**node_name_message_map, **virtual_node_map}  # type: ignore
         compute_status.compute_statuses(
             all_nodes_map,
@@ -195,7 +194,6 @@ def update_graph_elements(
             start_time,
             end_time,
         )
-    # print(elements)  # DEBUG_REMOVE
 
     # Determine if we need to generate a new UUID. This minimizes the choppyness of the animation.
     if triggered_id in [None, id_constants.SIGNAL_VIRTUAL_NODE_UPDATE]:

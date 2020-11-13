@@ -3,9 +3,12 @@ name: "GameService.GetScore"
 parent_name: "GameService"
 slis {
   node_name: "GameService.GetScore"
-  sli_value: 0.6150638042033924
+  sli_type: SLITYPE_LATENCY
+  sli_value: 0.7987326615446798
   slo_error_upper_bound: 0.9
   slo_error_lower_bound: 0.1
   slo_warn_upper_bound: 0.8
   slo_warn_lower_bound: 0.2
+  slo_target: 0.5
+  intra_status_change_threshold: 0.03
 }

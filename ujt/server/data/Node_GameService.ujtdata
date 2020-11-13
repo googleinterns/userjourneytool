@@ -4,9 +4,12 @@ child_names: "GameService.GetPlayerLocation"
 child_names: "GameService.GetScore"
 slis {
   node_name: "GameService"
-  sli_value: 0.6302347066491664
+  sli_type: SLITYPE_AVAILABILITY
+  sli_value: 0.1799083978739977
   slo_error_upper_bound: 0.9
   slo_error_lower_bound: 0.1
   slo_warn_upper_bound: 0.8
   slo_warn_lower_bound: 0.2
+  slo_target: 0.5
+  intra_status_change_threshold: 0.03
 }

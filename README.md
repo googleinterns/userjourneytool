@@ -11,7 +11,7 @@ User Journey Tool simplifies debugging by providing an overview of an applicatio
 
 2. Run the Dash server to host the UI.
 
-        python3 -m ujt.ujt
+        python3 -m ujt.main
 
 
 ## Development Setup
