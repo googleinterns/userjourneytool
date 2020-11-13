@@ -20,6 +20,7 @@ def test_clear_sli_cache(patch_path):
 
 
 def test_get_slis(patch_path):
+    ujt.state.clear_sli_cache()
     with patch(f"{patch_path}.rpc_client.get_slis") as mock_rpc_client_get_slis, patch(
         f"{patch_path}.list"
     ) as mock_list:

@@ -41,5 +41,7 @@ jobs:
       run: |
         mypy ujt tests
     - name: Test
+      env:
+        PERCY_TOKEN: ${{ secrets.UJT_PERCY }}
       run: |
         ./test

@@ -440,9 +440,16 @@ def sort_nodes_by_parent_relationship(elements):
 
     parent_child_map = defaultdict(list)
     bfs_queue = deque()
-    # build a tree from parents to children
+
+    lexicographically_sorted_edges = sorted(edges, key=lambda edge: edge["data"]["id"])
+    # initially sort the nodes to ensure a consistent traversal order, for a consistent layout
+    lexicographically_sorted_nodes = sorted(
+        node_id_element_map.values(), key=lambda node: node["data"]["id"]
+    )
+
+    # build a tree from parents to children (parent_child_map)
     # (reversing the edge direction of cytoscape format)
-    for node in node_id_element_map.values():
+    for node in lexicographically_sorted_nodes:
         node_id = node["data"]["id"]
         if "parent" in node["data"]:
             parent_id = node["data"]["parent"]
@@ -461,4 +468,4 @@ def sort_nodes_by_parent_relationship(elements):
         bfs_queue.extend(parent_child_map[node_id])
         topologically_sorted_nodes.append(node_id_element_map[node_id])
 
-    return edges + topologically_sorted_nodes
+    return lexicographically_sorted_edges + topologically_sorted_nodes
