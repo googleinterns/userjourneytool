@@ -6,7 +6,7 @@ mypy==0.782
 dash[testing]==1.16.0
 dash-cytoscape==0.2.0
 sphinx==3.2.1
-protobuf==3.13.0
+protobuf==4.25.8
 isort==5.5.2
 pylint-protobuf==0.13
 mypy-protobuf==1.23
